@@ -1,0 +1,10 @@
+{
+  "q_44150": {
+    "question_id": 44150,
+    "question_text": "How many foreign visitors will fly to the United States in June 2026?",
+    "question_type": "numeric",
+    "status": "success",
+    "submitted_forecast": 4830000,
+    "submitted_forecast_note": "Backfilled retroactively. The original 11:10am submission had the comma-parsing bug and was corrected via resubmit_q44150.py, which deliberately doesn't write its own results file (intentional — it's a one-off correction, not a new forecast cycle). The value here (4,830,000) is the actual median printed in the terminal output at the time of that resubmission, not the full CDF distribution (which was never logged anywhere)."
+  }
+}

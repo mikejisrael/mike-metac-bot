@@ -1,0 +1,404 @@
+{
+  "batch_id": "msgbatch_013dg8TzcQHBWx3fvdpFW3qm",
+  "submitted_at": "2026-06-01T09:08:24.385029",
+  "num_requests": 50,
+  "question_ids": {
+    "q_43606": 43606,
+    "q_43603": 43603,
+    "q_43510": 43510,
+    "q_43507": 43507,
+    "q_43506": 43506,
+    "q_43501": 43501,
+    "q_43498": 43498,
+    "q_43497": 43497,
+    "q_43488": 43488,
+    "q_43465": 43465,
+    "q_43459": 43459,
+    "q_43432": 43432,
+    "q_43430": 43430,
+    "q_43360": 43360,
+    "q_43336": 43336,
+    "q_43307": 43307,
+    "q_43288": 43288,
+    "q_43266": 43266,
+    "q_43182": 43182,
+    "q_42771": 42771,
+    "q_42684": 42684,
+    "q_42575": 42575,
+    "q_41930": 41930,
+    "q_41621": 41621,
+    "q_41544": 41544,
+    "q_41425": 41425,
+    "q_41424": 41424,
+    "q_41418": 41418,
+    "q_41219": 41219,
+    "q_41205": 41205,
+    "q_40928": 40928,
+    "q_40916": 40916,
+    "q_40795": 40795,
+    "q_40794": 40794,
+    "q_39780": 39780,
+    "q_39432": 39432,
+    "q_39090": 39090,
+    "q_38499": 38499,
+    "q_38485": 38485,
+    "q_38463": 38463,
+    "q_38280": 38280,
+    "q_38265": 38265,
+    "q_38099": 38099,
+    "q_38063": 38063,
+    "q_37484": 37484,
+    "q_37460": 37460,
+    "q_36888": 36888,
+    "q_36515": 36515,
+    "q_36295": 36295,
+    "q_35710": 35710
+  },
+  "question_texts": {
+    "q_43606": "Will Donald Trump declare a national emergency related to election integrity before November 3, 2026?",
+    "q_43603": "Will a case of Bundibugyo Ebola disease be first confirmed in the US before 2027?",
+    "q_43510": "Will the Senate of the Philippines remove Vice President Sara Duterte from office before September 2026?",
+    "q_43507": "Will Bitcoin trade above $120,000 before August 1, 2026?",
+    "q_43506": "Will Instructure be subject to another major hack before September 1, 2026?",
+    "q_43501": "Will any U.S. state or EU member state restrict large-scale data center grid connections before September 2026?",
+    "q_43498": "Will a new High Representative for Bosnia and Herzegovina officially be in place before September 2, 2026?",
+    "q_43497": "Will Missouri's 2026 Amendment 3 pass, repealing the 2024 abortion-rights protections?",
+    "q_43488": "Will Claude Mythos or a similar model be publicly released before September 2026?",
+    "q_43465": "Will at least 5 non-passengers be linked to the MV Hondius hantavirus outbreak before August 2026?",
+    "q_43459": "Will Donald Trump and Vladimir Putin meet in person before October 1, 2026?",
+    "q_43432": "Will there be a successful coup in Africa or Latin America before September 1, 2026?",
+    "q_43430": "Will Pope Leo XIV visit another country other than Spain before September 2026?",
+    "q_43360": "Will the UK National Threat Level reduce from SEVERE before September 2026?",
+    "q_43336": "Will another country announce they will quit OPEC or OPEC+ before September 2026?",
+    "q_43307": "Will there be a nationwide anti-government uprising in Russia between September 20 and November 1, 2026?",
+    "q_43288": "Will Waymo have a service area of 1,200 square miles before July 1, 2026?",
+    "q_43266": "Will the United States and Iran hold another face-to-face diplomatic meeting before June 6, 2026?",
+    "q_43182": "Will the U.S. Senate pass another budget reconciliation bill before July 4, 2026?",
+    "q_42771": "Will all of these New England comic con events be held during 2026?",
+    "q_42684": "Will total MLB regular-season attendance in 2026 exceed 72 million?",
+    "q_42575": "Will Iran participate in the 2026 FIFA World Cup?",
+    "q_41930": "Will Trump ban U.S. states from using mail-in ballots for the 2026 Midterm Elections?",
+    "q_41621": "Will widespread non-citizen voting occur in the 2026 U.S. midterm elections?",
+    "q_41544": "Will Jonathan Ross be indicted or charged in the death of Renee Good before July 1, 2026?",
+    "q_41425": "Will the 2026 U.S. midterm elections be considered \"free and fair\"?",
+    "q_41424": "Will Donald Trump be a primary voting factor in the 2026 U.S. Midterms?",
+    "q_41418": "Will Mary Peltola win the 2026 US Senate election in Alaska?",
+    "q_41219": "Will Vivek Ramaswamy win the 2026 Ohio gubernatorial election?",
+    "q_41205": "Will Joe Biden's autopen orders be declared 'null and void' before the 2026 midterms?",
+    "q_40928": "Will Bitcoin reach a new all-time high price before October 6, 2026?",
+    "q_40916": "Will Anthropic file an initial registration statement (S-1) with the SEC to launch an IPO, before July 1, 2026?",
+    "q_40795": "Will the winner of the 2026 FIFA World Cup be a country that has never won before?",
+    "q_40794": "Will the United States experience negative GDP growth during Q1, Q2, or Q3 2026?",
+    "q_39780": "Will the U.S. Department of Commerce complete a new census before the 2026 midterms?",
+    "q_39432": "Will Russia, India, and China hold a trilateral (three-way) meeting before September 1, 2026?",
+    "q_39090": "Will Lisa Cook cease to be a member of the Federal Reserve Board of Governors before November 3, 2026?",
+    "q_38499": "Will Escambia County athletes be more likely than non-athletes to have cross-race friendships in 2026?",
+    "q_38485": "Before July 1, 2026, will the U.S. Supreme Court agree to hear a case that could end the constitutional right to same-sex marriage?",
+    "q_38463": "Will computer science and engineering see a greater percentage decrease (or smaller increase) in the number of enrolled international students in Trump's first year compared to other fields?",
+    "q_38280": "Will over 2/3 of EU member states recognize Palestinian\u00a0statehood before July 2026?",
+    "q_38265": "Will Barack Obama be arrested before July 2026?",
+    "q_38099": "Will the US government file a denaturalization lawsuit against Elon Musk before July 1, 2026?",
+    "q_38063": "Will the One Big Beautiful Bill Act contain a 5+ year AI moratorium provision and be signed into law before July 2026?",
+    "q_37484": "Will the DOJ officially remove the requirement for U.S. attorneys to consult with the Public Integrity Section before prosecuting lawmakers before November 4, 2026?",
+    "q_37460": "Will presidential impoundment authority be expanded by the Supreme Court or by law before November 3, 2026?",
+    "q_36888": "Will the ceasefire between the U.S. and Yemen\u2019s Houthis mediated by Oman be broken before June 2026?",
+    "q_36515": "Will federal legislation be passed before the 2026 midterm elections offering immunity to banks providing financial services to legal marijuana businesses?",
+    "q_36295": "Will the market capitalization for USDT & USDC stablecoins surpass $300 billion USD by June 30, 2026?",
+    "q_35710": "Will the 2026 ICPC World Finals be held in China?"
+  },
+  "community_predictions": {
+    "q_43606": null,
+    "q_43603": null,
+    "q_43510": null,
+    "q_43507": null,
+    "q_43506": null,
+    "q_43501": null,
+    "q_43498": null,
+    "q_43497": null,
+    "q_43488": null,
+    "q_43465": null,
+    "q_43459": null,
+    "q_43432": null,
+    "q_43430": null,
+    "q_43360": null,
+    "q_43336": null,
+    "q_43307": null,
+    "q_43288": null,
+    "q_43266": null,
+    "q_43182": null,
+    "q_42771": null,
+    "q_42684": null,
+    "q_42575": null,
+    "q_41930": null,
+    "q_41621": null,
+    "q_41544": null,
+    "q_41425": null,
+    "q_41424": null,
+    "q_41418": null,
+    "q_41219": null,
+    "q_41205": null,
+    "q_40928": null,
+    "q_40916": null,
+    "q_40795": null,
+    "q_40794": null,
+    "q_39780": null,
+    "q_39432": null,
+    "q_39090": null,
+    "q_38499": null,
+    "q_38485": null,
+    "q_38463": null,
+    "q_38280": null,
+    "q_38265": null,
+    "q_38099": null,
+    "q_38063": null,
+    "q_37484": null,
+    "q_37460": null,
+    "q_36888": null,
+    "q_36515": null,
+    "q_36295": null,
+    "q_35710": null
+  },
+  "resolve_times": {
+    "q_43606": "2026-11-03T05:00:00+00:00",
+    "q_43603": "2026-06-18T14:59:19+00:00",
+    "q_43510": "2026-09-01T11:00:00+00:00",
+    "q_43507": "2026-08-01T00:00:00+00:00",
+    "q_43506": "2026-09-01T01:00:00+00:00",
+    "q_43501": "2026-09-02T15:00:00+00:00",
+    "q_43498": "2026-09-02T11:00:00+00:00",
+    "q_43497": "2026-11-04T01:00:00+00:00",
+    "q_43488": "2026-09-01T00:00:00+00:00",
+    "q_43465": "2026-08-01T00:00:00+00:00",
+    "q_43459": "2026-10-01T09:00:00+00:00",
+    "q_43432": "2026-09-01T05:00:00+00:00",
+    "q_43430": "2026-09-01T11:00:00+00:00",
+    "q_43360": "2026-09-01T11:00:00+00:00",
+    "q_43336": "2026-09-02T16:00:00+00:00",
+    "q_43307": "2026-11-03T16:59:00+00:00",
+    "q_43288": "2026-07-01T17:00:00+00:00",
+    "q_43266": "2026-06-07T00:00:00+00:00",
+    "q_43182": "2026-07-04T05:00:00+00:00",
+    "q_42771": "2026-11-08T00:00:00+00:00",
+    "q_42684": "2026-10-06T00:00:00+00:00",
+    "q_42575": "2026-06-15T16:00:00+00:00",
+    "q_41930": "2026-11-04T14:00:00+00:00",
+    "q_41621": "2027-01-21T04:59:00+00:00",
+    "q_41544": "2026-07-01T22:23:00+00:00",
+    "q_41425": "2027-01-21T04:59:00+00:00",
+    "q_41424": "2027-01-21T04:59:00+00:00",
+    "q_41418": "2026-11-30T15:00:00+00:00",
+    "q_41219": "2026-11-10T12:00:00+00:00",
+    "q_41205": "2026-11-05T04:59:00+00:00",
+    "q_40928": "2026-10-06T11:00:00+00:00",
+    "q_40916": "2026-07-01T05:00:00+00:00",
+    "q_40795": "2026-07-19T23:00:00+00:00",
+    "q_40794": "2027-01-01T00:00:00+00:00",
+    "q_39780": "2026-11-03T08:00:00+00:00",
+    "q_39432": "2026-09-01T00:00:00+00:00",
+    "q_39090": "2026-11-04T13:00:00+00:00",
+    "q_38499": "2026-07-31T03:59:00+00:00",
+    "q_38485": "2026-07-01T05:00:00+00:00",
+    "q_38463": "2026-11-18T17:00:00+00:00",
+    "q_38280": "2026-07-01T05:00:00+00:00",
+    "q_38265": "2026-07-01T05:00:00+00:00",
+    "q_38099": "2026-07-01T05:00:00+00:00",
+    "q_38063": "2026-06-30T22:59:00+00:00",
+    "q_37484": "2026-11-05T12:00:00+00:00",
+    "q_37460": "2026-11-03T14:00:00+00:00",
+    "q_36888": "2026-06-02T03:59:00+00:00",
+    "q_36515": "2026-11-04T05:01:00+00:00",
+    "q_36295": "2026-07-01T03:59:00+00:00",
+    "q_35710": "2026-08-16T13:17:00+00:00"
+  },
+  "categories": {
+    "q_43606": [
+      "Law",
+      "Elections"
+    ],
+    "q_43603": [
+      "Health & Pandemics"
+    ],
+    "q_43510": [
+      "Law",
+      "Politics"
+    ],
+    "q_43507": [
+      "Crypto\u00adcurrencies",
+      "Technology"
+    ],
+    "q_43506": [
+      "Economy & Business",
+      "Technology",
+      "Law"
+    ],
+    "q_43501": [
+      "Politics",
+      "Artificial Intelligence"
+    ],
+    "q_43498": [
+      "Politics",
+      "Geopolitics"
+    ],
+    "q_43497": [
+      "Politics"
+    ],
+    "q_43488": [
+      "Artificial Intelligence"
+    ],
+    "q_43465": [
+      "Health & Pandemics"
+    ],
+    "q_43459": [
+      "Geopolitics"
+    ],
+    "q_43432": [
+      "Politics",
+      "Geopolitics"
+    ],
+    "q_43430": [
+      "Geopolitics"
+    ],
+    "q_43360": [
+      "Geopolitics"
+    ],
+    "q_43336": [
+      "Economy & Business",
+      "Geopolitics"
+    ],
+    "q_43307": [
+      "Politics",
+      "Geopolitics"
+    ],
+    "q_43288": [
+      "Technology"
+    ],
+    "q_43266": [
+      "Geopolitics",
+      "Nuclear Technology & Risks"
+    ],
+    "q_43182": [
+      "Politics"
+    ],
+    "q_42771": [
+      "Sports & Entertainment"
+    ],
+    "q_42684": [
+      "Sports & Entertainment"
+    ],
+    "q_42575": [
+      "Sports & Entertainment",
+      "Geopolitics"
+    ],
+    "q_41930": [
+      "Social Sciences",
+      "Elections",
+      "Law",
+      "Politics"
+    ],
+    "q_41621": [
+      "Elections",
+      "Law",
+      "Politics"
+    ],
+    "q_41544": [
+      "Law"
+    ],
+    "q_41425": [
+      "Social Sciences",
+      "Elections",
+      "Law",
+      "Politics"
+    ],
+    "q_41424": [
+      "Social Sciences",
+      "Elections",
+      "Law",
+      "Politics"
+    ],
+    "q_41418": [
+      "Politics",
+      "Elections"
+    ],
+    "q_41219": [
+      "Politics",
+      "Elections"
+    ],
+    "q_41205": [
+      "Elections",
+      "Technology",
+      "Law",
+      "Politics"
+    ],
+    "q_40928": [
+      "Economy & Business",
+      "Crypto\u00adcurrencies"
+    ],
+    "q_40916": [
+      "Economy & Business",
+      "Artificial Intelligence"
+    ],
+    "q_40795": [
+      "Sports & Entertainment"
+    ],
+    "q_40794": [
+      "Economy & Business"
+    ],
+    "q_39780": [
+      "Politics",
+      "Elections"
+    ],
+    "q_39432": [
+      "Geopolitics"
+    ],
+    "q_39090": [
+      "Politics"
+    ],
+    "q_38499": [],
+    "q_38485": [
+      "Law"
+    ],
+    "q_38463": [
+      "Politics"
+    ],
+    "q_38280": [
+      "Geopolitics",
+      "Law"
+    ],
+    "q_38265": [
+      "Law",
+      "Politics"
+    ],
+    "q_38099": [
+      "Law",
+      "Politics"
+    ],
+    "q_38063": [
+      "Artificial Intelligence"
+    ],
+    "q_37484": [
+      "Law",
+      "Politics"
+    ],
+    "q_37460": [
+      "Law",
+      "Politics"
+    ],
+    "q_36888": [
+      "Social Sciences",
+      "Geopolitics",
+      "Politics"
+    ],
+    "q_36515": [
+      "Law"
+    ],
+    "q_36295": [
+      "Economy & Business",
+      "Technology",
+      "Crypto\u00adcurrencies"
+    ],
+    "q_35710": [
+      "Sports & Entertainment",
+      "Computing and Math"
+    ]
+  }
+}

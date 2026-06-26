@@ -1,0 +1,42 @@
+{
+  "batch_id": "msgbatch_01Bd2tbs3M5DNKRqYWThDxDQ",
+  "submitted_at": "2026-05-30T10:42:53.520006",
+  "batch_type": "refresh",
+  "num_requests": 4,
+  "question_ids": {
+    "refresh_43266_20260530": 43266,
+    "refresh_43264_20260530": 43264,
+    "refresh_43090_20260530": 43090,
+    "refresh_36888_20260530": 36888
+  },
+  "question_texts": {
+    "refresh_43266_20260530": "Will Starlink's website show India as a country with Starlink availability before September 1, 2026?",
+    "refresh_43264_20260530": "Will Starlink's website show India as a country with Starlink availability before September 1, 2026?",
+    "refresh_43090_20260530": "Will Starlink's website show India as a country with Starlink availability before September 1, 2026?",
+    "refresh_36888_20260530": "Will Starlink's website show India as a country with Starlink availability before September 1, 2026?"
+  },
+  "original_probabilities": {
+    "refresh_43266_20260530": 0.12,
+    "refresh_43264_20260530": 0.05,
+    "refresh_43090_20260530": 0.04,
+    "refresh_36888_20260530": 0.08
+  },
+  "refresh_reasons": {
+    "refresh_43266_20260530": "closing in 7 days",
+    "refresh_43264_20260530": "closing in 1 days",
+    "refresh_43090_20260530": "closing in 2 days",
+    "refresh_36888_20260530": "closing in 3 days"
+  },
+  "community_predictions": {
+    "refresh_43266_20260530": null,
+    "refresh_43264_20260530": null,
+    "refresh_43090_20260530": null,
+    "refresh_36888_20260530": null
+  },
+  "resolve_times": {
+    "refresh_43266_20260530": "2026-09-01T07:00:00+00:00",
+    "refresh_43264_20260530": "2026-09-01T07:00:00+00:00",
+    "refresh_43090_20260530": "2026-09-01T07:00:00+00:00",
+    "refresh_36888_20260530": "2026-09-01T07:00:00+00:00"
+  }
+}

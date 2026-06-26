@@ -1,0 +1,1854 @@
+[
+  {
+    "question": {
+      "question_text": "Will a case of Bundibugyo Ebola disease be first confirmed in the US before 2027?",
+      "id_of_post": 43606,
+      "page_url": "https://www.metaculus.com/questions/43606",
+      "id_of_question": 43603,
+      "state": "open",
+      "num_forecasters": 52,
+      "num_predictions": 163,
+      "resolution_criteria": "This question will resolve as **Yes** if, before January 1, 2027, the US CDC reports at least one laboratory-confirmed case of Ebola disease caused by Bundibugyo virus in a patient whose infection is first confirmed in any of the 50 US states or the District of Columbia.",
+      "fine_print": "* Cases first confirmed outside this area, including in patients later transferred to the US, do not count.\n* Cases caused by other Ebola virus species do not count.",
+      "background_info": "On 16 May 2026, the WHO Director-General [declared](https://www.who.int/news/item/17-05-2026-epidemic-of-ebola-disease-in-the-democratic-republic-of-the-congo-and-uganda-determined-a-public-health-emergency-of-international-concern) the outbreak of Ebola disease caused by [Bundibugyo virus (BVD)](https://en.wikipedia.org/wiki/Bundibugyo_ebolavirus) in the Democratic Republic of the Congo and Uganda a Public Health Emergency of International Concern. On May 17, WHO reported 8 laboratory-confirmed cases, 246 suspected cases, and 80 suspected deaths in Ituri Province, DRC, alongside two confirmed cases (including one death) in Kampala, Uganda. At least one American national in the DRC has reportedly tested positive, and US authorities have invoked a public health law to [limit entry from the affected region](https://www.cdc.gov/ebola/situation-summary/index.html).\n\nThere are no licensed vaccines or therapeutics specific to Bundibugyo virus. The two previously identified BVD outbreaks (Uganda 2007, DRC 2012) did not produce cases outside Africa. During the [2014\u20132016 Zaire ebolavirus epidemic](https://en.wikipedia.org/wiki/Western_African_Ebola_epidemic) in West Africa, four cases were diagnosed on US soil and several infected American healthcare workers were medically evacuated to US facilities for treatment.",
+      "unit_of_measure": "",
+      "close_time": "2026-06-18T14:59:19Z",
+      "actual_resolution_time": null,
+      "scheduled_resolution_time": "2026-06-18T14:59:19Z",
+      "published_time": "2026-05-19T14:59:19Z",
+      "open_time": "2026-05-19T17:00:00Z",
+      "date_accessed": "2026-05-27T22:40:47.119371+10:00",
+      "already_forecasted": true,
+      "tournament_slugs": [
+        "respiratory-outlook-25-26"
+      ],
+      "default_project_id": 32775,
+      "includes_bots_in_aggregates": false,
+      "cp_reveal_time": "2026-05-20T17:00:00Z",
+      "question_weight": 1.0,
+      "resolution_string": null,
+      "conditional_type": null,
+      "previous_forecasts": null,
+      "group_question_option": null,
+      "question_ids_of_group": null,
+      "api_json": {
+        "id": 43606,
+        "title": "Will a case of Bundibugyo Ebola disease be first confirmed in the US before 2027?",
+        "short_title": "Ebola bundibugyo case first confirmed on US soil before 2027?",
+        "url_title": "Ebola bundibugyo case first confirmed on US soil before 2027?",
+        "slug": "ebola-bundibugyo-case-first-confirmed-on-us-soil-before-2027",
+        "author_id": 126626,
+        "author_username": "skmmcj",
+        "coauthors": [],
+        "created_at": "2026-05-18T22:46:59.749431Z",
+        "published_at": "2026-05-19T14:59:19Z",
+        "edited_at": "2026-05-27T12:33:41.961781Z",
+        "curation_status": "approved",
+        "curation_status_updated_at": "2026-05-19T14:59:50.252987Z",
+        "comment_count": 4,
+        "status": "open",
+        "resolved": false,
+        "actual_close_time": null,
+        "scheduled_close_time": "2026-06-18T14:59:19Z",
+        "scheduled_resolve_time": "2026-06-18T14:59:19Z",
+        "actual_resolve_time": null,
+        "open_time": "2026-05-19T17:00:00Z",
+        "nr_forecasters": 52,
+        "html_metadata_json": null,
+        "projects": {
+          "leaderboard_tag": [
+            {
+              "id": 32925,
+              "name": "2026 Leaderboard",
+              "slug": "2026_leaderboard",
+              "type": "leaderboard_tag"
+            }
+          ],
+          "tournament": [
+            {
+              "id": 32775,
+              "type": "tournament",
+              "name": "Respiratory Outlook 2025/26",
+              "slug": "respiratory-outlook-25-26",
+              "header_image": "https://cdn.metaculus.com/cdc-cover-final_1_62hhj9W.webp",
+              "prize_pool": null,
+              "start_date": "2025-06-24T06:00:00Z",
+              "close_date": "2027-07-01T12:00:00Z",
+              "forecasting_end_date": "2027-01-01T00:00:00Z",
+              "html_metadata_json": null,
+              "is_ongoing": true,
+              "user_permission": null,
+              "order": 2,
+              "created_at": "2025-06-24T20:18:49.802400Z",
+              "edited_at": "2026-05-27T12:33:42.191589Z",
+              "score_type": "peer_tournament",
+              "default_permission": "forecaster",
+              "visibility": "normal",
+              "show_on_homepage": false,
+              "is_current_content_translated": false,
+              "bot_leaderboard_status": "exclude_and_show",
+              "description_preview": "<p>The Respiratory Outlook 2025/26 is a collaboration between the Centers for Disease Control and Prevention (CDC) and Metaculus. Metaculus"
+            }
+          ],
+          "default_project": {
+            "id": 32775,
+            "type": "tournament",
+            "name": "Respiratory Outlook 2025/26",
+            "slug": "respiratory-outlook-25-26",
+            "header_image": "https://cdn.metaculus.com/cdc-cover-final_1_62hhj9W.webp",
+            "prize_pool": null,
+            "start_date": "2025-06-24T06:00:00Z",
+            "close_date": "2027-07-01T12:00:00Z",
+            "forecasting_end_date": "2027-01-01T00:00:00Z",
+            "html_metadata_json": null,
+            "is_ongoing": true,
+            "user_permission": null,
+            "order": 2,
+            "created_at": "2025-06-24T20:18:49.802400Z",
+            "edited_at": "2026-05-27T12:33:42.191589Z",
+            "score_type": "peer_tournament",
+            "default_permission": "forecaster",
+            "visibility": "normal",
+            "show_on_homepage": false,
+            "is_current_content_translated": false,
+            "bot_leaderboard_status": "exclude_and_show",
+            "description_preview": "<p>The Respiratory Outlook 2025/26 is a collaboration between the Centers for Disease Control and Prevention (CDC) and Metaculus. Metaculus"
+          },
+          "category": [
+            {
+              "id": 3691,
+              "name": "Health & Pandemics",
+              "slug": "health-pandemics",
+              "emoji": "\ud83e\udda0",
+              "description": "Health & Pandemics",
+              "type": "category"
+            }
+          ]
+        },
+        "question": {
+          "id": 43603,
+          "title": "Will a case of Bundibugyo Ebola disease be first confirmed in the US before 2027?",
+          "created_at": "2026-05-18T22:46:59.749735Z",
+          "open_time": "2026-05-19T17:00:00Z",
+          "cp_reveal_time": "2026-05-20T17:00:00Z",
+          "spot_scoring_time": "2026-05-20T17:00:00Z",
+          "scheduled_resolve_time": "2026-06-18T14:59:19Z",
+          "actual_resolve_time": null,
+          "resolution_set_time": null,
+          "scheduled_close_time": "2026-06-18T14:59:19Z",
+          "actual_close_time": "2026-06-18T14:59:19Z",
+          "type": "binary",
+          "options": null,
+          "all_options_ever": null,
+          "options_history": null,
+          "options_order": null,
+          "group_variable": "",
+          "status": "open",
+          "possibilities": null,
+          "resolution": null,
+          "include_bots_in_aggregates": false,
+          "question_weight": 1,
+          "default_score_type": "peer",
+          "default_aggregation_method": "recency_weighted",
+          "label": "",
+          "unit": "",
+          "open_upper_bound": false,
+          "open_lower_bound": false,
+          "inbound_outcome_count": null,
+          "scaling": {
+            "range_min": null,
+            "range_max": null,
+            "nominal_min": null,
+            "nominal_max": null,
+            "zero_point": null,
+            "open_upper_bound": false,
+            "open_lower_bound": false,
+            "inbound_outcome_count": null,
+            "continuous_range": null
+          },
+          "group_rank": null,
+          "coherence_links": null,
+          "coherence_link_aggregations": null,
+          "description": "On 16 May 2026, the WHO Director-General [declared](https://www.who.int/news/item/17-05-2026-epidemic-of-ebola-disease-in-the-democratic-republic-of-the-congo-and-uganda-determined-a-public-health-emergency-of-international-concern) the outbreak of Ebola disease caused by [Bundibugyo virus (BVD)](https://en.wikipedia.org/wiki/Bundibugyo_ebolavirus) in the Democratic Republic of the Congo and Uganda a Public Health Emergency of International Concern. On May 17, WHO reported 8 laboratory-confirmed cases, 246 suspected cases, and 80 suspected deaths in Ituri Province, DRC, alongside two confirmed cases (including one death) in Kampala, Uganda. At least one American national in the DRC has reportedly tested positive, and US authorities have invoked a public health law to [limit entry from the affected region](https://www.cdc.gov/ebola/situation-summary/index.html).\n\nThere are no licensed vaccines or therapeutics specific to Bundibugyo virus. The two previously identified BVD outbreaks (Uganda 2007, DRC 2012) did not produce cases outside Africa. During the [2014\u20132016 Zaire ebolavirus epidemic](https://en.wikipedia.org/wiki/Western_African_Ebola_epidemic) in West Africa, four cases were diagnosed on US soil and several infected American healthcare workers were medically evacuated to US facilities for treatment.",
+          "resolution_criteria": "This question will resolve as **Yes** if, before January 1, 2027, the US CDC reports at least one laboratory-confirmed case of Ebola disease caused by Bundibugyo virus in a patient whose infection is first confirmed in any of the 50 US states or the District of Columbia.",
+          "fine_print": "* Cases first confirmed outside this area, including in patients later transferred to the US, do not count.\n* Cases caused by other Ebola virus species do not count.",
+          "short_title": "Ebola bundibugyo case first confirmed on US soil before 2027?",
+          "post_id": 43606,
+          "aggregations": {
+            "recency_weighted": {
+              "history": null,
+              "latest": null,
+              "score_data": null,
+              "movement": null
+            }
+          },
+          "average_coverage": null,
+          "my_forecasts": {
+            "history": [
+              {
+                "question_id": 43603,
+                "author_id": 302314,
+                "start_time": 1779871522.071017,
+                "end_time": 1779875644.349994,
+                "forecast_values": [
+                  0.92,
+                  0.08
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43603,
+                "author_id": 302314,
+                "start_time": 1779875644.349994,
+                "end_time": 1779878658.60776,
+                "forecast_values": [
+                  0.97,
+                  0.03
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43603,
+                "author_id": 302314,
+                "start_time": 1779878658.60776,
+                "end_time": 1779884520.38986,
+                "forecast_values": [
+                  0.935,
+                  0.065
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43603,
+                "author_id": 302314,
+                "start_time": 1779884520.38986,
+                "end_time": null,
+                "forecast_values": [
+                  0.95,
+                  0.05
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              }
+            ],
+            "latest": {
+              "question_id": 43603,
+              "author_id": 302314,
+              "start_time": 1779884520.38986,
+              "end_time": null,
+              "forecast_values": [
+                0.95,
+                0.05
+              ],
+              "interval_lower_bounds": null,
+              "centers": null,
+              "interval_upper_bounds": null,
+              "distribution_input": null
+            },
+            "score_data": {}
+          }
+        },
+        "user_permission": "forecaster",
+        "vote": {
+          "score": 1,
+          "user_vote": null
+        },
+        "forecasts_count": 163,
+        "unread_comment_count": 0,
+        "last_viewed_at": "2026-05-27T12:22:05.324223Z",
+        "private_note": null,
+        "key_factors": [],
+        "is_current_content_translated": false
+      },
+      "custom_metadata": {},
+      "categories": [
+        {
+          "id": 3691,
+          "name": "Health & Pandemics",
+          "slug": "health-pandemics",
+          "emoji": "\ud83e\udda0",
+          "description": "Health & Pandemics",
+          "type": "category"
+        }
+      ],
+      "question_type": "binary",
+      "community_prediction_at_access_time": null
+    },
+    "explanation": "\n# SUMMARY\n*Question*: Will a case of Bundibugyo Ebola disease be first confirmed in the US before 2027?\n*Final Prediction*: 6.0%\n*Total Cost*: $0.0966 (estimated)\n*Time Spent*: 0.6 minutes\n*LLMs*: `{'default': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}, 'summarizer': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}, 'researcher': 'smart-searcher/claude-haiku-4-5', 'parser': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}}`\n*Bot Name*: SummerTemplateBot2026\n\n\n## Report 1 Summary\n### Forecasts\n*Forecaster 1*: 4.0%\n*Forecaster 2*: 6.0%\n*Forecaster 3*: 6.0%\n\n\n### Research Summary\n# Summary\n\nNo research results were found for this query. The search did not return any available sources or studies that specifically address the likelihood of a confirmed Bundibugyo Ebola disease case in the United States before 2027.\n\n**Sources:**\nNo sources were available to summarize.\n\n\n# RESEARCH\n## Report 1 Research\nNo search results found for the query using the search filter chosen\n\n# FORECASTS\n\n## R1: Forecaster 1 Reasoning\n### Forecasting Analysis: Bundibugyo Ebola in the US Before 2027\n\n#### (a) Time Left Until Outcome is Known\n**217 days** (from May 27, 2026 to January 1, 2027)\n\n#### (b) Status Quo Outcome if Nothing Changed\nThe outbreak remains contained in DRC and Uganda with no confirmed cases in the US. Entry restrictions and heightened surveillance prevent transmission to American soil.\n\n#### (c) Scenario Resulting in No Outcome\nThe outbreak is controlled through public health measures in Africa (contact tracing, isolation, infection control). No infected individuals travel to the US, or any who do are detected and isolated before developing symptoms in US territory. The 7-month window closes without a US-confirmed case.\n\n#### (d) Scenario Resulting in Yes Outcome\nAn infected individual (healthcare worker, family member, or other contact) travels to the US before symptom onset, develops symptoms domestically, and receives laboratory confirmation of BVD infection while in the US. Alternatively, an American in the affected region becomes infected, travels home, and is confirmed positive in the US (though this would likely be caught at entry screening).\n\n#### (e) Base Rate Analysis\n\n**Historical Ebola precedents:**\n- **2014-2016 Zaire epidemic**: 4 cases confirmed on US soil out of ~11,000 total cases (~0.04% of cases reached US)\n- **Previous BVD outbreaks** (2007 Uganda, 2012 DRC): 0 cases outside Africa despite international travel\n- **General principle**: Hemorrhagic fevers with high case fatality rates and obvious symptoms tend to be self-limiting in spread due to rapid incapacitation\n\n**Relevant factors:**\n- US has entry screening protocols specifically activated for this outbreak\n- BVD appears less transmissible than Zaire ebolavirus (smaller outbreak, fewer international cases reported)\n- 7-month timeframe is relatively short for an outbreak to generate sufficient cases to produce international spillover\n\n#### (f) Key Influencing Factors\n\n1. **Entry screening effectiveness**: US has invoked public health law and CDC is actively screening. This is a major barrier.\n2. **Outbreak trajectory**: Currently 8 confirmed cases (as of May 17). Growth rate will determine if enough cases exist to produce international travel.\n3. **Healthcare worker risk**: American nationals in DRC are at elevated risk; one already tested positive (but presumably still in DRC).\n4. **Symptom severity**: BVD causes rapid incapacitation, making asymptomatic travel unlikely.\n5. **Historical precedent of BVD**: No previous international spread despite opportunities.\n6. **Vaccine/therapeutic availability**: None specific to BVD, so no treatment advantage in US vs. Africa.\n\n#### (g) Initial Estimate (Base Rate Only)\n\nGiven:\n- Zaire ebolavirus produced 4 US cases from ~11,000 total (0.04%)\n- BVD appears less transmissible and has stricter screening\n- Only 8 confirmed cases as of May 17 (vs. thousands for Zaire by comparable timepoint)\n- Historical BVD outbreaks produced zero international cases\n- 7-month window is short\n\n**Base rate anchor: 3-5%**\n\nThis reflects that while Ebola can reach the US (as proven in 2014-2016), BVD appears to be a lower-risk pathogen with better containment measures in place.\n\n#### (h) Recent News Adjustment\n\nThe recent news (outbreak declaration, entry restrictions, American national testing positive) actually supports the **lower** end of my base rate estimate:\n\n- **Positive for Yes**: An American is already infected in DRC, showing the pathway exists\n- **Negative for Yes**: The fact that this case is being detected and managed in DRC (not the US) shows screening/containment is working; entry restrictions are now active; only 8 confirmed cases suggests slower spread than Zaire\n\n**Net adjustment**: Move down slightly from 5% to **4%**, as the active screening and small case count outweigh the American infection precedent.\n\n#### (i) Community Prediction Comparison\n\nNo community prediction provided in the prompt. If one exists and differs significantly, I would consider:\n- Whether they have access to epidemiological modeling of BVD transmission rates\n- Whether they're weighting the American national case differently than I am\n- Whether they have information on outbreak growth trajectory post-May 17\n\n#### Final Reasoning Check\n\nAm I below 5%? Let me verify this isn't too low:\n- \u2713 Entry screening is active and specifically designed for this\n- \u2713 Historical BVD has zero international cases\n- \u2713 Current case count is very small\n- \u2713 7 months is a short window\n- \u2713 Symptoms are severe and rapid, limiting asymptomatic travel\n\nAm I too low? Could I be missing something?\n- The 2014-2016 precedent shows it *can* happen\n- American nationals in DRC are at genuine risk\n- One American is already infected\n- But that person is being managed in DRC, not the US\n\nThe 4% estimate appropriately reflects \"unlikely but not impossible\" given the historical precedent and active outbreak, while heavily weighting the containment measures and BVD's lower transmissibility.\n\n---\n\n**Probability: 4%**\n\n\n## R1: Forecaster 2 Reasoning\n### Forecasting Analysis: Bundibugyo Ebola in the US Before 2027\n\n#### (a) Time Left Until Outcome is Known\n**7 months** (from May 27, 2026 to January 1, 2027)\n\n#### (b) Status Quo Outcome if Nothing Changed\nThe outbreak remains contained to DRC and Uganda with no cases confirmed in the US. This aligns with historical precedent\u2014previous BVD outbreaks (2007, 2012) remained geographically limited to Africa.\n\n#### (c) Scenario Resulting in No Outcome\nThe outbreak is controlled through public health measures in DRC/Uganda. Entry restrictions from affected regions remain effective. Any American nationals infected abroad are treated outside the US or their infections are confirmed outside US territory before potential transfer. The virus does not establish transmission chains in the US.\n\n#### (d) Scenario Resulting in Yes Outcome\nAn infected individual travels to the US before symptom onset (incubation period up to 21 days), develops symptoms in the US, and receives laboratory confirmation of BVD infection. Alternatively, community transmission occurs in the US following an initial importation, with cases confirmed domestically.\n\n#### (e) Base Rate Analysis\n\n**Historical precedent for Ebola in the US:**\n- 2014-2016 Zaire ebolavirus epidemic: 4 cases confirmed in the US (all healthcare workers or medically evacuated patients)\n- 2007 BVD outbreak (Uganda): 0 cases outside Africa\n- 2012 BVD outbreak (DRC): 0 cases outside Africa\n- Overall: Ebola has reached the US only once in modern history (2014-2016), and only during the largest outbreak on record\n\n**Key distinction:** The 2014-2016 epidemic involved ~28,000 cases with sustained community transmission in West Africa. The current BVD outbreak (as of May 27) shows 8 confirmed cases and 246 suspected cases\u2014orders of magnitude smaller and in a region with better epidemiological surveillance than 2014 West Africa.\n\n**Base rate for novel pathogen importation to US in 7-month window:** Historically very low (~1-3%) for outbreaks of this size in Africa, even without entry restrictions.\n\n#### (f) Key Influencing Factors\n\n1. **Entry restrictions already in place** - CDC has invoked public health law limiting entry from affected regions (strong mitigating factor)\n2. **Outbreak size and trajectory** - Currently small (8 confirmed) vs. 2014 epidemic (thousands); no evidence of exponential growth yet\n3. **Geographic location** - DRC/Uganda have better healthcare infrastructure and surveillance than 2014 West Africa, though still limited\n4. **Incubation period** - 21-day window creates vulnerability for asymptomatic travelers\n5. **No specific therapeutics/vaccines** - Increases severity if imported, but doesn't increase importation probability\n6. **American nationals present in DRC** - One already tested positive (though infection confirmed abroad, not in US)\n7. **Time horizon** - Only 7 months remaining; short window for outbreak escalation and international spread\n\n#### (g) Initial Estimate (Base Rate Only)\n**3-5%** \n\nReasoning: Historical precedent shows Ebola reaches the US only during massive outbreaks with sustained transmission. This outbreak is currently small with entry restrictions in place. The 2014 epidemic (28,000+ cases) produced 4 US cases; this outbreak would need to grow 100x+ to reach similar risk levels, and even then faces entry barriers.\n\n#### (h) Recent News Adjustment\n\n**Move from base rate: +2-3 percentage points (to 5-8%)**\n\nWhy this modest increase:\n- The WHO PHEIC declaration indicates international concern, but doesn't change epidemiological facts\n- One American already infected in DRC demonstrates the pathway exists, but also shows current containment (infection confirmed abroad)\n- Entry restrictions are *already implemented*, which is a strong countermeasure\n- The 7-month timeframe is relatively short for an outbreak to grow large enough to overcome entry barriers\n- No evidence yet of rapid exponential growth or healthcare system collapse in affected regions\n\nThe recent news confirms risk exists but doesn't fundamentally alter the low base rate. The system appears to be responding appropriately.\n\n#### (i) Community Prediction Comparison\nNo community prediction provided in the prompt to compare against.\n\n---\n\n#### Final Reasoning Check\n\nAm I above 70% or below 5%? No, I'm at 5-8%, which is reasonable given:\n- \u2713 Strong historical precedent for low importation risk\n- \u2713 Entry restrictions already active\n- \u2713 Outbreak currently small relative to 2014 epidemic\n- \u2713 Short time window (7 months)\n- \u2713 One confirmed case in American national, but infection confirmed abroad (not in US)\n\nThe main uncertainty is whether the outbreak will grow substantially in the next 7 months, but even if it doubles or triples, entry restrictions should prevent most importation.\n\n**Probability: 6%**\n\n\n## R1: Forecaster 3 Reasoning\n### Forecasting Analysis: Bundibugyo Ebola in the US Before 2027\n\n#### (a) Time Left Until Outcome is Known\nApproximately **7 months** (from May 27, 2026 to January 1, 2027).\n\n#### (b) Status Quo Outcome if Nothing Changed\nThe outbreak remains contained to DRC and Uganda with no cases confirmed in the US. This is the most likely baseline scenario given historical precedent.\n\n#### (c) Scenario Resulting in No Outcome\nThe outbreak is controlled through public health measures in Uganda and DRC (as happened with previous BVD outbreaks in 2007 and 2012). Entry restrictions from affected regions prevent infected individuals from reaching the US. Any American nationals infected abroad are treated outside the US or recover without traveling home. The 7-month window passes without a US-confirmed case.\n\n#### (d) Scenario Resulting in Yes Outcome\nAn infected individual (likely a healthcare worker, journalist, or aid worker) travels from DRC/Uganda to the US during the incubation period (2-21 days). They develop symptoms and seek medical care in the US, where laboratory confirmation of BVD occurs before January 1, 2027. This requires both: (1) an infected person reaching US soil, and (2) rapid diagnostic confirmation.\n\n#### (e) Base Rate Analysis\n\n**Historical precedent for Ebola in the US:**\n- **2014-2016 Zaire ebolavirus epidemic**: 4 cases confirmed in the US (out of ~11,000 cases in West Africa). This represents a ~0.04% transmission rate from outbreak region to US.\n- **Previous BVD outbreaks (2007, 2012)**: Zero cases outside Africa despite being real outbreaks.\n- **General pattern**: Ebola rarely reaches the US despite multiple African outbreaks. When it does, it requires either medical evacuation of known cases or undetected travel by infected individuals.\n\n**Relevant factors:**\n- The 2014-2016 epidemic was much larger (11,000+ cases) and lasted 2+ years\n- Current BVD outbreak is smaller (8 confirmed, 246 suspected as of May 17)\n- US has implemented entry restrictions specifically for this outbreak\n- No licensed treatments or vaccines for BVD (unlike current Zaire response capabilities)\n\n#### (f) Key Influencing Factors\n\n1. **Outbreak size and trajectory**: Currently much smaller than 2014-2016 Zaire epidemic; unclear if it will grow\n2. **Entry restrictions**: US has already invoked public health law limiting entry from affected regions\u2014this is a significant barrier\n3. **Historical containment**: Both previous BVD outbreaks remained in Africa despite being real public health events\n4. **Time window**: Only 7 months remaining; shorter than typical epidemic duration\n5. **Healthcare worker presence**: Americans are present in affected regions (at least one confirmed case), but most would likely be medically evacuated if symptomatic\n6. **Diagnostic capability**: US has strong capacity to detect and confirm cases if they arrive\n7. **Incubation period**: 2-21 days provides some window for asymptomatic travel, but symptomatic individuals are less likely to travel\n\n#### (g) Initial Estimate (Base Rate Only)\n\nGiven:\n- Historical rate of ~0.04% for Zaire (4 cases from 11,000)\n- Previous BVD outbreaks: 0% international transmission\n- Current outbreak appears smaller than 2014-2016\n- Entry restrictions now in place\n- 7-month timeframe\n\n**Base rate anchor: 2-4%**\n\nThis reflects that while Ebola occasionally reaches the US, it's rare, and BVD specifically has never done so despite prior opportunities.\n\n#### (h) Recent News Adjustment\n\n**Recent news factors:**\n- WHO declared PHEIC on May 16 (escalation signal)\n- At least one American already confirmed infected in DRC\n- Entry restrictions implemented (reduces risk)\n- No vaccines/therapeutics for BVD (increases severity if it occurs, but doesn't necessarily increase probability)\n\n**Adjustment reasoning:**\nThe presence of an infected American in the DRC is notable but not decisive\u2014this person is likely to be medically evacuated (as happened in 2014-2016) rather than travel commercially. Entry restrictions are a significant countervailing factor. The PHEIC declaration indicates concern but doesn't change the fundamental epidemiology.\n\n**Net adjustment: +1-2 percentage points** (modest increase from base rate due to confirmed American case, but offset by entry restrictions)\n\n#### (i) Community Prediction Comparison\n\nNo community prediction provided in the prompt, so no divergence analysis possible.\n\n---\n\n#### Final Reasoning Check\n\n- Am I above 70%? No. This is appropriate given strong historical precedent against US cases.\n- Am I below 5%? No. The presence of an infected American and the PHEIC declaration warrant meaningful probability.\n- Is my estimate reasonable? Yes. It reflects that while unlikely, the scenario is plausible given the 2014-2016 precedent and current outbreak dynamics.\n\n**Probability: 6%**\n\n",
+    "other_notes": null,
+    "price_estimate": 0.09662999999999994,
+    "minutes_taken": 0.5994662801424663,
+    "errors": [],
+    "prediction": 0.06
+  },
+  {
+    "question": {
+      "question_text": "Will Bitcoin trade above $120,000 before August 1, 2026?",
+      "id_of_post": 43502,
+      "page_url": "https://www.metaculus.com/questions/43502",
+      "id_of_question": 43507,
+      "state": "open",
+      "num_forecasters": 19,
+      "num_predictions": 101,
+      "resolution_criteria": "This question will resolve as Yes if, before August 1, 2026, Bitcoin trades at >\\$120,000 USD.",
+      "fine_print": "The primary source for this question will be [CoinMarketCap](https://coinmarketcap.com/currencies/bitcoin/historical-data/), specifically the High values of each day.",
+      "background_info": "Bitcoin remains the largest cryptocurrency by market capitalization and is closely watched by investors worldwide. Recent institutional adoption, ETF growth, and macroeconomic conditions have increased speculation about another major price rally during 2026.\n\nSupporters believe strong demand and limited supply could push Bitcoin above \\$120,000 in the near future, while critics argue that market volatility and regulatory uncertainty may prevent such growth.\n\nHelpful resources:\n\n* [Binance BTC/USDT](https://www.binance.com/en/trade/BTC_USDT)\n* [CoinMarketCap Bitcoin Page](https://coinmarketcap.com/currencies/bitcoin)",
+      "unit_of_measure": "",
+      "close_time": "2026-08-01T00:00:00Z",
+      "actual_resolution_time": null,
+      "scheduled_resolution_time": "2026-08-01T00:00:00Z",
+      "published_time": "2026-05-15T21:54:52Z",
+      "open_time": "2026-05-16T21:54:52Z",
+      "date_accessed": "2026-05-27T22:40:47.121221+10:00",
+      "already_forecasted": true,
+      "tournament_slugs": [],
+      "default_project_id": 144,
+      "includes_bots_in_aggregates": false,
+      "cp_reveal_time": "2026-05-19T15:00:00Z",
+      "question_weight": 1.0,
+      "resolution_string": null,
+      "conditional_type": null,
+      "previous_forecasts": null,
+      "group_question_option": null,
+      "question_ids_of_group": null,
+      "api_json": {
+        "id": 43502,
+        "title": "Will Bitcoin trade above $120,000 before August 1, 2026?",
+        "short_title": "Will BTC hit $120k by Aug 2026?",
+        "url_title": "Will BTC hit $120k by Aug 2026?",
+        "slug": "will-btc-hit-120k-by-aug-2026",
+        "author_id": 302089,
+        "author_username": "khan12a1212",
+        "coauthors": [],
+        "created_at": "2026-05-14T08:33:38.332562Z",
+        "published_at": "2026-05-15T21:54:52Z",
+        "edited_at": "2026-05-27T12:22:30.200798Z",
+        "curation_status": "approved",
+        "curation_status_updated_at": "2026-05-15T21:56:08.094571Z",
+        "comment_count": 1,
+        "status": "open",
+        "resolved": false,
+        "actual_close_time": null,
+        "scheduled_close_time": "2026-08-01T00:00:00Z",
+        "scheduled_resolve_time": "2026-08-01T00:00:00Z",
+        "actual_resolve_time": null,
+        "open_time": "2026-05-16T21:54:52Z",
+        "nr_forecasters": 19,
+        "html_metadata_json": null,
+        "projects": {
+          "leaderboard_tag": [
+            {
+              "id": 32925,
+              "name": "2026 Leaderboard",
+              "slug": "2026_leaderboard",
+              "type": "leaderboard_tag"
+            }
+          ],
+          "site_main": [
+            {
+              "id": 144,
+              "type": "site_main",
+              "name": "Metaculus Community",
+              "slug": null,
+              "header_image": null,
+              "prize_pool": null,
+              "start_date": null,
+              "close_date": null,
+              "forecasting_end_date": null,
+              "html_metadata_json": null,
+              "is_ongoing": null,
+              "user_permission": null,
+              "order": 0,
+              "created_at": "2023-11-08T16:55:29.484707Z",
+              "edited_at": "2026-04-03T12:10:54.728515Z",
+              "score_type": null,
+              "default_permission": "forecaster",
+              "visibility": "normal",
+              "show_on_homepage": false,
+              "is_current_content_translated": false,
+              "bot_leaderboard_status": "exclude_and_show",
+              "description_preview": "-"
+            }
+          ],
+          "default_project": {
+            "id": 144,
+            "type": "site_main",
+            "name": "Metaculus Community",
+            "slug": null,
+            "header_image": null,
+            "prize_pool": null,
+            "start_date": null,
+            "close_date": null,
+            "forecasting_end_date": null,
+            "html_metadata_json": null,
+            "is_ongoing": null,
+            "user_permission": null,
+            "order": 0,
+            "created_at": "2023-11-08T16:55:29.484707Z",
+            "edited_at": "2026-04-03T12:10:54.728515Z",
+            "score_type": null,
+            "default_permission": "forecaster",
+            "visibility": "normal",
+            "show_on_homepage": false,
+            "is_current_content_translated": false,
+            "bot_leaderboard_status": "exclude_and_show",
+            "description_preview": "-"
+          },
+          "category": [
+            {
+              "id": 3693,
+              "name": "Crypto\u00adcurrencies",
+              "slug": "cryptocurrencies",
+              "emoji": "\ud83d\udcb0",
+              "description": "Cryptocurrencies",
+              "type": "category"
+            },
+            {
+              "id": 3701,
+              "name": "Technology",
+              "slug": "technology",
+              "emoji": "\u2699\ufe0f",
+              "description": "Technology",
+              "type": "category"
+            }
+          ]
+        },
+        "question": {
+          "id": 43507,
+          "title": "Will Bitcoin trade above $120,000 before August 1, 2026?",
+          "created_at": "2026-05-14T08:33:38.332874Z",
+          "open_time": "2026-05-16T21:54:52Z",
+          "cp_reveal_time": "2026-05-19T15:00:00Z",
+          "spot_scoring_time": "2026-05-19T15:00:00Z",
+          "scheduled_resolve_time": "2026-08-01T00:00:00Z",
+          "actual_resolve_time": null,
+          "resolution_set_time": null,
+          "scheduled_close_time": "2026-08-01T00:00:00Z",
+          "actual_close_time": "2026-08-01T00:00:00Z",
+          "type": "binary",
+          "options": null,
+          "all_options_ever": null,
+          "options_history": null,
+          "options_order": null,
+          "group_variable": "",
+          "status": "open",
+          "possibilities": null,
+          "resolution": null,
+          "include_bots_in_aggregates": false,
+          "question_weight": 1,
+          "default_score_type": "peer",
+          "default_aggregation_method": "recency_weighted",
+          "label": "",
+          "unit": "",
+          "open_upper_bound": false,
+          "open_lower_bound": false,
+          "inbound_outcome_count": null,
+          "scaling": {
+            "range_min": null,
+            "range_max": null,
+            "nominal_min": null,
+            "nominal_max": null,
+            "zero_point": null,
+            "open_upper_bound": false,
+            "open_lower_bound": false,
+            "inbound_outcome_count": null,
+            "continuous_range": null
+          },
+          "group_rank": null,
+          "coherence_links": null,
+          "coherence_link_aggregations": null,
+          "description": "Bitcoin remains the largest cryptocurrency by market capitalization and is closely watched by investors worldwide. Recent institutional adoption, ETF growth, and macroeconomic conditions have increased speculation about another major price rally during 2026.\n\nSupporters believe strong demand and limited supply could push Bitcoin above \\$120,000 in the near future, while critics argue that market volatility and regulatory uncertainty may prevent such growth.\n\nHelpful resources:\n\n* [Binance BTC/USDT](https://www.binance.com/en/trade/BTC_USDT)\n* [CoinMarketCap Bitcoin Page](https://coinmarketcap.com/currencies/bitcoin)",
+          "resolution_criteria": "This question will resolve as Yes if, before August 1, 2026, Bitcoin trades at >\\$120,000 USD.",
+          "fine_print": "The primary source for this question will be [CoinMarketCap](https://coinmarketcap.com/currencies/bitcoin/historical-data/), specifically the High values of each day.",
+          "short_title": "Will BTC hit $120k by Aug 2026?",
+          "post_id": 43502,
+          "aggregations": {
+            "recency_weighted": {
+              "history": null,
+              "latest": null,
+              "score_data": null,
+              "movement": null
+            }
+          },
+          "average_coverage": null,
+          "my_forecasts": {
+            "history": [
+              {
+                "question_id": 43507,
+                "author_id": 302314,
+                "start_time": 1779871511.802827,
+                "end_time": 1779875657.663779,
+                "forecast_values": [
+                  0.43000000000000005,
+                  0.57
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43507,
+                "author_id": 302314,
+                "start_time": 1779875657.663779,
+                "end_time": 1779878710.978873,
+                "forecast_values": [
+                  0.8200000000000001,
+                  0.18
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43507,
+                "author_id": 302314,
+                "start_time": 1779878710.978873,
+                "end_time": 1779884539.654574,
+                "forecast_values": [
+                  0.65,
+                  0.35
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43507,
+                "author_id": 302314,
+                "start_time": 1779884539.654574,
+                "end_time": null,
+                "forecast_values": [
+                  0.76,
+                  0.24
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              }
+            ],
+            "latest": {
+              "question_id": 43507,
+              "author_id": 302314,
+              "start_time": 1779884539.654574,
+              "end_time": null,
+              "forecast_values": [
+                0.76,
+                0.24
+              ],
+              "interval_lower_bounds": null,
+              "centers": null,
+              "interval_upper_bounds": null,
+              "distribution_input": null
+            },
+            "score_data": {}
+          }
+        },
+        "user_permission": "forecaster",
+        "vote": {
+          "score": -2,
+          "user_vote": null
+        },
+        "forecasts_count": 101,
+        "unread_comment_count": 0,
+        "last_viewed_at": "2026-05-27T12:22:25.055364Z",
+        "private_note": null,
+        "key_factors": [],
+        "is_current_content_translated": false
+      },
+      "custom_metadata": {},
+      "categories": [
+        {
+          "id": 3693,
+          "name": "Crypto\u00adcurrencies",
+          "slug": "cryptocurrencies",
+          "emoji": "\ud83d\udcb0",
+          "description": "Cryptocurrencies",
+          "type": "category"
+        },
+        {
+          "id": 3701,
+          "name": "Technology",
+          "slug": "technology",
+          "emoji": "\u2699\ufe0f",
+          "description": "Technology",
+          "type": "category"
+        }
+      ],
+      "question_type": "binary",
+      "community_prediction_at_access_time": null
+    },
+    "explanation": "\n# SUMMARY\n*Question*: Will Bitcoin trade above $120,000 before August 1, 2026?\n*Final Prediction*: 15.0%\n*Total Cost*: $0.0914 (estimated)\n*Time Spent*: 0.4 minutes\n*LLMs*: `{'default': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}, 'summarizer': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}, 'researcher': 'smart-searcher/claude-haiku-4-5', 'parser': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}}`\n*Bot Name*: SummerTemplateBot2026\n\n\n## Report 1 Summary\n### Forecasts\n*Forecaster 1*: 17.0%\n*Forecaster 2*: 15.0%\n*Forecaster 3*: 10.0%\n\n\n### Research Summary\n# Summary\n\nNo research results were found to summarize regarding Bitcoin's potential price movement above $120,000 before August 1, 2026.\n\n**Sources:**\nNo sources were available, as the search query returned no results.\n\n\n# RESEARCH\n## Report 1 Research\nNo search results found for the query using the search filter chosen\n\n# FORECASTS\n\n## R1: Forecaster 1 Reasoning\n### Forecasting Analysis: Bitcoin Above $120,000 by August 1, 2026\n\n#### (a) Time Left Until Outcome is Known\n**65 days** (from May 27, 2026 to August 1, 2026)\n\n#### (b) Status Quo Outcome if Nothing Changed\nBitcoin would remain in its current range (~$75,800). For the status quo to result in a Yes outcome, Bitcoin would need to appreciate approximately **58% in 65 days**, which would be a substantial move requiring significant catalyst events.\n\n#### (c) Scenario Resulting in NO\nRegulatory crackdowns intensify globally; macroeconomic headwinds (rising interest rates, recession concerns) dampen risk appetite; institutional adoption plateaus; Bitcoin consolidates in the $70k-$85k range through summer 2026 with no major breakout catalyst.\n\n#### (d) Scenario Resulting in YES\nMajor institutional capital inflows accelerate; Bitcoin ETF adoption reaches critical mass; geopolitical events drive safe-haven demand; macroeconomic conditions shift toward inflation concerns; technical breakout above $82k triggers momentum-driven rally to $120k+.\n\n#### (e) Base Rate Analysis\n\n**Historical Bitcoin Price Movement Patterns:**\n- Bitcoin has achieved 50%+ moves in 2-3 month windows multiple times (2017, 2020-2021, 2023-2024)\n- However, a 58% move in 65 days is in the upper quartile of probability\n- Bitcoin's volatility is high, but sustained rallies of this magnitude typically require:\n- Major macro catalysts (Fed policy shifts, geopolitical events)\n- Institutional adoption waves\n- Technical breakouts from consolidation\n\n**Relevant Historical Precedents:**\n- 2020-2021: Bitcoin went from ~$10k to $69k (590% over ~14 months) \u2014 extreme bull market\n- 2023-2024: Bitcoin rallied from ~$16.5k to $73k (343% over ~16 months) \u2014 strong bull market\n- Within 65-day windows during bull markets: 30-50% moves are relatively common\n- Within 65-day windows during consolidation: 10-20% moves are typical\n\n**Base rate for 58% move in 65 days:** Approximately **20-25%** historically during normal market conditions, higher during confirmed bull markets.\n\n#### (f) Key Influencing Factors\n\n1. **Current price level ($75.8k)**: Already near all-time highs; less room for explosive growth\n2. **Time horizon (65 days)**: Relatively short; requires catalyst-driven move, not gradual appreciation\n3. **Recent momentum**: 30-day change is -0.7% with range $75.5k-$82.1k \u2014 suggests consolidation, not breakout\n4. **Institutional adoption trajectory**: Ongoing but not showing signs of acceleration in recent data\n5. **Macroeconomic backdrop**: Unknown from current data, but typically constrains crypto in late May/early summer\n6. **Technical setup**: No evidence of major breakout above $82k resistance\n7. **Regulatory environment**: Remains uncertain; no major positive catalysts evident\n\n#### (g) Initial Estimate (Base Rate Anchor)\n\nGiven:\n- Historical base rate of 20-25% for 58% moves in 65 days\n- Current consolidation pattern (not breakout)\n- No obvious near-term catalyst\n- Status quo bias (markets change slowly)\n\n**Base rate anchor: 22%**\n\n#### (h) Recent News Adjustment\n\nThe live market data shows:\n- Slight negative momentum (-0.7% in 30 days)\n- Consolidation range, not breakout\n- No indication of accelerating institutional demand\n- 65 days is a tight timeframe for a 58% move without major catalyst\n\n**Adjustment: -4 to -6 percentage points**\n\nThe lack of positive recent momentum and the consolidation pattern suggest we should be slightly below base rates. However, the absence of *negative* catalysts (no major regulatory crackdowns, no macro disasters) prevents a larger downward adjustment.\n\n**Adjusted estimate: 16-18%**\n\n#### (i) Community Prediction Comparison\n\nNo community prediction data provided in the prompt. If one exists and differs significantly from my 16-18% estimate, I would consider:\n- Whether the community has access to forward-looking institutional data\n- Whether sentiment has shifted based on recent policy announcements\n- Whether technical analysts see breakout patterns I'm missing\n- But I would remain cautious about pure sentiment-driven adjustments\n\n---\n\n#### Final Reasoning Check\n\nAt 16-18%, I'm well below the 70% threshold and above the 5% floor, so no additional scrutiny is required for extreme confidence levels.\n\nThe forecast reflects:\n- Realistic base rates for large moves in short timeframes\n- Current consolidation pattern (not bullish)\n- Lack of obvious near-term catalysts\n- Status quo bias (most likely: Bitcoin stays in $70k-$85k range)\n- Non-zero probability of unexpected bullish catalyst\n\n**Probability: 17%**\n\n\n## R1: Forecaster 2 Reasoning\n### Forecasting Analysis: Bitcoin Above $120,000 by August 1, 2026\n\n#### (a) Time Left Until Outcome is Known\n**65 days** (from May 27, 2026 to August 1, 2026)\n\n#### (b) Status Quo Outcome if Nothing Changed\nBitcoin would remain around $75,800. For the resolution criteria to be met, Bitcoin needs to reach $120,000, representing a **58.2% increase** from current levels in just over 2 months.\n\n#### (c) Scenario Resulting in NO\nRegulatory crackdowns intensify globally; macroeconomic headwinds (rising interest rates, recession concerns) emerge; institutional adoption plateaus; a major security breach or exchange collapse undermines confidence. Bitcoin consolidates in the $70k-$90k range through August 1.\n\n#### (d) Scenario Resulting in YES\nMajor institutional capital inflows accelerate; a significant geopolitical event drives safe-haven demand; breakthrough regulatory clarity in major markets; Bitcoin ETF adoption surges dramatically; a major tech company announces significant Bitcoin holdings. Bitcoin rallies 58%+ in 2 months.\n\n#### (e) Base Rate Analysis\n\n**Historical Bitcoin Price Movement Patterns:**\n- Bitcoin has achieved 50%+ moves in 2-3 month windows, but these are relatively rare and typically occur during bull market phases\n- From late 2024 to early 2025, Bitcoin moved from ~$42k to ~$70k (67% in ~3 months) during a bull run\n- However, such explosive moves require specific catalysts and favorable conditions\n- In a typical 65-day window, Bitcoin moves 15-25% on average\n- A 58% move in 65 days would place this in the top 10-15% of historical outcomes for this timeframe\n- Base rate for a specific price target 58% higher being hit in 65 days: approximately **15-20%** historically\n\n#### (f) Key Influencing Factors\n\n1. **Current momentum**: 30-day change is -0.7% and recent range ($75k-$82k) shows consolidation, not explosive growth\n2. **Time constraint**: Only 65 days is a very short window for such a large move\n3. **Institutional adoption trajectory**: ETF growth is real but appears to be priced in already\n4. **Macroeconomic environment**: Unknown as of May 2026, but no indication of major tailwinds\n5. **Regulatory landscape**: Remains uncertain; no major breakthrough catalysts evident\n6. **Technical resistance**: $120k represents uncharted territory; previous all-time highs would need to be exceeded significantly\n7. **Volatility patterns**: Bitcoin's volatility has moderated somewhat with institutional adoption\n\n#### (g) Initial Estimate (Base Rate Anchor)\n**18%** \u2014 Based purely on historical frequency of 58%+ moves occurring within 65-day windows. This is a rare but not impossible event.\n\n#### (h) Recent News Adjustment\n**Adjustment: -3 to -5 percentage points**\n\nThe live market data shows:\n- Current price is $75,799 (reasonable, not at extremes)\n- 30-day momentum is slightly negative (-0.7%)\n- Recent 30-day range shows consolidation, not volatility expansion\n- No mention of major catalysts or breaking news\n\nThe lack of recent positive momentum and the consolidation pattern suggest we're not in an accelerating bull phase. The research assistant found no relevant recent news, which itself is notable\u2014if major catalysts existed, they would likely be documented. This argues for a modest downward adjustment from the base rate.\n\n#### (i) Community Prediction Divergence\nNo community prediction was provided in the prompt, so I cannot compare against it.\n\n---\n\n#### Final Reasoning Summary\n\nThis question requires Bitcoin to gain 58% in 65 days. While Bitcoin has demonstrated this capability historically (roughly 15-20% base rate), several factors argue for caution:\n\n1. **Status quo bias**: Current consolidation pattern suggests no imminent breakout\n2. **Time compression**: 65 days is tight for such a large move without existing momentum\n3. **No obvious catalyst**: The absence of breaking news or major announced developments\n4. **Recent weakness**: Slight negative 30-day momentum works against the thesis\n\nHowever, the scenario isn't impossible\u2014Bitcoin could experience a genuine bull run if institutional adoption accelerates or macroeconomic conditions shift dramatically. The base rate of ~18% already accounts for this possibility.\n\nGiven the consolidation pattern and lack of current momentum, I'm adjusting downward from the base rate, but not dramatically, since the timeframe is still long enough for unexpected developments.\n\n**Probability: 15%**\n\n\n## R1: Forecaster 3 Reasoning\n### Forecasting Analysis: Bitcoin Above $120,000 Before August 1, 2026\n\n#### (a) Time Left Until Outcome is Known\n**65 days** (from May 27, 2026 to August 1, 2026)\n\n#### (b) Status Quo Outcome if Nothing Changed\nBitcoin would remain around $75,800, well below the $120,000 target. No resolution to Yes.\n\n#### (c) Scenario Resulting in NO\nRegulatory crackdowns (e.g., major jurisdiction restricting crypto trading), macroeconomic shock (recession, rate hikes), or sustained market consolidation keeps Bitcoin in the $70k-$90k range through July 2026. This is the most likely path given current momentum.\n\n#### (d) Scenario Resulting in YES\nA major positive catalyst (e.g., significant institutional adoption announcement, favorable regulatory clarity, geopolitical flight-to-safety demand, or a major corporate treasury allocation) triggers a sustained rally. Bitcoin would need to gain ~58% in 65 days to reach $120k.\n\n#### (e) Base Rate Analysis\n\n**Required move:** 58% gain in 65 days (~2.2 months)\n\n**Historical context for Bitcoin:**\n- Bitcoin has achieved 50%+ moves in 2-3 month windows multiple times (2017, 2020-2021 bull runs)\n- However, such moves typically occur during established bull market phases, not from consolidation\n- In the last 5 years, Bitcoin has hit new all-time highs roughly every 2-4 years during bull cycles\n- The 30-day range shows minimal volatility ($75.5k-$82.1k), suggesting consolidation rather than momentum building\n- Bitcoin's historical volatility allows for large moves, but they require catalytic events\n\n**Base rate estimate:** In any given 2-month window outside of an active bull market, a 58% move occurs roughly **8-15% of the time** historically.\n\n#### (f) Key Influencing Factors\n\n1. **Current price momentum:** Flat to slightly negative (-0.7% in 30 days) suggests no building momentum\n2. **Time constraint:** Only 65 days is a tight window for such a large move without existing momentum\n3. **Institutional adoption trajectory:** Ongoing but gradual; unlikely to accelerate dramatically in 2 months\n4. **Regulatory environment:** Uncertain but no major positive catalysts visible on horizon\n5. **Macroeconomic conditions:** Not clearly supportive of risk-on sentiment in May 2026\n6. **Volatility capacity:** Bitcoin's historical volatility supports large moves *when catalyzed*, but catalysts are unpredictable\n7. **Halving cycles:** Bitcoin's next halving would be in 2028, so no supply shock catalyst in this timeframe\n\n#### (g) Initial Estimate (Base Rate Anchor)\nGiven the base rate of 8-15% for a 58% move in a 2-month window outside active bull markets, and the current lack of momentum, I anchor at **12%** before considering recent news.\n\n#### (h) Recent News Adjustment\nThe live market data shows:\n- Bitcoin at $75,799 (reasonable price level)\n- Flat 30-day performance\n- Tight 30-day range indicating consolidation\n\nThis data does NOT suggest building momentum toward a bull run. There is no recent news provided that would shift expectations upward. The question background mentions \"recent institutional adoption and ETF growth,\" but these are ongoing trends already reflected in current pricing. Without a specific new catalyst, I should remain anchored to base rates or move slightly downward due to the lack of momentum.\n\n**Adjustment:** -2 to -3 percentage points due to consolidation pattern and lack of visible catalysts.\n\n#### (i) Community Prediction Divergence\nNo community prediction provided in the prompt, so no divergence analysis possible.\n\n---\n\n#### Final Reasoning\n\nThe core challenge: Bitcoin needs a 58% move in 65 days. While Bitcoin is volatile enough to achieve this, it requires either:\n1. An existing bull market (not present\u2014we're in consolidation)\n2. A major unexpected catalyst (unpredictable, but base rates suggest low probability in any given 2-month window)\n\nThe status quo bias is strong here\u2014Bitcoin has shown no momentum building, and extraordinary moves require extraordinary catalysts. The 30-day range of only ~8% suggests the market is pricing in stability, not a near-term explosion.\n\nBase rate of ~12% adjusted downward to account for current consolidation pattern and lack of visible catalysts.\n\n**Probability: 10%**\n\n",
+    "other_notes": null,
+    "price_estimate": 0.091378,
+    "minutes_taken": 0.40239333709081015,
+    "errors": [],
+    "prediction": 0.15
+  },
+  {
+    "question": {
+      "question_text": "Will Instructure be subject to another major hack before September 1, 2026?",
+      "id_of_post": 43501,
+      "page_url": "https://www.metaculus.com/questions/43501",
+      "id_of_question": 43506,
+      "state": "open",
+      "num_forecasters": 54,
+      "num_predictions": 126,
+      "resolution_criteria": "This question will resolve as **Yes** if, after the question's opening and before September 1, 2026, Instructure or any of its [products](https://www.instructure.com/products) (including but not limited to Canvas, Mastery, Parchment, and Impact) experiences at least one cybersecurity incident that meets any of the following conditions:\n\n1. **Data exfiltration:** An unauthorized party obtains personal data (such as names, email addresses, student IDs, messages, credentials, or financial information) of at least 10,000 users.\n2. **Service disruption:** One or more Instructure products are rendered substantially unavailable to at least 100 institutional customers for a continuous period of at least 4 hours as a direct result of a security breach.\n3. **Ransom or extortion demand:** A threat actor issues a ransom or extortion demand related to data or systems access newly obtained from Instructure.\n\nAll conditions require confirmation from at least one of the following: Instructure official communications, credible news reporting, or government disclosures. An attacker's public claim alone will not be sufficient.",
+      "fine_print": "Incidents originating from upstream third-party vendors (e.g., Salesforce, AWS) do not count unless Instructure or its products were the primary target of the attack, even if such incidents result in the compromise of Instructure-held user data or disruption of Instructure-operated services.\n\nRoutine vulnerability disclosures, bug bounty reports, or patched vulnerabilities that do not result in actual unauthorized access or data loss do not count.\n\nContinued fallout from the original April 29 to May 11, 2026 ShinyHunters breach, such as continued extortion demands based on, or disclosures of, already-stolen data, do not qualify.",
+      "background_info": "Instructure is the company behind Canvas LMS, used by [41%](https://en.wikipedia.org/wiki/2026_Canvas_security_incident) of North American higher education institutions for coursework, exams, grading, and student communication. In the last eight months, it has been hacked twice by [ShinyHunters](https://en.wikipedia.org/wiki/ShinyHunters), a black-hat criminal hacking and extortion group.\n\nIn September 2025, ShinyHunters [accessed Instructure's Salesforce environment](https://www.instructure.com/resources/blog/security-incident-update), compromising business contact information. Then in late April 2026, the group [exploited a vulnerability in Canvas's Free-For-Teacher accounts](https://www.theregister.com/cyber-crime/2026/05/12/congress-investigates-canvas-breach-after-instructure-cuts-deal-with-shinyhunters/5238927) to exfiltrate an estimated 3.65 terabytes of data \u2014 including names, emails, student IDs, and billions of private messages \u2014 affecting approximately 275 million users across 8,809 institutions. After Instructure attempted to patch the vulnerability without negotiating, the ShinyHunters [re-entered on May 7 through the same vulnerability](https://www.theregister.com/cyber-crime/2026/05/12/congress-investigates-canvas-breach-after-instructure-cuts-deal-with-shinyhunters/5238927), defacing login pages with ransom demands and triggering a global Canvas outage during exams week, leading many universities to postpone finals. Instructure [ultimately paid a ransom](https://www.insidehighered.com/news/tech-innovation/administrative-tech/2026/05/11/instructure-pays-ransom-canvas-hackers) in exchange for data destruction and assurances against further extortion.\n\n[At least three class-action lawsuits have been filed](https://www.abc4.com/news/wasatch-front/lawsuits-instructure-data-breach/) alleging Instructure failed to protect user data (including that of minors) and that the outage cut off access to materials students needed to study for finals. The [U.S. House Homeland Security Committee has summoned CEO Steve Daly](https://techcrunch.com/2026/05/13/us-lawmakers-demand-answers-from-instructure-after-canvas-data-breaches/) for a briefing by May 21, 2026, and the [FBI, CISA, and Department of Education are all engaged](https://fsapartners.ed.gov/knowledge-center/library/electronic-announcements/2026-05-12/technology-security-alert-ongoing-cybersecurity-incident-involving-canvas-learning-management-system). Instructure [states that Canvas is fully operational with enhanced security measures](https://www.instructure.com/incident_update), though its forensic investigation remains ongoing.\n\nCybersecurity experts have [noted that paying the ransom risks incentivizing future attacks](https://www.insidehighered.com/news/tech-innovation/administrative-tech/2026/05/11/instructure-pays-ransom-canvas-hackers). The sheer concentration of educational infrastructure on a single platform means another breach would compound reputational, legal, and operational damage at a scale difficult to absorb.",
+      "unit_of_measure": "",
+      "close_time": "2026-08-01T17:00:00Z",
+      "actual_resolution_time": null,
+      "scheduled_resolution_time": "2026-09-01T01:00:00Z",
+      "published_time": "2026-05-22T17:00:00Z",
+      "open_time": "2026-05-25T17:00:00Z",
+      "date_accessed": "2026-05-27T22:40:47.121221+10:00",
+      "already_forecasted": true,
+      "tournament_slugs": [
+        "metaculus-cup-summer-2026"
+      ],
+      "default_project_id": 33021,
+      "includes_bots_in_aggregates": false,
+      "cp_reveal_time": "2026-05-29T17:00:00Z",
+      "question_weight": 1.0,
+      "resolution_string": null,
+      "conditional_type": null,
+      "previous_forecasts": null,
+      "group_question_option": null,
+      "question_ids_of_group": null,
+      "api_json": {
+        "id": 43501,
+        "title": "Will Instructure be subject to another major hack before September 1, 2026?",
+        "short_title": "Another Instructure Hack Before Sep 2026?",
+        "url_title": "Another Instructure Hack Before Sep 2026?",
+        "slug": "another-instructure-hack-before-sep-2026",
+        "author_id": 285420,
+        "author_username": "tejvn",
+        "coauthors": [],
+        "created_at": "2026-05-14T03:24:30.385902Z",
+        "published_at": "2026-05-22T17:00:00Z",
+        "edited_at": "2026-05-27T12:22:52.405503Z",
+        "curation_status": "approved",
+        "curation_status_updated_at": "2026-05-22T12:36:48.536239Z",
+        "comment_count": 2,
+        "status": "open",
+        "resolved": false,
+        "actual_close_time": null,
+        "scheduled_close_time": "2026-08-01T17:00:00Z",
+        "scheduled_resolve_time": "2026-09-01T01:00:00Z",
+        "actual_resolve_time": null,
+        "open_time": "2026-05-25T17:00:00Z",
+        "nr_forecasters": 54,
+        "html_metadata_json": null,
+        "projects": {
+          "leaderboard_tag": [
+            {
+              "id": 32925,
+              "name": "2026 Leaderboard",
+              "slug": "2026_leaderboard",
+              "type": "leaderboard_tag"
+            }
+          ],
+          "category": [
+            {
+              "id": 3698,
+              "name": "Economy & Business",
+              "slug": "economy-business",
+              "emoji": "\ud83d\udcbc",
+              "description": "Economy & Business",
+              "type": "category"
+            },
+            {
+              "id": 3701,
+              "name": "Technology",
+              "slug": "technology",
+              "emoji": "\u2699\ufe0f",
+              "description": "Technology",
+              "type": "category"
+            },
+            {
+              "id": 3688,
+              "name": "Law",
+              "slug": "law",
+              "emoji": "\u2696\ufe0f",
+              "description": "Law",
+              "type": "category"
+            }
+          ],
+          "tournament": [
+            {
+              "id": 33021,
+              "type": "tournament",
+              "name": "Metaculus Cup Summer 2026",
+              "slug": "metaculus-cup-summer-2026",
+              "header_image": "https://cdn.metaculus.com/cup-cover2x.webp",
+              "prize_pool": "5000.00",
+              "start_date": "2026-05-04T17:00:00Z",
+              "close_date": "2026-09-04T00:00:00Z",
+              "forecasting_end_date": "2026-09-01T00:00:00Z",
+              "html_metadata_json": null,
+              "is_ongoing": true,
+              "user_permission": null,
+              "order": 0,
+              "created_at": "2026-04-23T10:51:46.376890Z",
+              "edited_at": "2026-05-27T12:22:52.746797Z",
+              "score_type": "peer_tournament",
+              "default_permission": "forecaster",
+              "visibility": "normal",
+              "show_on_homepage": false,
+              "is_current_content_translated": false,
+              "bot_leaderboard_status": "exclude_and_show",
+              "description_preview": "<p>Welcome to the Metaculus Cup. Each week, forecasters new and experienced predict on a fresh batch of topical questions, with $5,000 in pr"
+            }
+          ],
+          "default_project": {
+            "id": 33021,
+            "type": "tournament",
+            "name": "Metaculus Cup Summer 2026",
+            "slug": "metaculus-cup-summer-2026",
+            "header_image": "https://cdn.metaculus.com/cup-cover2x.webp",
+            "prize_pool": "5000.00",
+            "start_date": "2026-05-04T17:00:00Z",
+            "close_date": "2026-09-04T00:00:00Z",
+            "forecasting_end_date": "2026-09-01T00:00:00Z",
+            "html_metadata_json": null,
+            "is_ongoing": true,
+            "user_permission": null,
+            "order": 0,
+            "created_at": "2026-04-23T10:51:46.376890Z",
+            "edited_at": "2026-05-27T12:22:52.746797Z",
+            "score_type": "peer_tournament",
+            "default_permission": "forecaster",
+            "visibility": "normal",
+            "show_on_homepage": false,
+            "is_current_content_translated": false,
+            "bot_leaderboard_status": "exclude_and_show",
+            "description_preview": "<p>Welcome to the Metaculus Cup. Each week, forecasters new and experienced predict on a fresh batch of topical questions, with $5,000 in pr"
+          }
+        },
+        "question": {
+          "id": 43506,
+          "title": "Will Instructure be subject to another major hack before September 1, 2026?",
+          "created_at": "2026-05-14T03:24:30.386190Z",
+          "open_time": "2026-05-25T17:00:00Z",
+          "cp_reveal_time": "2026-05-29T17:00:00Z",
+          "spot_scoring_time": "2026-05-29T17:00:00Z",
+          "scheduled_resolve_time": "2026-09-01T01:00:00Z",
+          "actual_resolve_time": null,
+          "resolution_set_time": null,
+          "scheduled_close_time": "2026-08-01T17:00:00Z",
+          "actual_close_time": "2026-08-01T17:00:00Z",
+          "type": "binary",
+          "options": null,
+          "all_options_ever": null,
+          "options_history": null,
+          "options_order": null,
+          "group_variable": "",
+          "status": "open",
+          "possibilities": null,
+          "resolution": null,
+          "include_bots_in_aggregates": false,
+          "question_weight": 1,
+          "default_score_type": "peer",
+          "default_aggregation_method": "recency_weighted",
+          "label": "",
+          "unit": "",
+          "open_upper_bound": false,
+          "open_lower_bound": false,
+          "inbound_outcome_count": null,
+          "scaling": {
+            "range_min": null,
+            "range_max": null,
+            "nominal_min": null,
+            "nominal_max": null,
+            "zero_point": null,
+            "open_upper_bound": false,
+            "open_lower_bound": false,
+            "inbound_outcome_count": null,
+            "continuous_range": null
+          },
+          "group_rank": null,
+          "coherence_links": null,
+          "coherence_link_aggregations": null,
+          "description": "Instructure is the company behind Canvas LMS, used by [41%](https://en.wikipedia.org/wiki/2026_Canvas_security_incident) of North American higher education institutions for coursework, exams, grading, and student communication. In the last eight months, it has been hacked twice by [ShinyHunters](https://en.wikipedia.org/wiki/ShinyHunters), a black-hat criminal hacking and extortion group.\n\nIn September 2025, ShinyHunters [accessed Instructure's Salesforce environment](https://www.instructure.com/resources/blog/security-incident-update), compromising business contact information. Then in late April 2026, the group [exploited a vulnerability in Canvas's Free-For-Teacher accounts](https://www.theregister.com/cyber-crime/2026/05/12/congress-investigates-canvas-breach-after-instructure-cuts-deal-with-shinyhunters/5238927) to exfiltrate an estimated 3.65 terabytes of data \u2014 including names, emails, student IDs, and billions of private messages \u2014 affecting approximately 275 million users across 8,809 institutions. After Instructure attempted to patch the vulnerability without negotiating, the ShinyHunters [re-entered on May 7 through the same vulnerability](https://www.theregister.com/cyber-crime/2026/05/12/congress-investigates-canvas-breach-after-instructure-cuts-deal-with-shinyhunters/5238927), defacing login pages with ransom demands and triggering a global Canvas outage during exams week, leading many universities to postpone finals. Instructure [ultimately paid a ransom](https://www.insidehighered.com/news/tech-innovation/administrative-tech/2026/05/11/instructure-pays-ransom-canvas-hackers) in exchange for data destruction and assurances against further extortion.\n\n[At least three class-action lawsuits have been filed](https://www.abc4.com/news/wasatch-front/lawsuits-instructure-data-breach/) alleging Instructure failed to protect user data (including that of minors) and that the outage cut off access to materials students needed to study for finals. The [U.S. House Homeland Security Committee has summoned CEO Steve Daly](https://techcrunch.com/2026/05/13/us-lawmakers-demand-answers-from-instructure-after-canvas-data-breaches/) for a briefing by May 21, 2026, and the [FBI, CISA, and Department of Education are all engaged](https://fsapartners.ed.gov/knowledge-center/library/electronic-announcements/2026-05-12/technology-security-alert-ongoing-cybersecurity-incident-involving-canvas-learning-management-system). Instructure [states that Canvas is fully operational with enhanced security measures](https://www.instructure.com/incident_update), though its forensic investigation remains ongoing.\n\nCybersecurity experts have [noted that paying the ransom risks incentivizing future attacks](https://www.insidehighered.com/news/tech-innovation/administrative-tech/2026/05/11/instructure-pays-ransom-canvas-hackers). The sheer concentration of educational infrastructure on a single platform means another breach would compound reputational, legal, and operational damage at a scale difficult to absorb.",
+          "resolution_criteria": "This question will resolve as **Yes** if, after the question's opening and before September 1, 2026, Instructure or any of its [products](https://www.instructure.com/products) (including but not limited to Canvas, Mastery, Parchment, and Impact) experiences at least one cybersecurity incident that meets any of the following conditions:\n\n1. **Data exfiltration:** An unauthorized party obtains personal data (such as names, email addresses, student IDs, messages, credentials, or financial information) of at least 10,000 users.\n2. **Service disruption:** One or more Instructure products are rendered substantially unavailable to at least 100 institutional customers for a continuous period of at least 4 hours as a direct result of a security breach.\n3. **Ransom or extortion demand:** A threat actor issues a ransom or extortion demand related to data or systems access newly obtained from Instructure.\n\nAll conditions require confirmation from at least one of the following: Instructure official communications, credible news reporting, or government disclosures. An attacker's public claim alone will not be sufficient.",
+          "fine_print": "Incidents originating from upstream third-party vendors (e.g., Salesforce, AWS) do not count unless Instructure or its products were the primary target of the attack, even if such incidents result in the compromise of Instructure-held user data or disruption of Instructure-operated services.\n\nRoutine vulnerability disclosures, bug bounty reports, or patched vulnerabilities that do not result in actual unauthorized access or data loss do not count.\n\nContinued fallout from the original April 29 to May 11, 2026 ShinyHunters breach, such as continued extortion demands based on, or disclosures of, already-stolen data, do not qualify.",
+          "short_title": "Another Instructure Hack Before Sep 2026?",
+          "post_id": 43501,
+          "aggregations": {
+            "recency_weighted": {
+              "history": null,
+              "latest": null,
+              "score_data": null,
+              "movement": null
+            }
+          },
+          "average_coverage": null,
+          "my_forecasts": {
+            "history": [
+              {
+                "question_id": 43506,
+                "author_id": 302314,
+                "start_time": 1779871534.164366,
+                "end_time": 1779875670.450185,
+                "forecast_values": [
+                  0.79,
+                  0.21000000000000002
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43506,
+                "author_id": 302314,
+                "start_time": 1779875670.450185,
+                "end_time": 1779878687.044185,
+                "forecast_values": [
+                  0.75,
+                  0.25
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43506,
+                "author_id": 302314,
+                "start_time": 1779878687.044185,
+                "end_time": 1779884561.424268,
+                "forecast_values": [
+                  0.72,
+                  0.28
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43506,
+                "author_id": 302314,
+                "start_time": 1779884561.424268,
+                "end_time": null,
+                "forecast_values": [
+                  0.84,
+                  0.16
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              }
+            ],
+            "latest": {
+              "question_id": 43506,
+              "author_id": 302314,
+              "start_time": 1779884561.424268,
+              "end_time": null,
+              "forecast_values": [
+                0.84,
+                0.16
+              ],
+              "interval_lower_bounds": null,
+              "centers": null,
+              "interval_upper_bounds": null,
+              "distribution_input": null
+            },
+            "score_data": {}
+          }
+        },
+        "user_permission": "forecaster",
+        "vote": {
+          "score": 2,
+          "user_vote": null
+        },
+        "forecasts_count": 126,
+        "unread_comment_count": 0,
+        "last_viewed_at": "2026-05-27T12:22:48.006194Z",
+        "private_note": null,
+        "key_factors": [
+          {
+            "id": 2255,
+            "author": {
+              "id": 271410,
+              "username": "WasteTimeContinuum",
+              "is_bot": false,
+              "is_staff": false,
+              "metadata": null
+            },
+            "comment_id": 863526,
+            "created_at": "2026-05-25T01:56:38.382911+00:00",
+            "vote": {
+              "score": 4,
+              "aggregated_data": [
+                {
+                  "score": 5,
+                  "count": 2
+                }
+              ],
+              "user_vote": null,
+              "user_vote_reason": null,
+              "count": 2
+            },
+            "question_id": null,
+            "question": null,
+            "question_option": "",
+            "freshness": 3.7878415847646614,
+            "driver": {
+              "text": "Copycats may target Instructure after breach",
+              "impact_direction": 1,
+              "certainty": null
+            },
+            "base_rate": null,
+            "news": null,
+            "post": {
+              "id": 43501,
+              "question_type": "binary",
+              "unit": ""
+            }
+          },
+          {
+            "id": 2257,
+            "author": {
+              "id": 271410,
+              "username": "WasteTimeContinuum",
+              "is_bot": false,
+              "is_staff": false,
+              "metadata": null
+            },
+            "comment_id": 863526,
+            "created_at": "2026-05-25T01:58:06.954669+00:00",
+            "vote": {
+              "score": 3,
+              "aggregated_data": [
+                {
+                  "score": 5,
+                  "count": 1
+                },
+                {
+                  "score": 2,
+                  "count": 1
+                }
+              ],
+              "user_vote": null,
+              "user_vote_reason": null,
+              "count": 2
+            },
+            "question_id": null,
+            "question": null,
+            "question_option": "",
+            "freshness": 2.8859427482344038,
+            "driver": {
+              "text": "CrowdStrike is hardening Instructure's security",
+              "impact_direction": -1,
+              "certainty": null
+            },
+            "base_rate": null,
+            "news": null,
+            "post": {
+              "id": 43501,
+              "question_type": "binary",
+              "unit": ""
+            }
+          },
+          {
+            "id": 2256,
+            "author": {
+              "id": 271410,
+              "username": "WasteTimeContinuum",
+              "is_bot": false,
+              "is_staff": false,
+              "metadata": null
+            },
+            "comment_id": 863526,
+            "created_at": "2026-05-25T01:57:35.719778+00:00",
+            "vote": {
+              "score": 3,
+              "aggregated_data": [
+                {
+                  "score": 5,
+                  "count": 1
+                }
+              ],
+              "user_vote": null,
+              "user_vote_reason": null,
+              "count": 1
+            },
+            "question_id": null,
+            "question": null,
+            "question_option": "",
+            "freshness": 2.887282226389967,
+            "driver": null,
+            "base_rate": null,
+            "news": {
+              "itn_article_id": null,
+              "url": "https://www.halcyon.ai/ransomware-alerts/education-sector-in-the-crosshairs-shinyhunters-extortion-campaign-against-instructure",
+              "title": "Education Sector in the Crosshairs: ShinyHunters' Extortion Campaign Against Instructure",
+              "img_url": "https://cdn.prod.website-files.com/6568a1bce0ae49e6bedec385/6568a1bce0ae49e6bedec439_Group%20330.png",
+              "source": "halcyon.ai",
+              "published_at": "2026-05-25T01:56:12.681000Z",
+              "impact_direction": 1,
+              "certainty": null
+            },
+            "post": {
+              "id": 43501,
+              "question_type": "binary",
+              "unit": ""
+            }
+          }
+        ],
+        "is_current_content_translated": false
+      },
+      "custom_metadata": {},
+      "categories": [
+        {
+          "id": 3698,
+          "name": "Economy & Business",
+          "slug": "economy-business",
+          "emoji": "\ud83d\udcbc",
+          "description": "Economy & Business",
+          "type": "category"
+        },
+        {
+          "id": 3701,
+          "name": "Technology",
+          "slug": "technology",
+          "emoji": "\u2699\ufe0f",
+          "description": "Technology",
+          "type": "category"
+        },
+        {
+          "id": 3688,
+          "name": "Law",
+          "slug": "law",
+          "emoji": "\u2696\ufe0f",
+          "description": "Law",
+          "type": "category"
+        }
+      ],
+      "question_type": "binary",
+      "community_prediction_at_access_time": null
+    },
+    "explanation": "\n# SUMMARY\n*Question*: Will Instructure be subject to another major hack before September 1, 2026?\n*Final Prediction*: 11.0%\n*Total Cost*: $0.1157 (estimated)\n*Time Spent*: 0.78 minutes\n*LLMs*: `{'default': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}, 'summarizer': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}, 'researcher': 'smart-searcher/claude-haiku-4-5', 'parser': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}}`\n*Bot Name*: SummerTemplateBot2026\n\n\n## Report 1 Summary\n### Forecasts\n*Forecaster 1*: 28.0%\n*Forecaster 2*: 8.0%\n*Forecaster 3*: 11.0%\n\n\n### Research Summary\n# Summary\n\nNo research results were found to summarize regarding Instructure's cybersecurity vulnerabilities or the likelihood of another major hack before September 1, 2026.\n\n**Sources:**\nNo sources were available due to lack of search results.\n\n\n# RESEARCH\n## Report 1 Research\nNo search results found for the query using the search filter chosen\n\n# FORECASTS\n\n## R1: Forecaster 1 Reasoning\n### Forecasting Analysis: Instructure Major Hack Before September 1, 2026\n\n#### (a) Time Left Until Outcome is Known\n**96 days** (from May 27, 2026 to September 1, 2026)\n\n#### (b) Status Quo Outcome if Nothing Changed\nThe status quo would be **No** \u2014 no additional major hack occurs. Instructure has implemented \"enhanced security measures,\" the immediate vulnerability has been patched, and the organization is under intense scrutiny from Congress, FBI, CISA, and the Department of Education.\n\n#### (c) Scenario Resulting in No Outcome\nInstructure's security improvements prove effective. The heightened attention from federal agencies, combined with forensic investigation findings, identifies and remediates root causes. No new vulnerabilities are exploited, no significant data exfiltration occurs, and no ransom demands emerge in the next 96 days. The organization stabilizes operationally and reputationally.\n\n#### (d) Scenario Resulting in Yes Outcome\nShinyHunters or another threat actor exploits a previously unknown vulnerability in Canvas or another Instructure product before September 1. This could involve:\n- Re-exploitation of the patched vulnerability if the patch is incomplete\n- Discovery of a new zero-day vulnerability\n- Lateral movement from the ongoing forensic investigation revealing additional compromised systems\n- A different threat actor capitalizing on Instructure's weakened security posture\n\nAny of these resulting in data exfiltration (10k+ users), service disruption (100+ institutions, 4+ hours), or new ransom demands would satisfy the resolution criteria.\n\n#### (e) Base Rate Analysis\n\n**Historical precedent for repeat attacks on same target:**\n- Organizations that have experienced major breaches face elevated risk of follow-on attacks within 6-12 months\n- Studies suggest 20-30% of breached organizations experience a second breach within 12 months\n- However, this varies dramatically by sector and response quality\n- Financial institutions and critical infrastructure (like educational systems) typically see lower repeat rates due to intensive remediation\n- The fact that ShinyHunters already re-entered once (May 7) after initial patching suggests patch quality issues\n\n**Specific to this case:**\n- Instructure is now under federal oversight (FBI, CISA, DoE)\n- The organization has strong incentive and resources to remediate\n- However, the April-May breaches suggest systemic vulnerabilities, not just isolated flaws\n- Educational sector targets are attractive (high-value data, institutional budgets for ransom)\n\n**Base rate estimate for similar critical infrastructure:** 15-25% risk of repeat major incident within 6 months post-breach\n\n#### (f) Key Influencing Factors\n\n**Factors increasing risk (Yes):**\n1. **Demonstrated vulnerability pattern**: ShinyHunters exploited the same vulnerability twice, suggesting incomplete initial patching\n2. **Systemic issues**: Two separate breaches in 8 months (Salesforce + Canvas) suggests organizational security culture problems\n3. **Attacker motivation**: ShinyHunters has proven Instructure is profitable and vulnerable; they have institutional knowledge of systems\n4. **Time window**: 96 days is substantial; vulnerabilities are often discovered in batches\n5. **Forensic investigation ongoing**: Ongoing investigation may reveal additional compromised systems or backdoors\n6. **High-value target**: 275M users, 8,809 institutions make this extremely attractive to threat actors\n\n**Factors decreasing risk (No):**\n1. **Intense scrutiny**: Federal oversight (FBI, CISA, Congress) creates accountability and resource pressure\n2. **Patch urgency**: The organization has demonstrated ability to patch (though imperfectly)\n3. **Reputational damage**: Further breaches would be catastrophic; strong incentive for security investment\n4. **Ransom paid**: ShinyHunters received payment and assurances; may honor agreement (though not guaranteed)\n5. **Status quo bias**: Most organizations don't experience multiple major breaches in short windows\n6. **Incident response**: Forensic investigation and enhanced monitoring are active\n\n#### (g) Initial Estimate (Base Rate Only)\n\nWithout considering recent news, using historical base rates for critical infrastructure experiencing repeat breaches within 6 months: **20%**\n\nThis reflects:\n- 20-25% historical repeat breach rate for major breaches\n- Slightly lower due to federal oversight and resources\n- Slightly higher due to demonstrated systemic vulnerabilities\n\n#### (h) How Recent News Moves the Estimate\n\n**Recent news factors (May 2026):**\n\n**Upward pressure:**\n- The May 7 re-entry through the same vulnerability is extremely concerning \u2014 it suggests patches may be incomplete or additional backdoors exist\n- Forensic investigation is \"ongoing,\" implying unknown scope of compromise\n- ShinyHunters has proven operational knowledge of Instructure systems and motivation\n- The ransom payment, while stopping immediate extortion, may not prevent future attacks from other actors who now know the vulnerabilities\n\n**Downward pressure:**\n- Federal oversight is now active and intense (Congress, FBI, CISA, DoE)\n- Reputational stakes are extremely high \u2014 another breach would be existential\n- The organization has demonstrated ability to respond quickly (patching within days)\n- 96 days is a relatively short window for discovering and exploiting new vulnerabilities\n\n**Net adjustment:** The May 7 re-entry is the most significant recent data point. It demonstrates that the initial patch was insufficient, which is a strong signal of systemic security issues. However, the subsequent \"enhanced security measures\" and federal oversight should have addressed this.\n\n**Revised estimate: 28%** (up from 20% base rate)\n\nThe May 7 incident is strong evidence that initial remediation was inadequate, but federal oversight and heightened vigilance should partially offset this risk.\n\n#### (i) Community Prediction Comparison\n\nNo community prediction provided in the prompt. If one exists and differs significantly from 28%, I would consider:\n- Whether the community has access to non-public information about Instructure's security posture\n- Whether the community is overweighting the federal oversight factor\n- Whether the community is underweighting the demonstrated pattern of incomplete patching\n\n#### Final Reasoning Check\n\nAt 28%, I'm not in the extreme ranges (>70% or <5%), so this passes the sanity check. The estimate reflects:\n- Elevated risk due to demonstrated vulnerabilities and incomplete patching\n- Meaningful mitigation from federal oversight and organizational incentives\n- A 96-day window that is substantial but not extremely long\n- Historical base rates adjusted for this specific high-profile case\n\nThe May 7 re-entry is the key differentiator from base rates \u2014 it's strong evidence of systemic issues that weren't fully resolved by the initial patch.\n\n---\n\n**Probability: 28%**\n\n\n## R1: Forecaster 2 Reasoning\n### Forecasting Analysis: Instructure Major Hack Before September 1, 2026\n\n#### (a) Time Left Until Outcome is Known\n**96 days** (from May 27, 2026 to September 1, 2026)\n\n#### (b) Status Quo Outcome if Nothing Changed\nInstructure would likely avoid another major hack in this timeframe. The company has:\n- Just experienced catastrophic breaches and paid ransom\n- Implemented \"enhanced security measures\" \n- Faces intense scrutiny from Congress, FBI, CISA, and Department of Education\n- Has strong incentive to invest heavily in security immediately\n- Would likely have increased monitoring and incident response capabilities\n\nThe status quo trajectory suggests **No** (no additional major hack).\n\n#### (c) Scenario Resulting in No Outcome\nInstructure's emergency security investments prove effective. The enhanced measures, combined with heightened vigilance from federal agencies and the institution itself, successfully prevent another breach. ShinyHunters moves on to easier targets given the now-fortified defenses and intense law enforcement attention. The 96-day window passes without meeting any of the three resolution criteria.\n\n#### (d) Scenario Resulting in Yes Outcome\nShinyHunters or another threat actor exploits a zero-day vulnerability in Canvas that wasn't caught during the emergency patching. Alternatively, a different hacking group targets Instructure while it's still in recovery mode, finding gaps in the hastily-implemented security measures. This results in either: exfiltration of 10,000+ user records, 4+ hour outage across 100+ institutions, or new ransom demands with proof of access.\n\n#### (e) Base Rate Analysis\n\n**Historical context for educational technology platforms:**\n- Major LMS platforms (Blackboard, Canvas, Moodle) experience significant breaches roughly once every 3-5 years on average\n- However, **repeat breaches within 6 months** are much rarer\u2014estimated at 5-15% of organizations that have just experienced major incidents\n- Organizations that pay ransoms see repeat extortion attempts in 20-30% of cases within 12 months\n- Post-breach security investments typically reduce risk by 40-60% in the immediate aftermath\n- Federal agency involvement and Congressional scrutiny correlate with improved security posture\n\n**For this specific case:**\n- Base rate for repeat major breach within 96 days of a catastrophic incident: **8-12%**\n- This is lower than the 6-month repeat rate because:\n- Immediate post-incident period sees maximum security investment\n- Threat actors typically move to easier targets after intense law enforcement focus\n- The vulnerability that was exploited (Free-For-Teacher accounts) is now known and patched\n\n#### (f) Key Influencing Factors\n\n**Increasing Risk:**\n1. **Proven vulnerability in Canvas architecture** - The Free-For-Teacher vulnerability was exploited twice, suggesting systemic design issues\n2. **ShinyHunters' demonstrated persistence** - They re-entered after initial patch, showing sophisticated capability and determination\n3. **Ransom payment creates perverse incentive** - Instructure's payment signals willingness to pay, potentially attracting copycat attacks\n4. **Rushed security implementation** - Emergency patches may introduce new vulnerabilities or miss edge cases\n5. **Massive attack surface** - 275 million users across 8,809 institutions creates enormous target area\n6. **Organizational stress** - Leadership distraction from Congressional testimony, lawsuits, and crisis management may create operational gaps\n\n**Decreasing Risk:**\n1. **Intense federal scrutiny** - FBI, CISA, DoE involvement means threat actors face higher law enforcement risk\n2. **Immediate security investment** - Post-breach budgets for security are typically 5-10x normal levels\n3. **Heightened monitoring** - Incident response teams are now actively watching for suspicious activity\n4. **Threat actor migration** - ShinyHunters likely targeting easier victims; law enforcement pressure on the group\n5. **Institutional awareness** - Universities now have contingency plans and are monitoring Canvas more carefully\n6. **Short timeframe** - 96 days is relatively brief for developing and executing a sophisticated attack\n\n#### (g) Initial Estimate (Pure Base Rate, Pre-News)\n\nFor a major technology platform experiencing a catastrophic breach, the probability of another major breach within 96 days would normally be **8-12%** based on historical repeat-breach rates.\n\n**Initial anchor: 10%**\n\n#### (h) How Recent News Moves Me From Base Rate\n\nThe recent news actually **supports the base rate** rather than moving me significantly away from it:\n\n- The intensity of the recent breaches (two in 8 months, with the April breach being catastrophic) is already reflected in the base rate for \"organizations that have just experienced major incidents\"\n- The Congressional involvement and federal agency engagement are **risk-reducing factors** that should move the estimate **down** from the base rate\n- The ransom payment is concerning but is a **one-time incentive** that doesn't necessarily increase the probability of a breach occurring (it increases the probability of extortion if a breach occurs)\n- The rushed security implementation is a **moderate risk factor** but is outweighed by the intensity of post-incident focus\n\n**Adjustment from base rate: -2 to -3 percentage points**\n\nThe recent news suggests Instructure is receiving maximum possible attention and resources, which historically correlates with reduced breach probability in the immediate aftermath.\n\n#### (i) Community Prediction Comparison\n\nNo community prediction data provided in the prompt. If one exists and differs significantly from my estimate, I would consider:\n- Whether the community has access to insider information about Instructure's security posture\n- Whether the community is overweighting the \"proven vulnerability\" factor vs. the \"intense scrutiny\" factor\n- Whether the community is properly accounting for the short 96-day timeframe vs. longer-term risk\n\n#### Final Reasoning Check\n\nAm I between 5-70%? Yes, at 7-8%.\n\n**Sanity checks:**\n- Is 7-8% too low? No\u2014the combination of immediate post-incident security investment, federal oversight, and short timeframe justifies below-base-rate estimate\n- Is 7-8% too high? Possibly\u2014one could argue that federal involvement and emergency security measures should push this below 5%, but the proven architectural vulnerabilities and ransom incentive justify keeping it slightly higher\n- Does this pass the \"slow change\" principle? Yes\u2014organizations don't typically experience two catastrophic breaches 3 weeks apart and then a third within 3 months; the status quo is stability after crisis\n\n---\n\n**Probability: 8%**\n\n\n## R1: Forecaster 3 Reasoning\n### Forecasting Analysis: Instructure Major Hack Before September 1, 2026\n\n#### (a) Time Left Until Outcome is Known\n**96 days** (from May 27, 2026 to September 1, 2026)\n\n#### (b) Status Quo Outcome if Nothing Changed\nInstructure experiences no additional major security incidents and the question resolves **No**. The company has implemented \"enhanced security measures,\" the vulnerability has been patched, and the immediate crisis has passed.\n\n#### (c) Scenario Resulting in No Outcome\n- Instructure's security patches hold; no new vulnerabilities are exploited\n- ShinyHunters honors the ransom agreement and does not return\n- Other threat actors do not prioritize Instructure given heightened scrutiny\n- The 3-month window passes without meeting any of the three resolution criteria\n- Fallout from the April-May breach continues (lawsuits, investigations) but no new breach occurs\n\n#### (d) Scenario Resulting in Yes Outcome\n- ShinyHunters or another group exploits a previously unknown vulnerability in Canvas or related products\n- A new data exfiltration affects 10,000+ users, or service disruption lasts 4+ hours across 100+ institutions\n- Alternatively, a new ransom demand emerges from a different threat actor who has independently compromised Instructure systems\n- The incident is confirmed by Instructure, credible news sources, or government agencies\n\n#### (e) Base Rate Analysis\n\n**Historical context for educational technology platforms:**\n- Major LMS platforms (Blackboard, Canvas, Moodle) have experienced significant breaches, but repeat major breaches within 3 months are relatively uncommon\n- ShinyHunters specifically: Known for persistence and follow-through on threats, but typically move to new targets after successful extortion\n- Ransom payment dynamics: Paying ransoms does incentivize future attacks, but typically from different threat actors rather than the same group (reputational risk to the group)\n- Post-breach security posture: Companies that experience major breaches typically harden significantly in the immediate aftermath, reducing vulnerability window\n\n**Comparable timeframes:**\n- Organizations experiencing major breaches see repeat incidents within 90 days in roughly 5-15% of cases historically\n- However, Instructure's case is unusual: massive platform, high-profile incident, government scrutiny, and a known persistent threat actor\n\n#### (f) Key Influencing Factors\n\n**Factors increasing risk:**\n1. **Known persistent threat actor**: ShinyHunters has demonstrated capability, motivation, and willingness to re-enter (they did so on May 7)\n2. **Massive attack surface**: 41% of North American higher ed institutions = 275M users across 8,809 institutions\n3. **Ransom payment precedent**: May signal weakness and incentivize future attacks\n4. **Likely security debt**: A company that was breached twice in 8 months likely has other vulnerabilities\n5. **Government/legal pressure**: May force rapid patching that introduces new bugs\n6. **Short timeframe**: Only 96 days for another incident to occur\n\n**Factors decreasing risk:**\n1. **Heightened visibility**: Congressional scrutiny, FBI/CISA/DoE involvement means any new incident is immediately detected\n2. **Immediate hardening**: Post-breach security improvements typically reduce vulnerability window significantly\n3. **Threat actor behavior**: ShinyHunters likely satisfied with ransom; moving to new targets is more profitable than re-attacking\n4. **Patch deployment**: The Free-For-Teacher vulnerability has been patched; exploiting it again is unlikely\n5. **Status quo bias**: Most organizations do not experience repeat major breaches within 3 months\n\n#### (g) Initial Estimate (Base Rate Only)\n\nWithout recent news context, historical base rates suggest:\n- Repeat major breach within 90 days: ~8-12% for typical organizations\n- Adjusted upward for Instructure's unique risk profile (massive platform, known persistent actor, recent payment): ~15-20%\n\n**Initial anchor: 17%**\n\n#### (h) Recent News Impact and Adjustment\n\nThe recent news (as of May 27, 2026) actually *reduces* risk from the base rate:\n\n1. **Immediate patching**: The Free-For-Teacher vulnerability has been closed; ShinyHunters' known entry point is no longer viable\n2. **Ransom paid**: ShinyHunters has received payment and agreed to data destruction and no further extortion\u2014they have incentive to honor this (reputation for future victims)\n3. **Heightened detection**: Any new incident will be caught immediately due to government oversight\n4. **Rapid hardening**: Post-breach security improvements are typically most aggressive in the first 30-60 days\n5. **Threat actor pivot**: ShinyHunters likely moving to new, less-defended targets rather than re-attacking a now-hardened platform\n\nHowever, some risk remains:\n- Unknown vulnerabilities may exist\n- Other threat actors may attempt to exploit Instructure's notoriety\n- Rushed patching could introduce new vulnerabilities\n\n**Adjustment from base rate: -5 to -7 percentage points**\n\n**Revised estimate: 10-12%**\n\n#### (i) Community Prediction Comparison\n\nNo community prediction provided in the prompt. If one exists and differs significantly from 10-12%, I would consider:\n- Whether the community is overweighting the \"repeat attacker\" risk (ShinyHunters may be satisfied)\n- Whether the community is underweighting the immediate hardening effect\n- Whether the community has information about additional vulnerabilities I'm not aware of\n\n---\n\n#### Final Reasoning\n\n**Why not higher (>25%)?**\n- Status quo bias: Most organizations don't experience repeat major breaches within 3 months\n- Immediate patching of known vulnerability eliminates the most obvious attack vector\n- Threat actor incentives: ShinyHunters has been paid; re-attacking risks their reputation\n- Heightened detection: Any new incident will be caught immediately\n\n**Why not lower (<5%)?**\n- Instructure's massive attack surface (275M users, 8,809 institutions) creates many targets\n- Known persistent threat actor with demonstrated capability\n- Likely security debt from previous breaches\n- 96-day window is not negligible\n- Ransom payment may incentivize other threat actors\n\n**Final estimate: 11%**\n\nThis reflects:\n- Elevated risk vs. typical organizations (base rate ~8-10%)\n- Significant risk reduction from immediate post-breach hardening\n- Acknowledgment that repeat major breaches within 3 months are uncommon\n- Realistic assessment of threat actor behavior and incentives\n\nProbability: **11%**\n\n",
+    "other_notes": null,
+    "price_estimate": 0.11570400000000003,
+    "minutes_taken": 0.7779137055079143,
+    "errors": [],
+    "prediction": 0.11
+  },
+  {
+    "question": {
+      "question_text": "Will any U.S. state or EU member state restrict large-scale data center grid connections before September 2026?",
+      "id_of_post": 43494,
+      "page_url": "https://www.metaculus.com/questions/43494",
+      "id_of_question": 43501,
+      "state": "open",
+      "num_forecasters": 112,
+      "num_predictions": 137,
+      "resolution_criteria": "This question will resolve as **Yes** if, at any point before September 1, 2026, either a U.S. state or an EU member state announces a new moratorium, suspension, or binding restrictive rule applying to new grid connection requests from large-scale data centers, and the restriction is not officially reversed or rescinded before September 1, 2026, according to [credible sources](https://www.metaculus.com/faq/#definitions).\n\nLarge-scale datacenters are defined as facilities with contracted or requested grid capacity of 50 MW or more.",
+      "fine_print": "A **Yes** resolution requires a binding administrative order, enacted regulation, official policy directive, or other formal written statement with the force of law. Draft proposals open for public comment, preliminary consultations, and non-binding guidance documents do not qualify. Actions by transmission system operators acting without a formal government or regulatory mandate also will not cause this question to resolve as **Yes**.\n\nA **Yes** resolution also requires a new restriction that did not exist before May 20, 2026, in substantially the same form. Renewals, extensions, or reaffirmations of pre-existing restrictions do not qualify.\n\nActions taken by organs of the U.S. federal government (e.g., FERC, DOE) will not cause this question to resolve as **Yes**.",
+      "background_info": "The rapid expansion of AI infrastructure has placed unprecedented pressure on electricity grids across the United States and Europe. The U.S. Energy Information Administration (EIA) [projected in January 2026](https://www.eia.gov/outlooks/steo/archives/Jan26.pdf) that electricity demand growth will accelerate significantly, with large computing facilities identified as a primary driver. The U.S. Department of Energy has [similarly identified data centers](https://www.energy.gov/oe/clean-energy-resources-meet-data-center-electricity-demand) as a critical short-term demand factor.\n\nIn Europe, grid connection queues [have reached record lengths](https://www.cnbc.com/2026/05/04/denmark-data-centers-moratorium-grid-pause-power-demand.html) in Ireland, the Netherlands, and Denmark \u2014 jurisdictions that have previously imposed informal or formal restrictions on new data center connections. Ireland's EirGrid and the Dutch transmission operator TenneT have both taken administrative action to limit new connections in recent years, establishing a precedent base rate for this type of regulatory action.\n\nAs of May 2026, several U.S. states including Virginia, Texas, and Georgia \u2014 home to the [largest data center concentrations](https://www.pewresearch.org/short-reads/2026/04/13/most-new-data-centers-in-the-us-are-coming-to-rural-areas/) in the country \u2014 are actively reviewing grid capacity allocation for high-load facilities.",
+      "unit_of_measure": "",
+      "close_time": "2026-08-10T00:00:00Z",
+      "actual_resolution_time": null,
+      "scheduled_resolution_time": "2026-09-02T15:00:00Z",
+      "published_time": "2026-05-22T17:00:00Z",
+      "open_time": "2026-05-25T17:00:00Z",
+      "date_accessed": "2026-05-27T22:40:47.121221+10:00",
+      "already_forecasted": true,
+      "tournament_slugs": [
+        "metaculus-cup-summer-2026"
+      ],
+      "default_project_id": 33021,
+      "includes_bots_in_aggregates": true,
+      "cp_reveal_time": "2026-05-28T17:00:00Z",
+      "question_weight": 1.0,
+      "resolution_string": null,
+      "conditional_type": null,
+      "previous_forecasts": null,
+      "group_question_option": null,
+      "question_ids_of_group": null,
+      "api_json": {
+        "id": 43494,
+        "title": "Will any U.S. state or EU member state restrict large-scale data center grid connections before September 2026?",
+        "short_title": "US/EU restriction on data center grid before Sep 2026?",
+        "url_title": "US/EU restriction on data center grid before Sep 2026?",
+        "slug": "useu-restriction-on-data-center-grid-before-sep-2026",
+        "author_id": 284188,
+        "author_username": "DaiLothbrook",
+        "coauthors": [],
+        "created_at": "2026-05-12T22:46:23.138460Z",
+        "published_at": "2026-05-22T17:00:00Z",
+        "edited_at": "2026-05-27T12:22:42.667587Z",
+        "curation_status": "approved",
+        "curation_status_updated_at": "2026-05-22T12:46:04.290389Z",
+        "comment_count": 21,
+        "status": "open",
+        "resolved": false,
+        "actual_close_time": null,
+        "scheduled_close_time": "2026-08-10T00:00:00Z",
+        "scheduled_resolve_time": "2026-09-02T15:00:00Z",
+        "actual_resolve_time": null,
+        "open_time": "2026-05-25T17:00:00Z",
+        "nr_forecasters": 112,
+        "html_metadata_json": null,
+        "projects": {
+          "leaderboard_tag": [
+            {
+              "id": 32925,
+              "name": "2026 Leaderboard",
+              "slug": "2026_leaderboard",
+              "type": "leaderboard_tag"
+            }
+          ],
+          "tournament": [
+            {
+              "id": 33021,
+              "type": "tournament",
+              "name": "Metaculus Cup Summer 2026",
+              "slug": "metaculus-cup-summer-2026",
+              "header_image": "https://cdn.metaculus.com/cup-cover2x.webp",
+              "prize_pool": "5000.00",
+              "start_date": "2026-05-04T17:00:00Z",
+              "close_date": "2026-09-04T00:00:00Z",
+              "forecasting_end_date": "2026-09-01T00:00:00Z",
+              "html_metadata_json": null,
+              "is_ongoing": true,
+              "user_permission": null,
+              "order": 0,
+              "created_at": "2026-04-23T10:51:46.376890Z",
+              "edited_at": "2026-05-27T12:22:52.746797Z",
+              "score_type": "peer_tournament",
+              "default_permission": "forecaster",
+              "visibility": "normal",
+              "show_on_homepage": false,
+              "is_current_content_translated": false,
+              "bot_leaderboard_status": "exclude_and_show",
+              "description_preview": "<p>Welcome to the Metaculus Cup. Each week, forecasters new and experienced predict on a fresh batch of topical questions, with $5,000 in pr"
+            }
+          ],
+          "default_project": {
+            "id": 33021,
+            "type": "tournament",
+            "name": "Metaculus Cup Summer 2026",
+            "slug": "metaculus-cup-summer-2026",
+            "header_image": "https://cdn.metaculus.com/cup-cover2x.webp",
+            "prize_pool": "5000.00",
+            "start_date": "2026-05-04T17:00:00Z",
+            "close_date": "2026-09-04T00:00:00Z",
+            "forecasting_end_date": "2026-09-01T00:00:00Z",
+            "html_metadata_json": null,
+            "is_ongoing": true,
+            "user_permission": null,
+            "order": 0,
+            "created_at": "2026-04-23T10:51:46.376890Z",
+            "edited_at": "2026-05-27T12:22:52.746797Z",
+            "score_type": "peer_tournament",
+            "default_permission": "forecaster",
+            "visibility": "normal",
+            "show_on_homepage": false,
+            "is_current_content_translated": false,
+            "bot_leaderboard_status": "exclude_and_show",
+            "description_preview": "<p>Welcome to the Metaculus Cup. Each week, forecasters new and experienced predict on a fresh batch of topical questions, with $5,000 in pr"
+          },
+          "category": [
+            {
+              "id": 3689,
+              "name": "Politics",
+              "slug": "politics",
+              "emoji": "\ud83c\udfdb\ufe0f",
+              "description": "Politics",
+              "type": "category"
+            },
+            {
+              "id": 3694,
+              "name": "Artificial Intelligence",
+              "slug": "artificial-intelligence",
+              "emoji": "\ud83e\udd16",
+              "description": "Artificial Intelligence",
+              "type": "category"
+            }
+          ]
+        },
+        "question": {
+          "id": 43501,
+          "title": "Will any U.S. state or EU member state restrict large-scale data center grid connections before September 2026?",
+          "created_at": "2026-05-12T22:46:23.138816Z",
+          "open_time": "2026-05-25T17:00:00Z",
+          "cp_reveal_time": "2026-05-28T17:00:00Z",
+          "spot_scoring_time": "2026-05-28T17:00:00Z",
+          "scheduled_resolve_time": "2026-09-02T15:00:00Z",
+          "actual_resolve_time": null,
+          "resolution_set_time": null,
+          "scheduled_close_time": "2026-08-10T00:00:00Z",
+          "actual_close_time": "2026-08-10T00:00:00Z",
+          "type": "binary",
+          "options": null,
+          "all_options_ever": null,
+          "options_history": null,
+          "options_order": null,
+          "group_variable": "",
+          "status": "open",
+          "possibilities": null,
+          "resolution": null,
+          "include_bots_in_aggregates": true,
+          "question_weight": 1,
+          "default_score_type": "peer",
+          "default_aggregation_method": "recency_weighted",
+          "label": "",
+          "unit": "",
+          "open_upper_bound": false,
+          "open_lower_bound": false,
+          "inbound_outcome_count": null,
+          "scaling": {
+            "range_min": null,
+            "range_max": null,
+            "nominal_min": null,
+            "nominal_max": null,
+            "zero_point": null,
+            "open_upper_bound": false,
+            "open_lower_bound": false,
+            "inbound_outcome_count": null,
+            "continuous_range": null
+          },
+          "group_rank": null,
+          "coherence_links": null,
+          "coherence_link_aggregations": null,
+          "description": "The rapid expansion of AI infrastructure has placed unprecedented pressure on electricity grids across the United States and Europe. The U.S. Energy Information Administration (EIA) [projected in January 2026](https://www.eia.gov/outlooks/steo/archives/Jan26.pdf) that electricity demand growth will accelerate significantly, with large computing facilities identified as a primary driver. The U.S. Department of Energy has [similarly identified data centers](https://www.energy.gov/oe/clean-energy-resources-meet-data-center-electricity-demand) as a critical short-term demand factor.\n\nIn Europe, grid connection queues [have reached record lengths](https://www.cnbc.com/2026/05/04/denmark-data-centers-moratorium-grid-pause-power-demand.html) in Ireland, the Netherlands, and Denmark \u2014 jurisdictions that have previously imposed informal or formal restrictions on new data center connections. Ireland's EirGrid and the Dutch transmission operator TenneT have both taken administrative action to limit new connections in recent years, establishing a precedent base rate for this type of regulatory action.\n\nAs of May 2026, several U.S. states including Virginia, Texas, and Georgia \u2014 home to the [largest data center concentrations](https://www.pewresearch.org/short-reads/2026/04/13/most-new-data-centers-in-the-us-are-coming-to-rural-areas/) in the country \u2014 are actively reviewing grid capacity allocation for high-load facilities.",
+          "resolution_criteria": "This question will resolve as **Yes** if, at any point before September 1, 2026, either a U.S. state or an EU member state announces a new moratorium, suspension, or binding restrictive rule applying to new grid connection requests from large-scale data centers, and the restriction is not officially reversed or rescinded before September 1, 2026, according to [credible sources](https://www.metaculus.com/faq/#definitions).\n\nLarge-scale datacenters are defined as facilities with contracted or requested grid capacity of 50 MW or more.",
+          "fine_print": "A **Yes** resolution requires a binding administrative order, enacted regulation, official policy directive, or other formal written statement with the force of law. Draft proposals open for public comment, preliminary consultations, and non-binding guidance documents do not qualify. Actions by transmission system operators acting without a formal government or regulatory mandate also will not cause this question to resolve as **Yes**.\n\nA **Yes** resolution also requires a new restriction that did not exist before May 20, 2026, in substantially the same form. Renewals, extensions, or reaffirmations of pre-existing restrictions do not qualify.\n\nActions taken by organs of the U.S. federal government (e.g., FERC, DOE) will not cause this question to resolve as **Yes**.",
+          "short_title": "US/EU restriction on data center grid before Sep 2026?",
+          "post_id": 43494,
+          "aggregations": {
+            "recency_weighted": {
+              "history": null,
+              "latest": null,
+              "score_data": null,
+              "movement": null
+            }
+          },
+          "average_coverage": null,
+          "my_forecasts": {
+            "history": [
+              {
+                "question_id": 43501,
+                "author_id": 302314,
+                "start_time": 1779871545.446138,
+                "end_time": 1779875682.289552,
+                "forecast_values": [
+                  0.725,
+                  0.275
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43501,
+                "author_id": 302314,
+                "start_time": 1779875682.289552,
+                "end_time": 1779878733.811057,
+                "forecast_values": [
+                  0.72,
+                  0.28
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43501,
+                "author_id": 302314,
+                "start_time": 1779878733.811057,
+                "end_time": 1779884551.958969,
+                "forecast_values": [
+                  0.74,
+                  0.26
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43501,
+                "author_id": 302314,
+                "start_time": 1779884551.958969,
+                "end_time": null,
+                "forecast_values": [
+                  0.815,
+                  0.185
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              }
+            ],
+            "latest": {
+              "question_id": 43501,
+              "author_id": 302314,
+              "start_time": 1779884551.958969,
+              "end_time": null,
+              "forecast_values": [
+                0.815,
+                0.185
+              ],
+              "interval_lower_bounds": null,
+              "centers": null,
+              "interval_upper_bounds": null,
+              "distribution_input": null
+            },
+            "score_data": {}
+          }
+        },
+        "user_permission": "forecaster",
+        "vote": {
+          "score": 1,
+          "user_vote": null
+        },
+        "forecasts_count": 137,
+        "unread_comment_count": 0,
+        "last_viewed_at": "2026-05-27T12:22:36.764809Z",
+        "private_note": null,
+        "key_factors": [],
+        "is_current_content_translated": false
+      },
+      "custom_metadata": {},
+      "categories": [
+        {
+          "id": 3689,
+          "name": "Politics",
+          "slug": "politics",
+          "emoji": "\ud83c\udfdb\ufe0f",
+          "description": "Politics",
+          "type": "category"
+        },
+        {
+          "id": 3694,
+          "name": "Artificial Intelligence",
+          "slug": "artificial-intelligence",
+          "emoji": "\ud83e\udd16",
+          "description": "Artificial Intelligence",
+          "type": "category"
+        }
+      ],
+      "question_type": "binary",
+      "community_prediction_at_access_time": null
+    },
+    "explanation": "\n# SUMMARY\n*Question*: Will any U.S. state or EU member state restrict large-scale data center grid connections before September 2026?\n*Final Prediction*: 16.0%\n*Total Cost*: $0.1 (estimated)\n*Time Spent*: 1.01 minutes\n*LLMs*: `{'default': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}, 'summarizer': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}, 'researcher': 'smart-searcher/claude-haiku-4-5', 'parser': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}}`\n*Bot Name*: SummerTemplateBot2026\n\n\n## Report 1 Summary\n### Forecasts\n*Forecaster 1*: 19.0%\n*Forecaster 2*: 7.0%\n*Forecaster 3*: 16.0%\n\n\n### Research Summary\n# Summary\n\nNo research results were found to summarize regarding the question of whether any U.S. state or EU member state will restrict large-scale data center grid connections before September 2026.\n\n**Sources:** No sources were identified, as no search results were returned for this query.\n\n\n# RESEARCH\n## Report 1 Research\nNo search results found for the query using the search filter chosen\n\n# FORECASTS\n\n## R1: Forecaster 1 Reasoning\n### Forecasting Analysis: Data Center Grid Connection Restrictions\n\n#### (a) Time Left Until Resolution\n**96 days** (from May 27, 2026 to September 1, 2026)\n\n#### (b) Status Quo Outcome\nIf nothing changed, the question would resolve **No**. While grid pressures are mounting and several jurisdictions are \"actively reviewing\" policies, no formal binding restriction meeting the criteria has been announced as of May 27, 2026.\n\n#### (c) No Outcome Scenario\nContinued administrative delays and informal coordination without formal restrictions. States and EU members continue reviewing capacity but issue only non-binding guidance, preliminary consultations, or voluntary agreements. Transmission operators manage queues administratively without formal government mandates. The 96-day window closes with no binding written restrictions enacted.\n\n#### (d) Yes Outcome Scenario\nA U.S. state (Virginia, Texas, or Georgia most likely given their data center concentration and active review status) or an EU member state (Ireland, Netherlands, or Denmark given precedent and queue pressures) formally enacts a moratorium or binding rule restricting new grid connections for 50+ MW data centers before September 1, 2026. This would require a formal regulatory order, legislation, or official policy directive with legal force.\n\n#### (e) Base Rate Analysis\n\n**Historical precedent for similar restrictions:**\n- **EU precedent**: Ireland (EirGrid) and Netherlands (TenneT) have imposed informal/administrative restrictions in recent years; Denmark imposed a moratorium on data center connections (referenced in background). This suggests EU jurisdictions have a demonstrated willingness to act.\n- **U.S. precedent**: Much weaker. No U.S. state has formally restricted data center grid connections at scale. States typically favor economic development and have fragmented regulatory authority.\n- **Timeframe consideration**: 96 days is relatively short for formal regulatory action, which typically requires:\n- Legislative drafting or regulatory process (30-90 days minimum)\n- Public comment periods (often 30-60 days)\n- Formal adoption and legal review\n\n**Similar policy actions in 3-4 month windows**: Regulatory restrictions on major infrastructure typically occur at a rate of 1-2 per year across all U.S. states and EU member states combined when facing acute crises. The current situation qualifies as acute (record queue lengths, grid stress), but formal action remains less common than informal measures.\n\n**Estimated base rate**: 15-25% for a formal restriction being enacted within 96 days across all eligible jurisdictions.\n\n#### (f) Key Influencing Factors\n\n1. **Urgency level**: Record-length connection queues in Ireland, Netherlands, Denmark create genuine pressure for formal action\n2. **Precedent**: EU jurisdictions (especially Denmark) have already shown willingness; U.S. has not\n3. **Regulatory timeline**: 96 days is tight but not impossible for emergency/expedited action\n4. **Political economy**: Data centers bring jobs/tax revenue, creating resistance to formal restrictions\n5. **Alternative mechanisms**: Transmission operators can manage queues administratively without formal restrictions (satisfies grid concerns without formal policy)\n6. **Definition strictness**: The resolution criteria explicitly exclude non-binding guidance, TSO actions without government mandate, and renewals of existing restrictions\u2014this is a high bar\n7. **Geographic distribution**: Multiple jurisdictions eligible increases probability somewhat, but each individual jurisdiction's probability remains modest\n\n#### (g) Initial Estimate (Base Rate Only)\n**22%**\n\nReasoning: \n- EU jurisdictions (3-4 most likely candidates) have demonstrated precedent and acute pressure\n- 96-day window is tight but feasible for expedited regulatory action\n- High bar for resolution (binding, new, formal) reduces probability\n- U.S. states unlikely to act formally despite reviews\n- Status quo bias: most likely outcome is continued informal management\n\n#### (h) Recent News Adjustment\nThe research assistant found **no search results** for recent news with the chosen filter. This is notable because:\n- If a formal restriction had been announced in late May 2026, it would likely appear in search results\n- The absence of results suggests no major announcement has occurred recently\n- This reinforces the status quo and slightly reduces the probability from the base rate\n\n**Adjustment: -3 percentage points** (from 22% to 19%)\n\nThe lack of recent announcements despite acute grid pressures suggests that even jurisdictions with precedent (Denmark, Ireland) are moving cautiously toward formal action, preferring administrative measures.\n\n#### (i) Community Prediction Comparison\nNo community prediction provided in the prompt. Unable to compare.\n\n---\n\n#### Final Reasoning Summary\n\n**Supporting Yes (higher probability):**\n- EU precedent (Denmark moratorium, Ireland/Netherlands restrictions)\n- Acute grid pressure with record queue lengths\n- Multiple eligible jurisdictions increase aggregate probability\n- 96 days allows for expedited regulatory action if political will exists\n\n**Supporting No (higher probability):**\n- Status quo bias: informal/administrative measures are preferred\n- High resolution bar: must be binding, new, formal, and not reversed\n- No recent announcements despite acute conditions (suggests reluctance)\n- U.S. states unlikely to act (no precedent, economic incentives against)\n- Regulatory timelines typically exceed 96 days\n- Alternative mechanisms (administrative queue management) satisfy grid concerns without formal restrictions\n\nThe absence of recent news despite acute conditions is the strongest signal that formal restrictions remain unlikely even in the near term.\n\n**Probability: 19%**\n\n\n## R1: Forecaster 2 Reasoning\n### Forecasting Analysis: Data Center Grid Connection Restrictions\n\n#### (a) Time Left Until Resolution\n**96 days** (from May 27, 2026 to September 1, 2026)\n\n#### (b) Status Quo Outcome\nIf nothing changes, the question resolves **No**. Despite active reviews in Virginia, Texas, and Georgia, and record queue lengths in Europe, no formal binding restriction meeting the criteria has been announced as of May 27, 2026.\n\n#### (c) No Outcome Scenario\nStates and EU members continue administrative reviews and informal capacity management without issuing formal, binding moratoriums or restrictive rules. Grid operators manage demand through existing mechanisms (queue prioritization, connection delays) without new regulatory mandates. The 96-day window closes without a formal written restriction with force of law being enacted.\n\n#### (d) Yes Outcome Scenario\nOne of the actively reviewing U.S. states (Virginia, Texas, or Georgia) or an EU member state (Ireland, Netherlands, Denmark, or others) formally enacts a binding moratorium or restrictive rule on large-scale (50+ MW) data center grid connections before September 1, 2026. This could be triggered by acute grid stress, political pressure, or environmental concerns.\n\n#### (e) Base Rate Analysis\n\n**Historical precedent for similar restrictions:**\n- **EU**: Ireland and Netherlands have implemented informal/administrative restrictions in recent years; Denmark imposed a moratorium (referenced in background). These represent ~3 major EU actions over ~5 years = ~0.6 per year or ~8% per 96-day period for EU member states collectively.\n- **U.S. States**: No formal state-level moratoriums on data center grid connections exist historically. States typically use zoning/permitting rather than grid-based restrictions. Base rate for new state-level grid moratoriums: <1% per 96-day period.\n- **Combined base rate** (U.S. states + EU members): Given ~27 EU member states and 50 U.S. states, but concentrated risk in 3-4 EU states and 3 U.S. states, rough estimate: **5-12% for any jurisdiction in a 96-day window**.\n\n#### (f) Key Influencing Factors\n\n1. **Recency of EU precedent**: Denmark, Ireland, and Netherlands have recently taken action, establishing institutional willingness and legal frameworks. This increases EU probability significantly.\n\n2. **Compressed timeline**: Only 96 days remain. Formal regulatory processes typically take months. This is a major constraint.\n\n3. **Active review status**: Virginia, Texas, and Georgia are \"actively reviewing\" but this is pre-regulatory. Moving from review to formal binding rule in 96 days is possible but requires political urgency.\n\n4. **Grid stress indicators**: Record queue lengths in Europe and EIA projections of accelerating demand create pressure, but these have existed for months without triggering new formal restrictions yet.\n\n5. **Definition strictness**: The criteria explicitly exclude draft proposals, preliminary consultations, non-binding guidance, and TSO actions without government mandate. This narrows qualifying actions significantly.\n\n6. **Renewal vs. new restriction**: Pre-existing restrictions don't count. This eliminates Denmark's existing moratorium from qualifying.\n\n#### (g) Initial Estimate (Base Rate Anchor)\n\nGiven:\n- 5-12% base rate for similar events\n- 96-day compressed timeline reducing probability\n- EU has higher propensity than U.S. (recent precedent)\n- Strict definition requirements eliminate many borderline cases\n- Status quo bias (world changes slowly)\n\n**Base rate anchor: 8-10%**\n\n#### (h) Recent News Adjustment\n\nThe research assistant found no search results for recent news (as of May 27, 2026). This is notable because:\n- If a formal restriction had been announced, it would likely appear in searches\n- The absence of results suggests no major announcement has occurred recently\n- This slightly reinforces the status quo and reduces probability from base rate\n\n**Adjustment: -2 to -3 percentage points** due to lack of recent triggering events despite high-profile reviews.\n\n**Revised estimate: 5-8%**\n\n#### (i) Community Prediction Comparison\n\nNo community prediction provided in the prompt. If one exists and differs significantly, I would consider:\n- Whether the community has access to non-public regulatory timelines\n- Whether recent EU legislative developments (not captured in my search) are driving higher estimates\n- Whether the community is overweighting recent news vs. base rates\n\n#### Final Reasoning Check\n\n- **Above 70%?** No. The 96-day timeline is genuinely constraining for formal regulatory action.\n- **Below 5%?** Borderline, but justified given: (1) recent EU precedent showing it's possible, (2) active state reviews, (3) grid stress indicators. The 5-8% range appropriately reflects non-trivial but low probability.\n\n---\n\n**Probability: 7%**\n\n\n## R1: Forecaster 3 Reasoning\n### Forecasting Analysis: Data Center Grid Connection Restrictions\n\n#### (a) Time Left Until Resolution\n**96 days** (from May 27, 2026 to September 1, 2026)\n\n#### (b) Status Quo Outcome\nIf nothing changes, the question resolves **No**. While grid pressures are mounting and several jurisdictions are \"actively reviewing\" capacity allocation, no formal binding restriction meeting the resolution criteria has been announced as of May 27, 2026.\n\n#### (c) No Outcome Scenario\nStates and EU members continue administrative reviews and informal coordination with TSOs through summer 2026, but stop short of issuing formal, binding restrictions. They instead pursue alternatives: expedited grid upgrades, demand management agreements with data center operators, or voluntary connection pauses negotiated outside formal policy frameworks. The 96-day window closes without a legally binding moratorium or restrictive rule.\n\n#### (d) Yes Outcome Scenario\nOne of the actively reviewing U.S. states (Virginia, Texas, or Georgia) or an EU member (Ireland, Netherlands, Denmark) formally enacts a binding moratorium or restrictive rule on new large-scale (50+ MW) data center grid connections before September 1. This takes the form of an official regulatory order, enacted legislation, or formal policy directive with legal force\u2014not merely a transmission operator's administrative action or draft proposal.\n\n#### (e) Base Rate Analysis\n\n**Historical precedent for similar restrictions:**\n- **EU precedent (stronger):** Ireland's EirGrid and TenneT (Netherlands) have both taken administrative action limiting data center connections in recent years. Denmark's moratorium (referenced in May 2026 CNBC article) suggests formal restrictions are achievable in EU context. EU member states have demonstrated willingness to impose formal restrictions when grid stress is acute.\n- **U.S. precedent (weaker):** No formal state-level moratoriums on data center grid connections exist in the historical record. U.S. regulatory culture favors market solutions and incremental grid investment over categorical restrictions.\n- **Timeline consideration:** The question requires action within 96 days\u2014a compressed timeframe for formal regulatory action, which typically requires legislative or regulatory processes taking months.\n\n**Base rate estimate for similar regulatory restrictions in 3-4 month windows:**\n- EU member states imposing formal restrictions on infrastructure: ~15-25% (given precedent and current acute grid stress)\n- U.S. states imposing formal restrictions: ~5-10% (weaker precedent, regulatory culture)\n- Combined probability (at least one jurisdiction): ~20-30%\n\n#### (f) Key Influencing Factors\n\n1. **Regulatory precedent asymmetry:** EU jurisdictions (especially Ireland, Netherlands, Denmark) have already demonstrated willingness to act formally; U.S. states have not.\n\n2. **Grid stress acuity:** Queue backlogs at record levels in EU; active reviews (not yet formal action) in U.S. states. EU closer to triggering threshold.\n\n3. **Timeline constraint:** 96 days is tight for formal regulatory action. Formal restrictions require administrative/legislative processes that typically take 4-6+ months.\n\n4. **Definition strictness:** Resolution requires binding written policy with force of law\u2014excludes TSO actions without government mandate, draft proposals, and non-binding guidance. This is a high bar.\n\n5. **\"New restriction\" requirement:** Must not exist in substantially same form before May 20, 2026. Renewals/extensions don't count. This excludes formalizing existing informal practices.\n\n6. **Federal exclusion:** U.S. federal actions (FERC, DOE) don't count, limiting U.S. pathways.\n\n#### (g) Initial Estimate (Base Rate Anchor)\n\nWeighing:\n- EU precedent and acute grid stress: +15-20%\n- U.S. weak precedent and regulatory culture: +3-5%\n- Timeline constraint (96 days for formal action): -5 to -10%\n- High definitional bar (binding, written, force of law): -3 to -5%\n\n**Base rate anchor: 18%**\n\n#### (h) Recent News Adjustment\n\nThe research assistant found **no search results** for recent news. This is notable but not decisive:\n- The May 2026 CNBC article on Denmark moratorium and the May 2026 Pew Research article on data center locations are already reflected in the question background.\n- Absence of new search results suggests no major announcement has occurred since late May 2026.\n- The lack of breaking news slightly favors the **No** outcome (status quo bias), suggesting momentum toward formal action is not yet present.\n\n**Adjustment: -3 to -5 percentage points** due to absence of recent catalyzing announcements.\n\n**Revised estimate: 13-15%**\n\n#### (i) Community Prediction Divergence\n\nNo community prediction provided in the prompt. If one exists and differs significantly, I would consider:\n- Whether the community has access to proprietary regulatory tracking data\n- Whether recent legislative/regulatory filings in Virginia, Texas, Georgia, Ireland, Netherlands, or Denmark are known to the community\n- Whether the community is overweighting EU precedent or underweighting the timeline constraint\n\n---\n\n#### Final Reasoning\n\n**Why not higher (>25%)?**\n- The 96-day timeline is genuinely constraining for formal regulatory action\n- U.S. states show no historical precedent for such restrictions\n- The definitional bar (binding, written, force of law) excludes many near-miss scenarios\n- Status quo bias: the world changes slowly; absent recent catalyzing news, inertia favors No\n\n**Why not lower (<5%)?**\n- EU precedent is real and recent (Ireland, Netherlands, Denmark)\n- Grid stress is acute and documented\n- The question only requires *one* jurisdiction among multiple actively reviewing states/members\n- 96 days, while tight, is not impossible for emergency regulatory action\n\n**Probability: 16%**\n\n",
+    "other_notes": null,
+    "price_estimate": 0.09995599999999996,
+    "minutes_taken": 1.006725800037384,
+    "errors": [],
+    "prediction": 0.16
+  },
+  {
+    "question": {
+      "question_text": "Will a new High Representative for Bosnia and Herzegovina officially be in place before September 2, 2026?",
+      "id_of_post": 43491,
+      "page_url": "https://www.metaculus.com/questions/43491",
+      "id_of_question": 43498,
+      "state": "open",
+      "num_forecasters": 82,
+      "num_predictions": 373,
+      "resolution_criteria": "This question will resolve as **Yes** if a successor to Christian Schmidt is announced and begins their tenure in the role of the High Representative for Bosnia and Herzegovina before September 2, 2026, according to [the OHR](https://www.ohr.int/?lang=en).",
+      "fine_print": "If, before September 2, 2026, the High Representative for Bosnia and Herzegovina is replaced by another position, this question will be **annulled**. But if the OHR is closed without being replaced, the question will resolve as **No**.",
+      "background_info": "The High Representative for Bosnia and Herzegovina, together with the Office of the High Representative (OHR) in Bosnia and Herzegovina, was created in 1995 immediately after the signing of the [Dayton Agreement](https://www.ohr.int/dayton-peace-agreement/ \"Dayton Agreement\") ([Annex 10](https://www.ohr.int/dayton-peace-agreement/annex-10/)), which ended the 1992-1995 [Bosnian War](https://www.britannica.com/event/Bosnian-War \"Bosnian War\"). The purpose of the High Representative and the OHR is to oversee the civilian implementation of the Dayton Agreement. The High Representative is appointed by and serves to represent the countries of the [Peace Implementation Council](https://www.ohr.int/international-community-in-bih/peace-implementation-council/) (PIC).\n\nOn May 11, 2026, after nearly five years as High Representative, Christian Schmidt decided to [conclude his service](https://www.ohr.int/christian-schmidt-concludes-his-mandate-as-high-representative-for-bosnia-and-herzegovina/): he \"informed the PIC Steering Board of his decision and requested that they begin the work of finding his successor.\" In the lead-up to this decision, Schmidt had [repeatedly clashed](https://apnews.com/article/bosnia-international-envoy-resigns-serbs-a67c7c974cd1642a36831efba66929ba) with Bosnian Serb leader Milorad Dodik. Additionally, Schmidt, who had [never been approved by Russia](https://www.bbc.co.uk/news/articles/cg5pvj5pg51o) (a member of the PIC Steering Board, though it has not participated since July 2021), had apparently lost the support of the United States as well.&#x20;\n\nSchmidt says he will [remain in office until a successor is selected](https://www.bbc.co.uk/news/articles/cg5pvj5pg51o). Meanwhile, Russia has repeatedly supported Dodik's calls for OHR to be closed altogether.",
+      "unit_of_measure": "",
+      "close_time": "2026-08-01T11:00:00Z",
+      "actual_resolution_time": null,
+      "scheduled_resolution_time": "2026-09-02T11:00:00Z",
+      "published_time": "2026-05-15T17:00:00Z",
+      "open_time": "2026-05-18T17:00:00Z",
+      "date_accessed": "2026-05-27T22:40:47.121221+10:00",
+      "already_forecasted": true,
+      "tournament_slugs": [
+        "metaculus-cup-summer-2026"
+      ],
+      "default_project_id": 33021,
+      "includes_bots_in_aggregates": false,
+      "cp_reveal_time": "2026-05-21T17:00:00Z",
+      "question_weight": 1.0,
+      "resolution_string": null,
+      "conditional_type": null,
+      "previous_forecasts": null,
+      "group_question_option": null,
+      "question_ids_of_group": null,
+      "api_json": {
+        "id": 43491,
+        "title": "Will a new High Representative for Bosnia and Herzegovina officially be in place before September 2, 2026?",
+        "short_title": "New high representative for Bosnia before Sep 2, 2026?",
+        "url_title": "New high representative for Bosnia before Sep 2, 2026?",
+        "slug": "new-high-representative-for-bosnia-before-sep-2-2026",
+        "author_id": 119839,
+        "author_username": "DaAdCh",
+        "coauthors": [],
+        "created_at": "2026-05-12T15:15:23.012765Z",
+        "published_at": "2026-05-15T17:00:00Z",
+        "edited_at": "2026-05-27T12:17:26.159139Z",
+        "curation_status": "approved",
+        "curation_status_updated_at": "2026-05-15T13:12:35.991770Z",
+        "comment_count": 9,
+        "status": "open",
+        "resolved": false,
+        "actual_close_time": null,
+        "scheduled_close_time": "2026-08-01T11:00:00Z",
+        "scheduled_resolve_time": "2026-09-02T11:00:00Z",
+        "actual_resolve_time": null,
+        "open_time": "2026-05-18T17:00:00Z",
+        "nr_forecasters": 82,
+        "html_metadata_json": null,
+        "projects": {
+          "category": [
+            {
+              "id": 3689,
+              "name": "Politics",
+              "slug": "politics",
+              "emoji": "\ud83c\udfdb\ufe0f",
+              "description": "Politics",
+              "type": "category"
+            },
+            {
+              "id": 3687,
+              "name": "Geopolitics",
+              "slug": "geopolitics",
+              "emoji": "\ud83c\udf0d",
+              "description": "Geopolitics",
+              "type": "category"
+            }
+          ],
+          "tournament": [
+            {
+              "id": 33021,
+              "type": "tournament",
+              "name": "Metaculus Cup Summer 2026",
+              "slug": "metaculus-cup-summer-2026",
+              "header_image": "https://cdn.metaculus.com/cup-cover2x.webp",
+              "prize_pool": "5000.00",
+              "start_date": "2026-05-04T17:00:00Z",
+              "close_date": "2026-09-04T00:00:00Z",
+              "forecasting_end_date": "2026-09-01T00:00:00Z",
+              "html_metadata_json": null,
+              "is_ongoing": true,
+              "user_permission": null,
+              "order": 0,
+              "created_at": "2026-04-23T10:51:46.376890Z",
+              "edited_at": "2026-05-27T12:22:52.746797Z",
+              "score_type": "peer_tournament",
+              "default_permission": "forecaster",
+              "visibility": "normal",
+              "show_on_homepage": false,
+              "is_current_content_translated": false,
+              "bot_leaderboard_status": "exclude_and_show",
+              "description_preview": "<p>Welcome to the Metaculus Cup. Each week, forecasters new and experienced predict on a fresh batch of topical questions, with $5,000 in pr"
+            }
+          ],
+          "default_project": {
+            "id": 33021,
+            "type": "tournament",
+            "name": "Metaculus Cup Summer 2026",
+            "slug": "metaculus-cup-summer-2026",
+            "header_image": "https://cdn.metaculus.com/cup-cover2x.webp",
+            "prize_pool": "5000.00",
+            "start_date": "2026-05-04T17:00:00Z",
+            "close_date": "2026-09-04T00:00:00Z",
+            "forecasting_end_date": "2026-09-01T00:00:00Z",
+            "html_metadata_json": null,
+            "is_ongoing": true,
+            "user_permission": null,
+            "order": 0,
+            "created_at": "2026-04-23T10:51:46.376890Z",
+            "edited_at": "2026-05-27T12:22:52.746797Z",
+            "score_type": "peer_tournament",
+            "default_permission": "forecaster",
+            "visibility": "normal",
+            "show_on_homepage": false,
+            "is_current_content_translated": false,
+            "bot_leaderboard_status": "exclude_and_show",
+            "description_preview": "<p>Welcome to the Metaculus Cup. Each week, forecasters new and experienced predict on a fresh batch of topical questions, with $5,000 in pr"
+          }
+        },
+        "question": {
+          "id": 43498,
+          "title": "Will a new High Representative for Bosnia and Herzegovina officially be in place before September 2, 2026?",
+          "created_at": "2026-05-12T15:15:23.013384Z",
+          "open_time": "2026-05-18T17:00:00Z",
+          "cp_reveal_time": "2026-05-21T17:00:00Z",
+          "spot_scoring_time": "2026-05-21T17:00:00Z",
+          "scheduled_resolve_time": "2026-09-02T11:00:00Z",
+          "actual_resolve_time": null,
+          "resolution_set_time": null,
+          "scheduled_close_time": "2026-08-01T11:00:00Z",
+          "actual_close_time": "2026-08-01T11:00:00Z",
+          "type": "binary",
+          "options": null,
+          "all_options_ever": null,
+          "options_history": null,
+          "options_order": null,
+          "group_variable": "",
+          "status": "open",
+          "possibilities": null,
+          "resolution": null,
+          "include_bots_in_aggregates": false,
+          "question_weight": 1,
+          "default_score_type": "peer",
+          "default_aggregation_method": "recency_weighted",
+          "label": "",
+          "unit": "",
+          "open_upper_bound": false,
+          "open_lower_bound": false,
+          "inbound_outcome_count": null,
+          "scaling": {
+            "range_min": null,
+            "range_max": null,
+            "nominal_min": null,
+            "nominal_max": null,
+            "zero_point": null,
+            "open_upper_bound": false,
+            "open_lower_bound": false,
+            "inbound_outcome_count": null,
+            "continuous_range": null
+          },
+          "group_rank": null,
+          "coherence_links": null,
+          "coherence_link_aggregations": null,
+          "description": "The High Representative for Bosnia and Herzegovina, together with the Office of the High Representative (OHR) in Bosnia and Herzegovina, was created in 1995 immediately after the signing of the [Dayton Agreement](https://www.ohr.int/dayton-peace-agreement/ \"Dayton Agreement\") ([Annex 10](https://www.ohr.int/dayton-peace-agreement/annex-10/)), which ended the 1992-1995 [Bosnian War](https://www.britannica.com/event/Bosnian-War \"Bosnian War\"). The purpose of the High Representative and the OHR is to oversee the civilian implementation of the Dayton Agreement. The High Representative is appointed by and serves to represent the countries of the [Peace Implementation Council](https://www.ohr.int/international-community-in-bih/peace-implementation-council/) (PIC).\n\nOn May 11, 2026, after nearly five years as High Representative, Christian Schmidt decided to [conclude his service](https://www.ohr.int/christian-schmidt-concludes-his-mandate-as-high-representative-for-bosnia-and-herzegovina/): he \"informed the PIC Steering Board of his decision and requested that they begin the work of finding his successor.\" In the lead-up to this decision, Schmidt had [repeatedly clashed](https://apnews.com/article/bosnia-international-envoy-resigns-serbs-a67c7c974cd1642a36831efba66929ba) with Bosnian Serb leader Milorad Dodik. Additionally, Schmidt, who had [never been approved by Russia](https://www.bbc.co.uk/news/articles/cg5pvj5pg51o) (a member of the PIC Steering Board, though it has not participated since July 2021), had apparently lost the support of the United States as well.&#x20;\n\nSchmidt says he will [remain in office until a successor is selected](https://www.bbc.co.uk/news/articles/cg5pvj5pg51o). Meanwhile, Russia has repeatedly supported Dodik's calls for OHR to be closed altogether.",
+          "resolution_criteria": "This question will resolve as **Yes** if a successor to Christian Schmidt is announced and begins their tenure in the role of the High Representative for Bosnia and Herzegovina before September 2, 2026, according to [the OHR](https://www.ohr.int/?lang=en).",
+          "fine_print": "If, before September 2, 2026, the High Representative for Bosnia and Herzegovina is replaced by another position, this question will be **annulled**. But if the OHR is closed without being replaced, the question will resolve as **No**.",
+          "short_title": "New high representative for Bosnia before Sep 2, 2026?",
+          "post_id": 43491,
+          "aggregations": {
+            "recency_weighted": {
+              "history": null,
+              "latest": null,
+              "score_data": null,
+              "movement": null
+            }
+          },
+          "average_coverage": null,
+          "my_forecasts": {
+            "history": [
+              {
+                "question_id": 43498,
+                "author_id": 302314,
+                "start_time": 1779871556.344387,
+                "end_time": 1779875695.302661,
+                "forecast_values": [
+                  0.8,
+                  0.2
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43498,
+                "author_id": 302314,
+                "start_time": 1779875695.302661,
+                "end_time": 1779878723.354975,
+                "forecast_values": [
+                  0.8200000000000001,
+                  0.18
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              },
+              {
+                "question_id": 43498,
+                "author_id": 302314,
+                "start_time": 1779878723.354975,
+                "end_time": null,
+                "forecast_values": [
+                  0.725,
+                  0.275
+                ],
+                "interval_lower_bounds": null,
+                "centers": null,
+                "interval_upper_bounds": null,
+                "distribution_input": null
+              }
+            ],
+            "latest": {
+              "question_id": 43498,
+              "author_id": 302314,
+              "start_time": 1779878723.354975,
+              "end_time": null,
+              "forecast_values": [
+                0.725,
+                0.275
+              ],
+              "interval_lower_bounds": null,
+              "centers": null,
+              "interval_upper_bounds": null,
+              "distribution_input": null
+            },
+            "score_data": {}
+          }
+        },
+        "user_permission": "forecaster",
+        "vote": {
+          "score": 2,
+          "user_vote": null
+        },
+        "forecasts_count": 373,
+        "unread_comment_count": 0,
+        "last_viewed_at": "2026-05-27T10:45:28.546676Z",
+        "private_note": null,
+        "key_factors": [
+          {
+            "id": 2261,
+            "author": {
+              "id": 271410,
+              "username": "WasteTimeContinuum",
+              "is_bot": false,
+              "is_staff": false,
+              "metadata": null
+            },
+            "comment_id": 864653,
+            "created_at": "2026-05-26T20:40:23.319318+00:00",
+            "vote": {
+              "score": 3,
+              "aggregated_data": [
+                {
+                  "score": 5,
+                  "count": 1
+                }
+              ],
+              "user_vote": null,
+              "user_vote_reason": null,
+              "count": 1
+            },
+            "question_id": null,
+            "question": null,
+            "question_option": "",
+            "freshness": 2.9675553170904068,
+            "driver": {
+              "text": "US and Italian backing for Landi increases likelihood",
+              "impact_direction": 1,
+              "certainty": null
+            },
+            "base_rate": null,
+            "news": null,
+            "post": {
+              "id": 43491,
+              "question_type": "binary",
+              "unit": ""
+            }
+          },
+          {
+            "id": 2262,
+            "author": {
+              "id": 271410,
+              "username": "WasteTimeContinuum",
+              "is_bot": false,
+              "is_staff": false,
+              "metadata": null
+            },
+            "comment_id": 864653,
+            "created_at": "2026-05-26T20:41:10.436679+00:00",
+            "vote": {
+              "score": 3,
+              "aggregated_data": [
+                {
+                  "score": 5,
+                  "count": 1
+                }
+              ],
+              "user_vote": null,
+              "user_vote_reason": null,
+              "count": 1
+            },
+            "question_id": null,
+            "question": null,
+            "question_option": "",
+            "freshness": 2.967557983982985,
+            "driver": {
+              "text": "Historical transition precedents support swift process",
+              "impact_direction": 1,
+              "certainty": null
+            },
+            "base_rate": null,
+            "news": null,
+            "post": {
+              "id": 43491,
+              "question_type": "binary",
+              "unit": ""
+            }
+          },
+          {
+            "id": 2263,
+            "author": {
+              "id": 271410,
+              "username": "WasteTimeContinuum",
+              "is_bot": false,
+              "is_staff": false,
+              "metadata": null
+            },
+            "comment_id": 864653,
+            "created_at": "2026-05-26T20:41:23.336004+00:00",
+            "vote": {
+              "score": 3,
+              "aggregated_data": [
+                {
+                  "score": 5,
+                  "count": 1
+                }
+              ],
+              "user_vote": null,
+              "user_vote_reason": null,
+              "count": 1
+            },
+            "question_id": null,
+            "question": null,
+            "question_option": "",
+            "freshness": 2.967568610490208,
+            "driver": {
+              "text": "Scheduled PIC meeting accelerates decision",
+              "impact_direction": 1,
+              "certainty": null
+            },
+            "base_rate": null,
+            "news": null,
+            "post": {
+              "id": 43491,
+              "question_type": "binary",
+              "unit": ""
+            }
+          },
+          {
+            "id": 2258,
+            "author": {
+              "id": 284188,
+              "username": "DaiLothbrook",
+              "is_bot": false,
+              "is_staff": false,
+              "metadata": null
+            },
+            "comment_id": 864197,
+            "created_at": "2026-05-26T17:14:21.442276+00:00",
+            "vote": {
+              "score": 2,
+              "aggregated_data": [
+                {
+                  "score": 2,
+                  "count": 1
+                }
+              ],
+              "user_vote": null,
+              "user_vote_reason": null,
+              "count": 1
+            },
+            "question_id": null,
+            "question": null,
+            "question_option": "",
+            "freshness": 2,
+            "driver": {
+              "text": "Lack of consensus for successor slows process",
+              "impact_direction": -1,
+              "certainty": null
+            },
+            "base_rate": null,
+            "news": null,
+            "post": {
+              "id": 43491,
+              "question_type": "binary",
+              "unit": ""
+            }
+          },
+          {
+            "id": 2259,
+            "author": {
+              "id": 284188,
+              "username": "DaiLothbrook",
+              "is_bot": false,
+              "is_staff": false,
+              "metadata": null
+            },
+            "comment_id": 864197,
+            "created_at": "2026-05-26T17:14:23.591964+00:00",
+            "vote": {
+              "score": 2,
+              "aggregated_data": [
+                {
+                  "score": 2,
+                  "count": 1
+                }
+              ],
+              "user_vote": null,
+              "user_vote_reason": null,
+              "count": 1
+            },
+            "question_id": null,
+            "question": null,
+            "question_option": "",
+            "freshness": 2,
+            "driver": {
+              "text": "Geopolitical frictions delay decision",
+              "impact_direction": -1,
+              "certainty": null
+            },
+            "base_rate": null,
+            "news": null,
+            "post": {
+              "id": 43491,
+              "question_type": "binary",
+              "unit": ""
+            }
+          }
+        ],
+        "is_current_content_translated": false
+      },
+      "custom_metadata": {},
+      "categories": [
+        {
+          "id": 3689,
+          "name": "Politics",
+          "slug": "politics",
+          "emoji": "\ud83c\udfdb\ufe0f",
+          "description": "Politics",
+          "type": "category"
+        },
+        {
+          "id": 3687,
+          "name": "Geopolitics",
+          "slug": "geopolitics",
+          "emoji": "\ud83c\udf0d",
+          "description": "Geopolitics",
+          "type": "category"
+        }
+      ],
+      "question_type": "binary",
+      "community_prediction_at_access_time": null
+    },
+    "explanation": "\n# SUMMARY\n*Question*: Will a new High Representative for Bosnia and Herzegovina officially be in place before September 2, 2026?\n*Final Prediction*: 28.0%\n*Total Cost*: $0.0999 (estimated)\n*Time Spent*: 1.26 minutes\n*LLMs*: `{'default': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}, 'summarizer': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}, 'researcher': 'smart-searcher/claude-haiku-4-5', 'parser': {'original_model': 'claude-haiku-4-5', 'allowed_tries': 2, 'model': 'claude-haiku-4-5', 'temperature': 0.3, 'timeout': 60}}`\n*Bot Name*: SummerTemplateBot2026\n\n\n## Report 1 Summary\n### Forecasts\n*Forecaster 1*: 28.0%\n*Forecaster 2*: 45.0%\n*Forecaster 3*: 28.0%\n\n\n### Research Summary\n# Summary\n\nThe research conducted did not yield any search results for information regarding whether a new High Representative for Bosnia and Herzegovina will be officially in place before September 2, 2026. No data, articles, reports, or other sources were found that address this specific question.\n\n**Sources Used:**\nNo sources were available to review, as the search produced no results.\n\n\n# RESEARCH\n## Report 1 Research\nNo search results found for the query using the search filter chosen\n\n# FORECASTS\n\n## R1: Forecaster 1 Reasoning\n### Forecasting Analysis: High Representative for Bosnia and Herzegovina Succession\n\n#### (a) Time Left Until Outcome is Known\nFrom today (May 27, 2026) until September 2, 2026 = **98 days** (approximately 3.2 months)\n\n#### (b) Status Quo Outcome if Nothing Changed\nChristian Schmidt remains in office as High Representative. The PIC Steering Board has just begun the process of finding a successor, but no successor has been announced or begun tenure. If the current trajectory continues without acceleration, a new High Representative would likely NOT be in place by September 2, 2026.\n\n#### (c) Scenario Resulting in \"No\" Outcome\n- The PIC Steering Board takes an extended period to reach consensus on a successor (typical for international appointments)\n- Russia continues to block or delay consensus, given its historical opposition to Schmidt and its calls to close the OHR entirely\n- The selection process extends beyond September 2, 2026, or the OHR is formally closed without replacement\n- Political complications in Bosnia or within the PIC prevent timely appointment\n\n#### (d) Scenario Resulting in \"Yes\" Outcome\n- The PIC Steering Board rapidly identifies and agrees on a consensus candidate within 4-6 weeks\n- The candidate undergoes expedited vetting and approval\n- The new High Representative is formally announced and begins tenure by late August 2026\n- This would require an unusually fast process for an international appointment\n\n#### (e) Base Rate Analysis\n\n**Historical precedent for High Representative transitions:**\n- The position has existed since 1995 (31 years)\n- There have been approximately 10-11 High Representatives in this period\n- Average tenure: ~3 years\n- **Transition speed**: High Representative transitions typically take 3-6 months from announcement of departure to successor taking office\n- The current timeline (May 11 announcement to September 2 deadline) = ~4 months, which is at the faster end of historical transitions but not unprecedented\n\n**Similar international appointment processes:**\n- UN positions, EU envoys, and similar roles typically require 2-4 months for consensus-building among multiple stakeholders\n- When consensus is difficult (as here, with Russia's opposition), timelines extend to 6+ months\n- The requirement for PIC Steering Board consensus (multiple countries) adds complexity\n\n**Base rate estimate**: Historically, ~40-50% of such transitions are completed within 4 months when announced\n\n#### (f) Key Influencing Factors\n\n1. **Russia's opposition**: Russia never approved Schmidt and has not participated in PIC since July 2021. However, Russia's non-participation may actually *reduce* its blocking power, though it could still formally object.\n\n2. **US position shift**: The US apparently withdrew support for Schmidt, which may facilitate consensus on a new candidate, but the US position on timing is unclear.\n\n3. **Milorad Dodik's influence**: Dodik's calls to close the OHR entirely create uncertainty about whether the position will even be replaced.\n\n4. **Institutional inertia**: International bureaucracies move slowly; 98 days is a tight timeline for consensus-building among multiple countries.\n\n5. **No current candidate identified**: As of May 27, no successor has been announced or is publicly known to be in advanced consideration.\n\n6. **Political complexity in Bosnia**: Ongoing tensions may complicate the appointment process.\n\n#### (g) Initial Estimate (Base Rate Only)\n\nBased purely on historical transition timelines for similar international positions:\n- 4-month window is feasible but tight\n- Requires faster-than-average process\n- Base rate suggests ~40-45% probability\n\n**Initial anchor: 42%**\n\n#### (h) Recent News Adjustment\n\n**Factors pushing probability DOWN:**\n- Schmidt only announced departure on May 11; selection process just beginning\n- No candidate has been publicly identified or is in advanced stages\n- Russia's historical opposition and calls to close OHR create uncertainty\n- Only 98 days remaining is a compressed timeline\n- International consensus-building typically takes 4-6 months minimum\n- The fact that no search results exist for a successor candidate suggests the process is still in very early stages\n\n**Factors pushing probability UP:**\n- US withdrawal of support for Schmidt may facilitate consensus on a replacement\n- The PIC has institutional experience with these transitions\n- There is clear motivation to fill the position (Schmidt won't stay indefinitely)\n- A 4-month timeline, while tight, is not impossible\n\n**Net adjustment**: The lack of any identified candidate, combined with Russia's opposition and the compressed timeline, suggests the base rate should be adjusted downward.\n\n**Revised estimate: 28-32%**\n\n#### (i) Community Prediction Comparison\n\nNo community prediction data provided in the prompt. If one exists and differs significantly, I would consider:\n- Whether the community has identified a likely candidate not yet public\n- Whether the community has insight into PIC Steering Board discussions\n- Whether the community is overweighting the urgency of the appointment vs. the difficulty of consensus\n\n---\n\n#### Final Reasoning\n\nThe question requires a successor to be **announced AND begin tenure** before September 2, 2026. This is a high bar given:\n\n1. **Timeline constraint**: 98 days is tight for international consensus-building\n2. **Process stage**: Selection process just beginning as of May 11\n3. **No identified candidate**: Absence of public information about likely successors\n4. **Political obstacles**: Russia's opposition, Dodik's calls to close OHR, US position unclear\n5. **Historical norms**: Similar transitions typically take 4-6 months; this requires 3.2 months\n\nHowever, it's not impossible:\n- The PIC has done this before\n- There may be a pre-identified candidate not yet public\n- Urgency could accelerate the process\n- US support shift could facilitate consensus\n\nThe base rate of ~40-45% for 4-month transitions should be adjusted downward to account for the current lack of visible progress and political complications.\n\n**Probability: 28%**\n\n\n## R1: Forecaster 2 Reasoning\n### Forecasting Analysis: High Representative for Bosnia and Herzegovina Succession\n\n#### (a) Time Left Until Outcome is Known\n**97 days** (from May 27, 2026 to September 2, 2026)\n\n#### (b) Status Quo Outcome if Nothing Changed\nChristian Schmidt remains in office as High Representative, with no successor announced or in place by the deadline. This would resolve as **No**.\n\n#### (c) Scenario Resulting in \"No\" Outcome\nRussia continues blocking consensus on a successor (as it has never approved Schmidt and supports closing the OHR entirely). The PIC Steering Board cannot reach agreement on a replacement candidate within the 97-day window. Schmidt remains in a caretaker capacity through September 2, 2026. Alternatively, the OHR is formally closed without replacement.\n\n#### (d) Scenario Resulting in \"Yes\" Outcome\nThe PIC Steering Board (minus Russia's participation, which has been absent since July 2021) rapidly identifies and appoints a successor acceptable to key stakeholders (EU, US, UK, etc.). The new High Representative is announced and assumes office before September 2, 2026\u2014a compressed timeline but feasible given the urgency and that Russia's veto power is effectively neutralized by its non-participation.\n\n#### (e) Base Rate Analysis\n\n**Historical precedent for High Representative transitions:**\n- The position has existed since 1995 (31 years)\n- There have been approximately 10-11 High Representatives\n- Average tenure: ~3 years\n- Previous transitions have typically taken **2-6 months** from announcement to successor taking office\n- However, contested transitions or those facing diplomatic obstacles have extended to **6-12+ months**\n\n**Relevant base rate:** When a High Representative announces departure, a successor is typically in place within 3-6 months in non-contested scenarios. The current situation is contested (Russia's opposition, Dodik's influence, US withdrawal of support).\n\n#### (f) Key Influencing Factors\n\n1. **Russia's blocking power**: Russia has never approved Schmidt and supports closing the OHR. However, Russia has not participated in PIC Steering Board since July 2021, effectively removing its veto.\n\n2. **97-day timeline**: This is a tight but not impossible window. Previous transitions have occurred in similar timeframes.\n\n3. **Consensus requirement**: The PIC must agree on a successor. Without Russia's participation, consensus is more achievable, but other members (EU, US, UK, etc.) must align.\n\n4. **Political will**: Schmidt's departure was his own decision after losing US support. This suggests the process may move quickly to restore institutional stability.\n\n5. **Dodik's opposition**: Milorad Dodik opposes the OHR itself, which could complicate but not necessarily prevent succession.\n\n6. **No recent news available**: The search yielded no results on successor candidates or PIC progress as of May 27, 2026.\n\n#### (g) Initial Estimate (Base Rate Anchor)\n\nGiven:\n- Historical transitions take 2-6 months in cooperative scenarios\n- This scenario is contested but Russia is non-participating\n- 97 days is within the typical range but on the shorter end\n- No current momentum visible in available information\n\n**Base rate estimate: 55-60%**\n\nThe base rate slightly favors \"Yes\" because Russia's absence from the table removes the primary blocking mechanism, and 97 days is historically sufficient for such transitions.\n\n#### (h) Adjustment from Base Rate\n\n**Adjustment: -10 to -15 percentage points**\n\n**Reasoning:**\n- The lack of any reported successor candidates or PIC progress as of May 27 is concerning. With 97 days remaining, we would expect preliminary discussions or candidate names to be circulating.\n- The loss of US support for Schmidt suggests diplomatic friction that could slow consensus-building.\n- Dodik's opposition and calls to close the OHR entirely create additional political friction.\n- The compressed timeline (97 days) is achievable but leaves little margin for diplomatic delays.\n- Status quo bias: institutional inertia often extends timelines beyond optimistic projections.\n\n**Revised estimate: 40-50%**\n\n#### (i) Community Prediction Comparison\n\nNo community prediction data provided in the prompt. If one exists and differs significantly, I would consider:\n- Whether the community has access to non-public PIC discussions\n- Whether candidate names have emerged that I'm unaware of\n- Whether diplomatic momentum is stronger than the absence of news suggests\n\n---\n\n#### Final Rationale\n\nThis is a **genuinely uncertain** forecast. The structural factors (Russia's non-participation, historical timelines) support a moderately positive outlook, but the **absence of visible progress** with 97 days remaining is a significant red flag. The political friction (US withdrawal, Dodik opposition) adds friction to an already tight timeline.\n\nThe question hinges on whether the PIC can move with unusual speed and decisiveness. While possible, the lack of reported momentum suggests this is more likely to slip past September 2 than to be completed by then.\n\n**Probability: 45%**\n\n\n## R1: Forecaster 3 Reasoning\n### Forecasting Analysis: High Representative for Bosnia and Herzegovina Succession\n\n#### (a) Time Left Until Outcome is Known\n**97 days** (from May 27, 2026 to September 2, 2026)\n\n#### (b) Status Quo Outcome if Nothing Changed\nChristian Schmidt remains in office as High Representative, with no successor announced or in place by the deadline. This would resolve as **No**.\n\n#### (c) Scenario Resulting in No Outcome\nRussia continues to block consensus on a successor candidate (as it has never approved Schmidt and supports closing the OHR entirely). The PIC Steering Board cannot reach agreement on a replacement. The OHR is either closed without replacement, or Schmidt's tenure simply extends beyond September 2, 2026 without a successor taking office.\n\n#### (d) Scenario Resulting in Yes Outcome\nThe PIC Steering Board (particularly the EU, US, and other Western members) reaches consensus on a successor candidate despite Russian opposition or abstention. The candidate is formally announced and begins their tenure within the ~97-day window. This requires overcoming the Russia veto problem that already plagued Schmidt's tenure.\n\n#### (e) Base Rate Analysis\n\n**High Representative Succession History:**\n- The position has existed since 1995 (31 years)\n- There have been approximately 9-10 High Representatives total\n- Average tenure: ~3-4 years\n- Transition periods: Historical data suggests transitions typically take 2-6 months when consensus exists\n- **Critical factor**: Russia's veto power on PIC Steering Board has become increasingly problematic since 2021 (though Russia hasn't participated since July 2021, it retains formal veto rights)\n\n**Relevant base rate**: When a High Representative announces departure with 3+ months notice and no major institutional obstacles exist, successors are typically in place within 4-6 months (~70-80% success rate). However, this case has the Russia veto problem, which is unprecedented in severity.\n\n#### (f) Key Influencing Factors\n\n1. **Russia's veto power and opposition**: Russia never approved Schmidt and supports closing OHR entirely. Even though Russia hasn't participated since 2021, it retains formal blocking power. This is the single largest obstacle.\n\n2. **US support loss**: Schmidt lost US backing, suggesting the US may be willing to accept a successor quickly if one is proposed, but also indicates internal disagreement among PIC members.\n\n3. **Milorad Dodik's influence**: Dodik's opposition to Schmidt and alignment with Russia creates political pressure against any successor who might take similar stances.\n\n4. **97-day timeline**: This is tight but not impossible for a succession process, especially if candidates are already being considered.\n\n5. **PIC consensus requirement**: The PIC Steering Board must agree. With Russia's formal veto rights (even if not participating), this is extremely difficult.\n\n6. **Institutional continuity pressure**: The international community has strong incentives to maintain the OHR and avoid a leadership vacuum, which could push toward faster resolution.\n\n#### (g) Initial Estimate (Base Rate Only)\n\nWithout recent news, anchoring purely on base rates:\n- Standard succession with consensus: 70-80% within 6 months\n- Adjusted for Russia veto problem: -40 percentage points\n- **Base rate estimate: 30-35%**\n\n#### (h) Recent News Impact\n\nThe recent news (Schmidt's May 11 announcement, loss of US support, Russia's opposition) is largely **already reflected in the question setup**. The news confirms:\n- The succession process has officially begun\n- There are significant obstacles (Russia, Dodik)\n- The timeline is compressed\n\nThis news should move me **slightly downward** from base rate because:\n1. The loss of US support suggests internal PIC divisions\n2. Russia's explicit opposition to OHR closure suggests they may block any successor\n3. The compressed timeline (97 days) is genuinely tight for consensus-building with a veto player\n\nHowever, the news also shows the process is actively underway, which is slightly positive.\n\n**Adjustment: -5 to -10 percentage points from base rate**\n\n#### (i) Community Prediction Comparison\n\nNo community prediction provided in the prompt. If one exists and differs significantly from my estimate, I would consider:\n- Whether the community has information about specific candidates already being vetted\n- Whether there are diplomatic channels suggesting Russia might abstain rather than veto\n- Whether the PIC has developed workarounds to the Russia veto problem\n- Whether the OHR closure scenario is more likely than I'm estimating\n\n---\n\n#### Final Reasoning\n\nThe core tension is between:\n- **Positive factors**: Institutional pressure to maintain continuity, 97 days is technically sufficient, the succession process has begun\n- **Negative factors**: Russia's veto power and stated opposition, US support loss indicating PIC divisions, Dodik's political opposition, the unprecedented difficulty of the Russia veto problem\n\nThe Russia veto is the decisive factor. Even though Russia hasn't participated since 2021, it retains formal blocking power. For a successor to be \"officially in place,\" they need PIC consensus. Getting Russia's approval (or at least non-blocking abstention) seems very difficult given Russia's stated preference for closing OHR entirely.\n\nThe 97-day timeline is tight but not impossible if consensus emerges quickly. However, the consensus-building process appears to be just beginning.\n\n**Probability: 28%**\n\n",
+    "other_notes": null,
+    "price_estimate": 0.09991999999999998,
+    "minutes_taken": 1.2642184774080911,
+    "errors": [],
+    "prediction": 0.28
+  }
+]

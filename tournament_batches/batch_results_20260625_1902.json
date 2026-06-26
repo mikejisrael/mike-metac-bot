@@ -1,0 +1,14 @@
+{
+  "q_44153": {
+    "question_id": 44153,
+    "question_text": "How many countries will be classified as having an outbreak of foot-and-mouth disease on September 1, 2026?",
+    "question_type": "multiple_choice",
+    "status": "success",
+    "submitted_forecast": {
+      "Less than 4": 0.08,
+      "4 or 5": 0.78,
+      "6 or 7": 0.12,
+      "More than 7": 0.02
+    }
+  }
+}

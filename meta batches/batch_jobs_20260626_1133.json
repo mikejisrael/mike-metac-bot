@@ -1,0 +1,39 @@
+{
+  "batch_id": "msgbatch_01HmeUDLufL7EHYkYNNZ36y5",
+  "submitted_at": "2026-06-26T11:33:28.235687",
+  "num_requests": 3,
+  "question_ids": {
+    "q_44139": 44139,
+    "q_43926": 43926,
+    "q_43852": 43852
+  },
+  "question_texts": {
+    "q_44139": "Will James M. McDonald be sworn in as US Attorney for the Southern District of New York before August 22, 2026?",
+    "q_43926": "Will a bot beat all humans in the Summer 2026 Metaculus Cup?",
+    "q_43852": "Will Iceland vote Yes in the 2026 EU negotiations referendum?"
+  },
+  "community_predictions": {
+    "q_44139": null,
+    "q_43926": null,
+    "q_43852": null
+  },
+  "resolve_times": {
+    "q_44139": "2026-08-22T00:00:00+00:00",
+    "q_43926": "2026-09-02T00:00:00+00:00",
+    "q_43852": "2026-08-30T00:00:00+00:00"
+  },
+  "categories": {
+    "q_44139": [
+      "Law",
+      "Politics"
+    ],
+    "q_43926": [
+      "Metaculus",
+      "Artificial Intelligence"
+    ],
+    "q_43852": [
+      "Elections",
+      "Geopolitics"
+    ]
+  }
+}

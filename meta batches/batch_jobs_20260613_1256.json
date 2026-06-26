@@ -1,0 +1,101 @@
+{
+  "batch_id": "msgbatch_01WV6C2yhRVM6xGHtpbdKxmH",
+  "submitted_at": "2026-06-13T12:56:59.026128",
+  "num_requests": 13,
+  "question_ids": {
+    "q_43967": 43967,
+    "q_43911": 43911,
+    "q_43910": 43910,
+    "q_43909": 43909,
+    "q_43908": 43908,
+    "q_43897": 43897,
+    "q_43888": 43888,
+    "q_43882": 43882,
+    "q_43870": 43870,
+    "q_43612": 43612,
+    "q_43363": 43363,
+    "q_43343": 43343,
+    "q_43342": 43342
+  },
+  "question_texts": {
+    "q_43967": "Will Karen Bass be reelected Mayor of Los Angeles in 2026?",
+    "q_43911": "Will the U.S. employment-population ratio for ages 25-54 fall below 70% by 2035?",
+    "q_43910": "Will annualized U.S. per-capita consumption growth from 2030-2035 exceed 8% (with appropriate adjustments for quality changes, home production, and zero-cost goods and services)?",
+    "q_43909": "Will the annual revenue run rate of the top two AI labs in 2030 exceed $1T (2026 USD)?",
+    "q_43908": "Will Volodymyr Zelenskyy and Vladimir Putin meet in person before September 1, 2026?",
+    "q_43897": "Will the UK Parliament approve the target to cut greenhouse gas emissions by 87 per cent by 2040?",
+    "q_43888": "Will the average monthly price per kWh of electricity in the U.S. break $0.40 before the end of 2030 (doubling recent values)?",
+    "q_43882": "Will former U.S. Representative George Santos be arrested before September 1, 2026?",
+    "q_43870": "Will OpenAI publicly file an initial registration statement (S-1) with the SEC to launch an IPO, before September 1, 2026?",
+    "q_43612": "Will Shakira's \"Dai Dai\" outpeak Shakira's \"Waka Waka\" on the Billboard Hot 100?",
+    "q_43363": "Will the Community beat Dylan Matthews in the Metaculus Cup Summer 2026?",
+    "q_43343": "Will any match of the 2026 FIFA World Cup be delayed by more than 30 minutes due to extreme heat?",
+    "q_43342": "Will any host nation (USA, Mexico or Canada) reach the semifinals of the 2026 World Cup?"
+  },
+  "community_predictions": {
+    "q_43967": null,
+    "q_43911": null,
+    "q_43910": null,
+    "q_43909": null,
+    "q_43908": null,
+    "q_43897": null,
+    "q_43888": null,
+    "q_43882": null,
+    "q_43870": null,
+    "q_43612": null,
+    "q_43363": null,
+    "q_43343": null,
+    "q_43342": null
+  },
+  "resolve_times": {
+    "q_43967": "2026-11-05T12:00:00+00:00",
+    "q_43911": "2026-07-05T17:56:59+00:00",
+    "q_43910": "2026-07-05T17:55:17+00:00",
+    "q_43909": "2026-07-05T18:02:33+00:00",
+    "q_43908": "2026-09-01T09:00:00+00:00",
+    "q_43897": "2026-07-01T22:00:00+00:00",
+    "q_43888": "2026-07-05T18:00:50+00:00",
+    "q_43882": "2026-09-01T09:00:00+00:00",
+    "q_43870": "2026-09-01T09:00:00+00:00",
+    "q_43612": "2026-07-31T22:00:00+00:00",
+    "q_43363": "2026-09-03T04:00:00+00:00",
+    "q_43343": "2026-07-20T10:30:00+00:00",
+    "q_43342": "2026-07-12T04:00:00+00:00"
+  },
+  "categories": {
+    "q_43967": [
+      "Politics",
+      "Elections"
+    ],
+    "q_43911": [],
+    "q_43910": [],
+    "q_43909": [],
+    "q_43908": [
+      "Geopolitics"
+    ],
+    "q_43897": [
+      "Environment & Climate",
+      "Politics"
+    ],
+    "q_43888": [],
+    "q_43882": [
+      "Law"
+    ],
+    "q_43870": [
+      "Economy & Business",
+      "Artificial Intelligence"
+    ],
+    "q_43612": [
+      "Sports & Entertainment"
+    ],
+    "q_43363": [
+      "Metaculus"
+    ],
+    "q_43343": [
+      "Sports & Entertainment"
+    ],
+    "q_43342": [
+      "Sports & Entertainment"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "batch_id": "msgbatch_01Nq4LRpKhSzaq65RpLcXEsA",
+  "submitted_at": "2026-06-01T09:24:27.544255",
+  "batch_type": "refresh",
+  "num_requests": 3,
+  "question_ids": {
+    "refresh_43266_20260601": 43266,
+    "refresh_42575_20260601": 42575,
+    "refresh_36888_20260601": 36888
+  },
+  "question_texts": {
+    "refresh_43266_20260601": "Will US federal agencies cease international arrival processing at any of the following airports for 3 or more consecutive days before 2027?",
+    "refresh_42575_20260601": "Will US federal agencies cease international arrival processing at any of the following airports for 3 or more consecutive days before 2027?",
+    "refresh_36888_20260601": "Will US federal agencies cease international arrival processing at any of the following airports for 3 or more consecutive days before 2027?"
+  },
+  "original_probabilities": {
+    "refresh_43266_20260601": 0.11,
+    "refresh_42575_20260601": 0.18,
+    "refresh_36888_20260601": 0.48
+  },
+  "refresh_reasons": {
+    "refresh_43266_20260601": "closing in 6 days",
+    "refresh_42575_20260601": "closing in 14 days",
+    "refresh_36888_20260601": "closing in 1 days"
+  },
+  "community_predictions": {
+    "refresh_43266_20260601": null,
+    "refresh_42575_20260601": null,
+    "refresh_36888_20260601": null
+  },
+  "resolve_times": {
+    "refresh_43266_20260601": "2027-02-01T08:00:00+00:00",
+    "refresh_42575_20260601": "2027-02-01T08:00:00+00:00",
+    "refresh_36888_20260601": "2027-02-01T08:00:00+00:00"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "batch_id": "msgbatch_01AHjFsV6P19CDvGGU8TPbj8",
+  "submitted_at": "2026-06-01T17:09:26.475692",
+  "num_requests": 2,
+  "question_ids": {
+    "q_43641": 43641,
+    "q_43524": 43524
+  },
+  "question_texts": {
+    "q_43641": "Will the 2026 Alberta independence referendum pass?",
+    "q_43524": "Will federal courts block the USPS mail-in ballot restrictions before Election Day?"
+  },
+  "community_predictions": {
+    "q_43641": null,
+    "q_43524": null
+  },
+  "resolve_times": {
+    "q_43641": "2026-10-21T00:00:00+00:00",
+    "q_43524": "2026-11-03T23:00:00+00:00"
+  },
+  "categories": {
+    "q_43641": [
+      "Politics",
+      "Geopolitics"
+    ],
+    "q_43524": [
+      "Law",
+      "Elections"
+    ]
+  }
+}

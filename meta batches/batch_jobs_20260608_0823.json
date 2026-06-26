@@ -1,0 +1,29 @@
+{
+  "batch_id": "msgbatch_01YFNSjBRkZUMUdDckPMxFip",
+  "submitted_at": "2026-06-08T08:23:45.250837",
+  "num_requests": 2,
+  "question_ids": {
+    "q_43760": 43760,
+    "q_43716": 43716
+  },
+  "question_texts": {
+    "q_43760": "Will US federal agencies cease international arrival processing at any of the following airports for 3 or more consecutive days before 2027?",
+    "q_43716": "Will the Federal Reserve raise the federal funds target range before July 30, 2026?"
+  },
+  "community_predictions": {
+    "q_43760": null,
+    "q_43716": null
+  },
+  "resolve_times": {
+    "q_43760": "2027-02-01T08:00:00+00:00",
+    "q_43716": "2026-07-30T00:00:00+00:00"
+  },
+  "categories": {
+    "q_43760": [
+      "Politics"
+    ],
+    "q_43716": [
+      "Economy & Business"
+    ]
+  }
+}

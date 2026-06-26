@@ -3,7 +3,7 @@ import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import Literal
-
+from live_data import detect_data_needs, format_live_data_for_prompt
 import dotenv
 
 # Runtime helpers (env validation, banners, dependency-warning suppression).
@@ -186,25 +186,33 @@ class SummerTemplateBot2026(ForecastBot):
     async def _run_forecast_on_binary(
         self, question: BinaryQuestion, research: str
     ) -> ReasonedPrediction[float]:
+        # Fetch live market data relevant to this question
+        live_data = detect_data_needs(question.question_text)
+        live_data_text = format_live_data_for_prompt(live_data)
+        if live_data_text:
+            print(f"  📊 Live data fetched for: {list(live_data.keys())}")
+        community_prediction = ""
+        if hasattr(question, 'community_prediction') and question.community_prediction is not None:
+            community_prediction = f"\nThe current community prediction is: {question.community_prediction:.0%}. If your estimate differs significantly from this, make sure your reasoning explains why.\n"
+
         prompt = clean_indents(
             f"""
             You are a professional forecaster interviewing for a job.
-
             Your interview question is:
             {question.question_text}
 
             Question background:
             {question.background_info}
 
-
             This question's outcome will be determined by the specific criteria below. These criteria have not yet been satisfied:
             {question.resolution_criteria}
 
             {question.fine_print}
 
-
             Your research assistant says:
             {research}
+            {live_data_text}
+            {community_prediction}
 
             Today is {datetime.now().strftime("%Y-%m-%d")}.
 
@@ -213,8 +221,23 @@ class SummerTemplateBot2026(ForecastBot):
             (b) The status quo outcome if nothing changed.
             (c) A brief description of a scenario that results in a No outcome.
             (d) A brief description of a scenario that results in a Yes outcome.
+            (e) The base rate — how often have similar events happened historically? 
+                For price targets: what % move is required and how often does that happen in this timeframe?
+                For political events: how often do similar proposals pass?
+                For technology events: how often do similar releases happen on schedule?
+            (f) Key factors from your research that most influence this forecast.
+            (g) Your initial estimate BEFORE reading recent news — anchored purely on base rates.
+            (h) How much should recent news move you away from that base rate anchor, and why?
+            (i) If the community prediction exists and differs from your estimate by more than 10%, 
+                explain specifically why you diverge — consider that the community may have 
+                information or base rate knowledge you are missing.
 
-            You write your rationale remembering that good forecasters put extra weight on the status quo outcome since the world changes slowly most of the time.
+            You write your rationale remembering that:
+            - Good forecasters put extra weight on the status quo since the world changes slowly
+            - Recent news is often already priced into community predictions
+            - Large moves from base rates require strong specific evidence, not just positive sentiment
+            - If you find yourself above 70% or below 5%, double-check your reasoning carefully
+
             {self._get_conditional_disclaimer_if_necessary(question)}
 
             The last thing you write is your final answer as: "Probability: ZZ%", 0-100
@@ -656,12 +679,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--mode",
         type=str,
-        choices=["tournament", "metaculus_cup", "test_questions"],
+        choices=["tournament", "metaculus_cup", "test_questions", "custom_filter"],
         default="tournament",
         help="What to forecast on (default: tournament)",
     )
     args = parser.parse_args()
-    run_mode: Literal["tournament", "metaculus_cup", "test_questions"] = args.mode
+    run_mode: Literal["tournament", "metaculus_cup", "test_questions", "custom_filter"] = args.mode
 
     check_environment(strict=True)
     publish_to_metaculus = True
@@ -671,25 +694,35 @@ if __name__ == "__main__":
     # whichever default models forecasting-tools picks based on your env vars;
     # uncomment and edit to pin specific models.
     template_bot = SummerTemplateBot2026(
-        research_reports_per_question=1,
-        predictions_per_research_report=5,
-        use_research_summary_to_forecast=False,
-        publish_reports_to_metaculus=publish_to_metaculus,
-        folder_to_save_reports_to=None,
-        skip_previously_forecasted_questions=True,
-        extra_metadata_in_explanation=True,
-        # llms={
-        #     "default": GeneralLlm(
-        #         model="openrouter/openai/gpt-4o",
-        #         temperature=0.3,
-        #         timeout=40,
-        #         allowed_tries=2,
-        #     ),
-        #     "summarizer": "openai/gpt-4o-mini",
-        #     "researcher": "asknews/news-summaries",
-        #     "parser": "openai/gpt-4o-mini",
-        # },
-    )
+    research_reports_per_question=1,
+    predictions_per_research_report=2,
+    use_research_summary_to_forecast=False,
+    publish_reports_to_metaculus=publish_to_metaculus,
+    folder_to_save_reports_to="reports",
+    skip_previously_forecasted_questions=True,
+    extra_metadata_in_explanation=True,
+    llms={
+        "default": GeneralLlm(
+            model="claude-haiku-4-5",
+            temperature=0.3,
+            timeout=60,
+            allowed_tries=2,
+        ),
+        "summarizer": GeneralLlm(
+            model="claude-haiku-4-5",
+            temperature=0.3,
+            timeout=60,
+            allowed_tries=2,
+        ),
+        "researcher": "smart-searcher/claude-haiku-4-5",
+        "parser": GeneralLlm(
+            model="claude-haiku-4-5",
+            temperature=0.3,
+            timeout=60,
+            allowed_tries=2,
+        ),
+    },
+)
 
     # Per-mode tournament URL shown in the summary banner footer. These
     # piggyback on the forecasting_tools SDK constants and need updating
@@ -698,6 +731,7 @@ if __name__ == "__main__":
         "tournament": "https://www.metaculus.com/tournament/summer-futureeval-2026/",
         "metaculus_cup": "https://www.metaculus.com/tournament/metaculus-cup-summer-2025/",
         "test_questions": "https://www.metaculus.com/tournament/bot-testing-area/",
+        "custom_filter": "https://www.metaculus.com/questions/",
     }
 
     # Dispatch on mode. Each branch produces a list of ForecastReport (or
@@ -720,26 +754,47 @@ if __name__ == "__main__":
         # The Metaculus Cup may be uninitialized near the start of a season
         # (Jan/May/Sep). AXC_2025_TOURNAMENT_ID = 32564 and
         # AI_2027_TOURNAMENT_ID = "ai-2027" are also valid targets here.
-        template_bot.skip_previously_forecasted_questions = False
+        template_bot.skip_previously_forecasted_questions = True
         forecast_reports = asyncio.run(
             template_bot.forecast_on_tournament(
                 client.CURRENT_METACULUS_CUP_ID, return_exceptions=True
             )
         )
     elif run_mode == "test_questions":
-        # The bot-testing-area tournament contains all question types and is
-        # the recommended target for smoke-testing your bot.
-        # https://www.metaculus.com/tournament/bot-testing-area/
         template_bot.skip_previously_forecasted_questions = False
         forecast_reports = asyncio.run(
             template_bot.forecast_on_tournament(
                 "bot-testing-area", return_exceptions=True
             )
         )
-
-    template_bot.log_report_summary(forecast_reports)
-    print_run_summary_banner(
-        forecast_reports,
-        will_publish=publish_to_metaculus,
-        tournament_url=TOURNAMENT_URLS.get(run_mode),
-    )
+    elif run_mode == "custom_filter":
+        from forecasting_tools import ApiFilter, BinaryQuestion, BinaryPrediction
+        from datetime import timedelta
+        template_bot.skip_previously_forecasted_questions = True
+        now = datetime.now(timezone.utc)
+        api_filter = ApiFilter(
+            allowed_types=["binary"],
+            allowed_statuses=["open"],
+            close_time_gt=now,
+            close_time_lt=now + timedelta(days=180),
+            num_forecasters_gte=15,
+        )
+        questions = asyncio.run(
+            client.get_questions_matching_filter(
+                api_filter=api_filter,
+                num_questions=20,
+            )
+        )
+        binary_only = [
+            q for q in questions
+            if isinstance(q, BinaryQuestion)
+        ]
+        print(f"\nFound {len(binary_only)} binary questions closing within 90 days\n")
+        for q in binary_only[:10]:
+            print(f"  - {q.question_text[:70]}")
+        print()
+        forecast_reports = asyncio.run(
+            template_bot.forecast_questions(
+                binary_only, return_exceptions=True
+            )
+        )

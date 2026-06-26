@@ -1,0 +1,237 @@
+import yfinance as yf
+import requests
+from datetime import datetime, timedelta
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+def get_crypto_price(symbol: str) -> dict:
+    """Get current crypto price and recent history"""
+    try:
+        ticker = yf.Ticker(f"{symbol}-USD")
+        hist = ticker.history(period="30d")
+        current = hist['Close'].iloc[-1]
+        price_30d_ago = hist['Close'].iloc[0]
+        change_30d = ((current - price_30d_ago) / price_30d_ago) * 100
+        
+        high_30d = hist['Close'].max()
+        low_30d = hist['Close'].min()
+        
+        return {
+            "symbol": symbol,
+            "current_price_usd": round(current, 2),
+            "change_30d_pct": round(change_30d, 2),
+            "high_30d": round(high_30d, 2),
+            "low_30d": round(low_30d, 2),
+            "as_of": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+def get_stock_price(symbol: str) -> dict:
+    """Get current stock price and recent history"""
+    try:
+        ticker = yf.Ticker(symbol)
+        hist = ticker.history(period="30d")
+        info = ticker.fast_info
+        
+        current = hist['Close'].iloc[-1]
+        price_30d_ago = hist['Close'].iloc[0]
+        change_30d = ((current - price_30d_ago) / price_30d_ago) * 100
+        
+        return {
+            "symbol": symbol,
+            "current_price_usd": round(current, 2),
+            "change_30d_pct": round(change_30d, 2),
+            "52w_high": round(hist['Close'].max(), 2),
+            "52w_low": round(hist['Close'].min(), 2),
+            "as_of": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+def get_market_index(symbol: str) -> dict:
+    """Get current index level — VIX, S&P500, etc"""
+    try:
+        ticker = yf.Ticker(symbol)
+        hist = ticker.history(period="30d")
+        
+        current = hist['Close'].iloc[-1]
+        price_30d_ago = hist['Close'].iloc[0]
+        change_30d = ((current - price_30d_ago) / price_30d_ago) * 100
+        
+        days_above_30 = 0
+        if symbol == "^VIX":
+            days_above_30 = len(hist[hist['Close'] > 30])
+        
+        return {
+            "symbol": symbol,
+            "current_level": round(current, 2),
+            "change_30d_pct": round(change_30d, 2),
+            "high_30d": round(hist['Close'].max(), 2),
+            "low_30d": round(hist['Close'].min(), 2),
+            "days_above_30_last_30d": days_above_30,
+            "as_of": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+def get_fred_data(series_id: str, series_name: str) -> dict:
+    """Get economic data from FRED"""
+    try:
+        api_key = os.getenv('FRED_API_KEY', '')
+        if not api_key:
+            return {"error": "FRED_API_KEY not set"}
+        
+        url = f"https://api.stlouisfed.org/fred/series/observations"
+        params = {
+            "series_id": series_id,
+            "api_key": api_key,
+            "file_type": "json",
+            "sort_order": "desc",
+            "limit": 12,
+        }
+        response = requests.get(url, params=params)
+        data = response.json()
+        observations = data['observations']
+        
+        latest = observations[0]
+        previous = observations[1]
+        
+        return {
+            "series": series_name,
+            "latest_value": latest['value'],
+            "latest_date": latest['date'],
+            "previous_value": previous['value'],
+            "previous_date": previous['date'],
+            "trend": "up" if float(latest['value']) > float(previous['value']) else "down",
+            "as_of": datetime.now().strftime("%Y-%m-%d"),
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+def detect_data_needs(question_text: str) -> dict:
+    """
+    Analyse a question and determine what live data to fetch.
+    Returns a dict of relevant live data.
+    """
+    question_lower = question_text.lower()
+    data = {}
+    
+    # Crypto detection
+    if any(word in question_lower for word in ['bitcoin', 'btc']):
+        data['bitcoin'] = get_crypto_price('BTC')
+    if any(word in question_lower for word in ['ethereum', 'eth']):
+        data['ethereum'] = get_crypto_price('ETH')
+    
+    # Market index detection
+    if any(word in question_lower for word in ['vix', 'volatility index']):
+        data['vix'] = get_market_index('^VIX')
+    if any(word in question_lower for word in ['s&p', 's&p 500', 'sp500']):
+        data['sp500'] = get_market_index('^GSPC')
+    if any(word in question_lower for word in ['nasdaq']):
+        data['nasdaq'] = get_market_index('^IXIC')
+    if any(word in question_lower for word in ['gold']):
+        data['gold'] = get_market_index('GC=F')
+    if any(word in question_lower for word in ['oil', 'crude']):
+        data['oil'] = get_market_index('CL=F')
+        
+    # Economic data detection
+    if any(word in question_lower for word in ['cpi', 'inflation']):
+        data['cpi'] = get_fred_data('CPIAUCSL', 'CPI')
+    if any(word in question_lower for word in ['unemployment', 'jobs']):
+        data['unemployment'] = get_fred_data('UNRATE', 'Unemployment Rate')
+    if any(word in question_lower for word in ['federal funds', 'fed rate', 'interest rate', 'fomc', 'federal reserve', 'rate cut', 'rate hike', 'basis point', 'bps']):
+        data['fed_rate'] = get_fred_data('FEDFUNDS', 'Federal Funds Rate')
+        data['sp500'] = get_market_index('^GSPC')
+    if any(word in question_lower for word in ['recession', 'economic', 'economy']):
+        data['gdp'] = get_fred_data('GDP', 'GDP')
+        data['unemployment'] = get_fred_data('UNRATE', 'Unemployment Rate')
+        data['cpi'] = get_fred_data('CPIAUCSL', 'CPI')
+    if any(word in question_lower for word in ['gdp']):
+        data['gdp'] = get_fred_data('GDP', 'GDP')
+        
+    return data
+
+def format_live_data_for_prompt(data: dict) -> str:
+    """Format live data into readable text for the prompt"""
+    if not data:
+        return ""
+    
+    lines = ["LIVE MARKET DATA (fetched in real-time):"]
+    
+    for key, value in data.items():
+        if "error" in value:
+            lines.append(f"  {key}: Error fetching data — {value['error']}")
+            continue
+            
+        if key == 'bitcoin':
+            lines.append(f"  Bitcoin (BTC): ${value['current_price_usd']:,} USD")
+            lines.append(f"    30-day change: {value['change_30d_pct']:+.1f}%")
+            lines.append(f"    30-day range: ${value['low_30d']:,} — ${value['high_30d']:,}")
+            
+        elif key == 'vix':
+            lines.append(f"  VIX (Volatility Index): {value['current_level']}")
+            lines.append(f"    30-day change: {value['change_30d_pct']:+.1f}%")
+            lines.append(f"    Days above 30 (last 30 days): {value['days_above_30_last_30d']}")
+            lines.append(f"    30-day range: {value['low_30d']} — {value['high_30d']}")
+            
+        elif key in ['sp500', 'nasdaq', 'gold', 'oil']:
+            lines.append(f"  {key.upper()}: {value['current_level']:,}")
+            lines.append(f"    30-day change: {value['change_30d_pct']:+.1f}%")
+            
+        elif key in ['cpi', 'unemployment', 'fed_rate', 'gdp']:
+            lines.append(f"  {value['series']}: {value['latest_value']} ({value['latest_date']})")
+            lines.append(f"    Previous: {value['previous_value']} ({value['previous_date']})")
+            lines.append(f"    Trend: {value['trend']}")
+    
+    lines.append(f"  Data as of: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    print("Testing live data fetcher...\n")
+    
+    print("Bitcoin:")
+    btc = get_crypto_price('BTC')
+    print(f"  ${btc.get('current_price_usd', 'Error'):,} USD")
+    print(f"  30d change: {btc.get('change_30d_pct', 'N/A')}%\n")
+    
+    print("VIX:")
+    vix = get_market_index('^VIX')
+    print(f"  Current: {vix.get('current_level', 'Error')}")
+    print(f"  Days above 30: {vix.get('days_above_30_last_30d', 'N/A')}\n")
+    
+    print("S&P 500:")
+    sp500 = get_market_index('^GSPC')
+    print(f"  Current: {sp500.get('current_level', 'Error'):,}")
+    print(f"  30d change: {sp500.get('change_30d_pct', 'N/A')}%\n")
+    
+    print("CPI (Inflation):")
+    cpi = get_fred_data('CPIAUCSL', 'CPI')
+    print(f"  Latest: {cpi.get('latest_value', 'Error')} ({cpi.get('latest_date', '')})")
+    print(f"  Previous: {cpi.get('previous_value', 'N/A')} ({cpi.get('previous_date', '')})")
+    print(f"  Trend: {cpi.get('trend', 'N/A')}\n")
+    
+    print("Federal Funds Rate:")
+    fed = get_fred_data('FEDFUNDS', 'Federal Funds Rate')
+    print(f"  Latest: {fed.get('latest_value', 'Error')}% ({fed.get('latest_date', '')})")
+    print(f"  Previous: {fed.get('previous_value', 'N/A')}%")
+    print(f"  Trend: {fed.get('trend', 'N/A')}\n")
+    
+    print("Unemployment Rate:")
+    unemp = get_fred_data('UNRATE', 'Unemployment Rate')
+    print(f"  Latest: {unemp.get('latest_value', 'Error')}% ({unemp.get('latest_date', '')})")
+    print(f"  Previous: {unemp.get('previous_value', 'N/A')}%")
+    print(f"  Trend: {unemp.get('trend', 'N/A')}\n")
+    
+    print("GDP:")
+    gdp = get_fred_data('GDP', 'GDP')
+    print(f"  Latest: ${gdp.get('latest_value', 'Error')}B ({gdp.get('latest_date', '')})")
+    print(f"  Trend: {gdp.get('trend', 'N/A')}\n")
+    
+    print("Testing question detection:")
+    test_q = "Will the Federal Reserve cut interest rates before September 2026?"
+    data = detect_data_needs(test_q)
+    print(format_live_data_for_prompt(data))

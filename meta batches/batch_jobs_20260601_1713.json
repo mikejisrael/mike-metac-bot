@@ -1,0 +1,387 @@
+{
+  "batch_id": "msgbatch_01811tCtmTF56ejp5JFuWVM8",
+  "submitted_at": "2026-06-01T17:13:00.592004",
+  "num_requests": 50,
+  "question_ids": {
+    "q_43736": 43736,
+    "q_43702": 43702,
+    "q_43641": 43641,
+    "q_43524": 43524,
+    "q_43503": 43503,
+    "q_43472": 43472,
+    "q_43358": 43358,
+    "q_43332": 43332,
+    "q_43320": 43320,
+    "q_43318": 43318,
+    "q_43317": 43317,
+    "q_43316": 43316,
+    "q_43279": 43279,
+    "q_43249": 43249,
+    "q_43133": 43133,
+    "q_43087": 43087,
+    "q_42779": 42779,
+    "q_42686": 42686,
+    "q_42611": 42611,
+    "q_42569": 42569,
+    "q_42483": 42483,
+    "q_42315": 42315,
+    "q_42285": 42285,
+    "q_42282": 42282,
+    "q_42274": 42274,
+    "q_42157": 42157,
+    "q_42082": 42082,
+    "q_41847": 41847,
+    "q_41628": 41628,
+    "q_41543": 41543,
+    "q_41299": 41299,
+    "q_41268": 41268,
+    "q_41267": 41267,
+    "q_41231": 41231,
+    "q_41076": 41076,
+    "q_41075": 41075,
+    "q_40912": 40912,
+    "q_40902": 40902,
+    "q_40901": 40901,
+    "q_40900": 40900,
+    "q_40897": 40897,
+    "q_40896": 40896,
+    "q_40878": 40878,
+    "q_40856": 40856,
+    "q_40855": 40855,
+    "q_40854": 40854,
+    "q_40845": 40845,
+    "q_40843": 40843,
+    "q_40842": 40842,
+    "q_40840": 40840
+  },
+  "question_texts": {
+    "q_43736": "Will the People's Republic of China blockade or quarantine Taiwan before September 1, 2026?",
+    "q_43702": "Will the U.S. Supreme Court rule in favor of Monsanto in Monsanto Company v. John L. Durnell?",
+    "q_43641": "Will the 2026 Alberta independence referendum pass?",
+    "q_43524": "Will federal courts block the USPS mail-in ballot restrictions before Election Day?",
+    "q_43503": "Will Haiti hold the first round of its presidential election before September 1, 2026?",
+    "q_43472": "Will WHO declare hantavirus a Public Health Emergency of International Concern before 2027?",
+    "q_43358": "Will Iran and U.S play against each other in the 2026 FIFA World Cup?",
+    "q_43332": "Will any of Belgium, France, Italy, Luxembourg, Netherlands, and/or Germany leave the EU before 2027?",
+    "q_43320": "Will Russia order a general mobilization before January 1, 2027?",
+    "q_43318": "Will Lt Gen Abdel Fattah al-Burhan and Lt Gen Mohamed Hamdan Dagalo \"Hemedti\" be publicly confirmed to have met in person at any point during 2026?",
+    "q_43317": "Will any peer-reviewed paper or major-organization publication issued in 2026 estimate Sudan war excess mortality (direct + indirect) at more than 200,000?",
+    "q_43316": "Will Claude Code remain available to new Claude Pro subscribers through 2026?",
+    "q_43279": "Will Professor Layton and the New World of Steam be released in 2026?",
+    "q_43249": "Will United Airlines and American Airlines announce a definitive merger agreement before January 1, 2027?",
+    "q_43133": "Will the US and China jointly announce a new bilateral trade agreement in 2026?",
+    "q_43087": "Will Tesla discontinue the Cybertruck before January 1, 2027?",
+    "q_42779": "Will Israel conduct a ground invasion of Iran before 2027?",
+    "q_42686": "Will the United States attack Cuba before 2027?",
+    "q_42611": "Will the Cuban government lose power before 2027?",
+    "q_42569": "Will there be a non-test nuclear detonation in Iran before 2027?",
+    "q_42483": "Will any of these New England conventions be cancelled or rescheduled due to measles?",
+    "q_42315": "Will the United States lose its measles elimination status before 2027?",
+    "q_42285": "[RESTATED at https://www.metaculus.com/c/unjournal/42731/better-basis-for-a-well-being-metric-in-lmic-interventions-well_08/  (WELL_08)",
+    "q_42282": "Moved to https://www.metaculus.com/c/unjournal/42735/a-overall-wellby-vs-b-separate-measures-and-conversion-well_04/",
+    "q_42274": "Will the United States report any locally acquired New World screwworm infestation (in a human or an animal) before 2027?",
+    "q_42157": "Will Reza Pahlavi visit Iran during 2026?",
+    "q_42082": "Will any FAA-certified eVTOL passenger service be open to the general public in at least one U.S. city before Jan. 1, 2027?",
+    "q_41847": "Will the U.S. Supreme Court further cut back campaign finance limitations in National Republican Senatorial Committee v. FEC before January 1, 2027?",
+    "q_41628": "Will credible evidence emerge before 2027 that Meta can access the content of WhatsApp messages despite end-to-end encryption claims?",
+    "q_41543": "Will Sudan's Emergency Response Rooms win the Nobel Peace Prize in 2026?",
+    "q_41299": "Will the Insurrection Act or a state of martial law be declared in relation to the 2026 U.S. midterms?",
+    "q_41268": "Will the United States attack Colombia before 2027?",
+    "q_41267": "Will the Euro appreciate against the Dollar during 2026?",
+    "q_41231": "Will the United States gain formal sovereignty over any part of Greenland during 2026?",
+    "q_41076": "Will the Trump administration attempt to withdraw from key international arms control agreements in 2026?",
+    "q_41075": "Will India surpass Germany in GDP during 2026?",
+    "q_40912": "Will the U.S. enact an AI safety federal statute or executive order in 2026?",
+    "q_40902": "Will restrictions on the use of the Traditional Latin Mass in the Catholic Church be loosened during 2026?",
+    "q_40901": "Will the EU require mandatory age verification on social media or AI before 2027?",
+    "q_40900": "Will the FDA approve a psilocybin treatment during 2026?",
+    "q_40897": "Will the US, UK or EU approve a gene editing therapy for a new condition during 2026?",
+    "q_40896": "Will a UFC mixed martial arts event occur at the White House in 2026?",
+    "q_40878": "Will the European Space Agency launch the PLATO spacecraft before 2027?",
+    "q_40856": "Will the so-called Czech ammunition initiative be politically abolished by the end of 2026 or will it be transferred under the leadership of another state?",
+    "q_40855": "Will a state of emergency be declared in at least one of the Czech regions in 2026 in connection with a natural disaster?",
+    "q_40854": "Will the EU Council approve the full accession of Cyprus to the Schengen area by the end of 2026?",
+    "q_40845": "Will there be a ceasefire in the Sudanese Civil War during 2026?",
+    "q_40843": "Will SpaceX successfully refuel a Starship in orbit during 2026?",
+    "q_40842": "Will OpenAI file for an IPO during 2026?",
+    "q_40840": "Will China attack or blockade Taiwan during 2026?"
+  },
+  "community_predictions": {
+    "q_43736": null,
+    "q_43702": null,
+    "q_43641": null,
+    "q_43524": null,
+    "q_43503": null,
+    "q_43472": null,
+    "q_43358": null,
+    "q_43332": 0.04,
+    "q_43320": null,
+    "q_43318": null,
+    "q_43317": null,
+    "q_43316": null,
+    "q_43279": null,
+    "q_43249": null,
+    "q_43133": null,
+    "q_43087": null,
+    "q_42779": null,
+    "q_42686": null,
+    "q_42611": null,
+    "q_42569": null,
+    "q_42483": null,
+    "q_42315": null,
+    "q_42285": null,
+    "q_42282": null,
+    "q_42274": null,
+    "q_42157": null,
+    "q_42082": null,
+    "q_41847": null,
+    "q_41628": null,
+    "q_41543": null,
+    "q_41299": null,
+    "q_41268": null,
+    "q_41267": null,
+    "q_41231": null,
+    "q_41076": null,
+    "q_41075": null,
+    "q_40912": null,
+    "q_40902": null,
+    "q_40901": null,
+    "q_40900": null,
+    "q_40897": null,
+    "q_40896": null,
+    "q_40878": null,
+    "q_40856": null,
+    "q_40855": null,
+    "q_40854": null,
+    "q_40845": null,
+    "q_40843": null,
+    "q_40842": null,
+    "q_40840": null
+  },
+  "resolve_times": {
+    "q_43736": "2026-09-01T12:00:00+00:00",
+    "q_43702": "2026-07-15T00:00:00+00:00",
+    "q_43641": "2026-10-21T00:00:00+00:00",
+    "q_43524": "2026-11-03T23:00:00+00:00",
+    "q_43503": "2026-09-01T09:00:00+00:00",
+    "q_43472": "2027-01-01T01:00:00+00:00",
+    "q_43358": "2026-07-21T00:00:00+00:00",
+    "q_43332": "2027-01-31T23:59:00+00:00",
+    "q_43320": "2027-01-01T10:00:00+00:00",
+    "q_43318": "2027-01-15T16:00:00+00:00",
+    "q_43317": "2027-01-31T21:59:00+00:00",
+    "q_43316": "2027-01-15T08:00:00+00:00",
+    "q_43279": "2027-01-01T23:00:00+00:00",
+    "q_43249": "2027-01-01T06:00:00+00:00",
+    "q_43133": "2027-01-31T22:59:00+00:00",
+    "q_43087": "2027-01-01T06:00:00+00:00",
+    "q_42779": "2027-01-01T06:00:00+00:00",
+    "q_42686": "2027-01-05T11:00:00+00:00",
+    "q_42611": "2027-01-01T19:33:00+00:00",
+    "q_42569": "2027-01-01T14:00:00+00:00",
+    "q_42483": "2026-11-08T20:44:00+00:00",
+    "q_42315": "2027-01-01T00:00:00+00:00",
+    "q_42285": "2027-01-11T05:00:00+00:00",
+    "q_42282": "2027-01-11T05:00:00+00:00",
+    "q_42274": "2027-01-01T00:00:00+00:00",
+    "q_42157": "2027-01-06T00:00:00+00:00",
+    "q_42082": "2027-01-01T14:00:00+00:00",
+    "q_41847": "2027-01-01T05:00:00+00:00",
+    "q_41628": "2027-01-06T23:00:00+00:00",
+    "q_41543": "2026-10-11T11:00:00+00:00",
+    "q_41299": "2027-01-21T00:00:00+00:00",
+    "q_41268": "2027-01-12T12:00:00+00:00",
+    "q_41267": "2027-01-01T17:00:00+00:00",
+    "q_41231": "2027-01-01T00:01:00+00:00",
+    "q_41076": "2027-01-01T00:00:00+00:00",
+    "q_41075": "2027-01-01T00:01:00+00:00",
+    "q_40912": "2027-01-01T06:00:00+00:00",
+    "q_40902": "2027-01-01T00:00:00+00:00",
+    "q_40901": "2027-01-01T00:00:00+00:00",
+    "q_40900": "2027-01-01T00:00:00+00:00",
+    "q_40897": "2027-01-01T00:00:00+00:00",
+    "q_40896": "2027-01-01T18:00:00+00:00",
+    "q_40878": "2027-01-10T12:00:00+00:00",
+    "q_40856": "2027-01-01T11:00:00+00:00",
+    "q_40855": "2027-01-01T11:00:00+00:00",
+    "q_40854": "2027-01-01T11:00:00+00:00",
+    "q_40845": "2027-01-01T00:00:00+00:00",
+    "q_40843": "2027-01-01T00:00:00+00:00",
+    "q_40842": "2027-01-01T00:00:00+00:00",
+    "q_40840": "2027-01-01T00:00:00+00:00"
+  },
+  "categories": {
+    "q_43736": [
+      "Geopolitics"
+    ],
+    "q_43702": [
+      "Law",
+      "Environment & Climate"
+    ],
+    "q_43641": [
+      "Politics",
+      "Geopolitics"
+    ],
+    "q_43524": [
+      "Law",
+      "Elections"
+    ],
+    "q_43503": [
+      "Politics",
+      "Elections"
+    ],
+    "q_43472": [
+      "Health & Pandemics"
+    ],
+    "q_43358": [
+      "Sports & Entertainment"
+    ],
+    "q_43332": [
+      "Politics",
+      "Geopolitics"
+    ],
+    "q_43320": [
+      "Geopolitics",
+      "Law",
+      "Politics"
+    ],
+    "q_43318": [
+      "Politics",
+      "Geopolitics"
+    ],
+    "q_43317": [
+      "Health & Pandemics",
+      "Geopolitics"
+    ],
+    "q_43316": [
+      "Economy & Business",
+      "Technology",
+      "Artificial Intelligence"
+    ],
+    "q_43279": [],
+    "q_43249": [
+      "Economy & Business"
+    ],
+    "q_43133": [
+      "Economy & Business",
+      "Geopolitics"
+    ],
+    "q_43087": [
+      "Environment & Climate",
+      "Economy & Business"
+    ],
+    "q_42779": [
+      "Geopolitics"
+    ],
+    "q_42686": [
+      "Geopolitics"
+    ],
+    "q_42611": [
+      "Geopolitics"
+    ],
+    "q_42569": [
+      "Geopolitics",
+      "Nuclear Technology & Risks"
+    ],
+    "q_42483": [
+      "Sports & Entertainment",
+      "Health & Pandemics"
+    ],
+    "q_42315": [
+      "Health & Pandemics"
+    ],
+    "q_42285": [],
+    "q_42282": [],
+    "q_42274": [
+      "Health & Pandemics"
+    ],
+    "q_42157": [
+      "Geopolitics",
+      "Politics"
+    ],
+    "q_42082": [
+      "Environment & Climate",
+      "Technology"
+    ],
+    "q_41847": [
+      "Social Sciences",
+      "Elections",
+      "Law",
+      "Politics"
+    ],
+    "q_41628": [
+      "Economy & Business",
+      "Technology"
+    ],
+    "q_41543": [
+      "Politics",
+      "Geopolitics"
+    ],
+    "q_41299": [
+      "Social Sciences",
+      "Elections",
+      "Law",
+      "Politics"
+    ],
+    "q_41268": [
+      "Geopolitics",
+      "Politics"
+    ],
+    "q_41267": [
+      "Politics",
+      "Economy & Business"
+    ],
+    "q_41231": [
+      "Geopolitics",
+      "Politics"
+    ],
+    "q_41076": [
+      "Nuclear Technology & Risks",
+      "Geopolitics"
+    ],
+    "q_41075": [
+      "Economy & Business",
+      "Geopolitics"
+    ],
+    "q_40912": [
+      "Law",
+      "Artificial Intelligence"
+    ],
+    "q_40902": [
+      "Politics"
+    ],
+    "q_40901": [
+      "Technology",
+      "Law"
+    ],
+    "q_40900": [
+      "Health & Pandemics"
+    ],
+    "q_40897": [
+      "Health & Pandemics"
+    ],
+    "q_40896": [
+      "Sports & Entertainment",
+      "Politics"
+    ],
+    "q_40878": [
+      "Space"
+    ],
+    "q_40856": [],
+    "q_40855": [],
+    "q_40854": [],
+    "q_40845": [
+      "Geopolitics"
+    ],
+    "q_40843": [
+      "Space"
+    ],
+    "q_40842": [
+      "Economy & Business",
+      "Artificial Intelligence"
+    ],
+    "q_40840": [
+      "Geopolitics"
+    ]
+  }
+}

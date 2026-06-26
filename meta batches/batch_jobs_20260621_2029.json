@@ -1,0 +1,113 @@
+{
+  "batch_id": "msgbatch_013jhKAZXtLJDr7sd8oDiUN1",
+  "submitted_at": "2026-06-21T20:29:13.685703",
+  "num_requests": 13,
+  "question_ids": {
+    "q_44017": 44017,
+    "q_44016": 44016,
+    "q_44013": 44013,
+    "q_44012": 44012,
+    "q_44011": 44011,
+    "q_43937": 43937,
+    "q_43912": 43912,
+    "q_43892": 43892,
+    "q_43884": 43884,
+    "q_43854": 43854,
+    "q_43701": 43701,
+    "q_43613": 43613,
+    "q_43512": 43512
+  },
+  "question_texts": {
+    "q_44017": "Will July 2026 be the warmest July on record, according to Copernicus?",
+    "q_44016": "On July 8, 2026, will Marine Le Pen be ineligible to run in the 2027 French presidential election?",
+    "q_44013": "Will Ukraine announce a presidential election before September 1, 2026?",
+    "q_44012": "Before September 1, 2026, will Turkish President Recep Tayyip Erdo\u011fan be legally permitted to run for another term?",
+    "q_44011": "Will the Liberal Party officially nominate Fl\u00e1vio Bolsonaro as its candidate for president of Brazil before August 15, 2026?",
+    "q_43937": "Will the US and India finalise a new bilateral trade agreement before August 2026?",
+    "q_43912": "Will Spain hold a general election before May 23, 2027?",
+    "q_43892": "Will the U.S. Senate pass an Iran war powers resolution before August 1, 2026?",
+    "q_43884": "Will there be a documented case of civil unrest (e.g., a strike or protest) with over 1,000,000 participants globally, citing AI impacts (e.g., labor displacement) as a primary grievance by 2030?",
+    "q_43854": "Will the Brookmont Catastrophic Bond ETF drop at least $0.25 within two days before September 2026?",
+    "q_43701": "Will shipping traffic through the Strait of Hormuz return to normal on any day before September 2026?",
+    "q_43613": "Will the Save Our Bacon Act be enacted into law before July 2027?",
+    "q_43512": "Will OpenAI either have a valuation of less than $200bn USD or have filed for bankruptcy before January 1, 2028?"
+  },
+  "community_predictions": {
+    "q_44017": null,
+    "q_44016": null,
+    "q_44013": null,
+    "q_44012": null,
+    "q_44011": null,
+    "q_43937": null,
+    "q_43912": null,
+    "q_43892": null,
+    "q_43884": null,
+    "q_43854": null,
+    "q_43701": null,
+    "q_43613": null,
+    "q_43512": null
+  },
+  "resolve_times": {
+    "q_44017": "2026-08-15T12:00:00+00:00",
+    "q_44016": "2026-07-08T15:00:00+00:00",
+    "q_44013": "2026-09-01T12:00:00+00:00",
+    "q_44012": "2026-09-01T12:00:00+00:00",
+    "q_44011": "2026-08-15T09:00:00+00:00",
+    "q_43937": "2026-07-12T10:27:18+00:00",
+    "q_43912": "2027-05-24T00:00:00+00:00",
+    "q_43892": "2026-08-01T09:00:00+00:00",
+    "q_43884": "2027-01-08T18:59:00+00:00",
+    "q_43854": "2026-09-01T00:00:00+00:00",
+    "q_43701": "2026-09-01T00:00:00+00:00",
+    "q_43613": "2027-07-01T00:00:00+00:00",
+    "q_43512": "2028-01-05T22:59:00+00:00"
+  },
+  "categories": {
+    "q_44017": [
+      "Environment & Climate"
+    ],
+    "q_44016": [
+      "Elections",
+      "Law",
+      "Politics"
+    ],
+    "q_44013": [
+      "Politics"
+    ],
+    "q_44012": [
+      "Politics"
+    ],
+    "q_44011": [
+      "Elections"
+    ],
+    "q_43937": [
+      "Economy & Business",
+      "Geopolitics"
+    ],
+    "q_43912": [
+      "Social Sciences",
+      "Elections",
+      "Law",
+      "Politics"
+    ],
+    "q_43892": [
+      "Geopolitics"
+    ],
+    "q_43884": [],
+    "q_43854": [
+      "Environment & Climate",
+      "Economy & Business"
+    ],
+    "q_43701": [
+      "Economy & Business",
+      "Geopolitics"
+    ],
+    "q_43613": [
+      "Politics"
+    ],
+    "q_43512": [
+      "Economy & Business",
+      "Artificial Intelligence"
+    ]
+  }
+}

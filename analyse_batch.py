@@ -1,0 +1,54 @@
+import json
+import re
+
+with open('batch_results.json') as f:
+    data = json.load(f)
+
+print(f"Total results: {len(data)}")
+print("=" * 70)
+
+fixed = 0
+for custom_id, item in data.items():
+    prob = item.get('probability')
+    
+    # Try to extract from reasoning if probability is None
+    if prob is None and item.get('reasoning'):
+        for line in reversed(item['reasoning'].split('\n')):
+            if 'probability:' in line.lower():
+                numbers = re.findall(r'\d+\.?\d*', line)
+                if numbers:
+                    prob = float(numbers[-1]) / 100
+                    prob = max(0.01, min(0.99, prob))
+                    item['probability'] = prob
+                    fixed += 1
+                    break
+    
+    prob_str = f"{prob:.0%}" if prob is not None else "N/A"
+    print(f"{prob_str:6s} — {item['question_text'][:65]}")
+
+probs = [item['probability'] for item in data.values() 
+         if item.get('probability') is not None]
+
+print(f"\n{'='*70}")
+print(f"Extracted: {len(probs)}/{ len(data)} | Fixed by re-parse: {fixed}")
+if probs:
+    print(f"Average: {sum(probs)/len(probs):.0%}")
+    print(f"Highest: {max(probs):.0%}")
+    print(f"Lowest: {min(probs):.0%}")
+    
+    print(f"\nHigh confidence calls (>60%):")
+    high = [(item['question_text'][:65], item['probability']) 
+            for item in data.values() 
+            if item.get('probability') is not None and item['probability'] > 0.6]
+    if high:
+        for text, p in sorted(high, key=lambda x: x[1], reverse=True):
+            print(f"  {p:.0%} — {text}")
+    else:
+        print("  None")
+    
+    print(f"\nLow confidence calls (<10%):")
+    low = [(item['question_text'][:65], item['probability']) 
+           for item in data.values() 
+           if item.get('probability') is not None and item['probability'] < 0.10]
+    for text, p in sorted(low, key=lambda x: x[1]):
+        print(f"  {p:.0%} — {text}")
