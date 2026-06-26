@@ -1,0 +1,59 @@
+name: Tournament Forecast (tournament_forecast.py)
+
+on:
+  workflow_dispatch:  # manual trigger from GitHub UI
+  schedule:
+    - cron: "*/30 * * * *"  # every 30 minutes — questions can close in 90 min
+
+# Prevent overlapping runs (queue rather than cancel, since submissions are stateful)
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  forecast:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed to push batch_results back for dedup
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Run tournament_forecast.py
+        run: poetry run python tournament_forecast.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          METACULUS_TOKEN: ${{ secrets.METACULUS_TOKEN }}
+          # Optional: set this to your dedicated bot account token (mike_iz_-bot).
+          # Falls back to METACULUS_TOKEN if not set.
+          METAC_TOURNAMENT_TOKEN: ${{ secrets.METAC_TOURNAMENT_TOKEN }}
+          # Optional: override the tournament ID without editing the script.
+          # Set as a Repository variable (not secret) under Settings → Variables → Actions.
+          METAC_TOURNAMENT_ID: ${{ vars.METAC_TOURNAMENT_ID }}
+
+      - name: Commit forecast results for dedup
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tournament_batches/
+          git diff --cached --quiet && echo "No new results to commit." || (
+            git commit -m "chore: tournament forecast results [skip ci]" &&
+            git push
+          )
