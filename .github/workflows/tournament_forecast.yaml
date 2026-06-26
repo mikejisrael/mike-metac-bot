@@ -3,7 +3,7 @@ name: Tournament Forecast (tournament_forecast.py)
 on:
   workflow_dispatch:  # manual trigger from GitHub UI
   schedule:
-    - cron: "*/30 * * * *"  # every 30 minutes — questions can close in 90 min
+    - cron: "7,37 * * * *"  # every 30 minutes — questions can close in 90 min
 
 # Prevent overlapping runs (queue rather than cancel, since submissions are stateful)
 concurrency:
