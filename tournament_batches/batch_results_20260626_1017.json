@@ -1,0 +1,15 @@
+{
+  "q_44186": {
+    "question_id": 44186,
+    "question_text": "How many songs will Michael Jackson have on the Spotify Top 30 in the final full week of July?",
+    "question_type": "multiple_choice",
+    "status": "success",
+    "submitted_forecast": {
+      "Zero": 0.05000000000000001,
+      "One": 0.25000000000000006,
+      "Two": 0.4000000000000001,
+      "Three": 0.22000000000000003,
+      "More than three": 0.08000000000000002
+    }
+  }
+}
