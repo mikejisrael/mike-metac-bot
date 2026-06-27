@@ -24,8 +24,7 @@ endpoint requires. They are NOT always the same number.
 --single asks you for what you actually have (the URL / post id), fetches it
 through MetaculusClient.get_question_by_post_id (the one library method that
 is genuinely post-id-based), then reads the real id_of_question back off the
-fetched question object for the actual submission — so there's no guessing
-or title-matching involved for this path.
+fetched question object for the actual submission.
 (The older fetch_question_by_id() below, used only by --submit/--check for
 re-fetching STALE/CLOSING_SOON questions from local history, still keys off
 the stored "question_id" value against the /api2/questions/{id}/ endpoint.
@@ -36,6 +35,25 @@ mismatches and skips them, which is most likely the real explanation behind
 at least some of the "ID likely recycled" messages seen in the past — not
 necessarily actual ID recycling. Flagging this here rather than fixing it
 now since it's a separate, larger cleanup from the --single feature.)
+
+IMPORTANT — --single always authenticates as your PERSONAL account
+(mike_iz_, via METACULUS_TOKEN), never the bot's METAC_TOURNAMENT_TOKEN.
+This is deliberate and different from the rest of this file: the
+"significant change in Community Prediction" emails this flag is built for
+are about YOUR predictions specifically, not the bot's separate, unrelated
+forecasting history on the same questions. Using the wrong token here would
+silently show/refresh the wrong account's forecast.
+
+IMPORTANT — community prediction & your last forecast, fetched live:
+get_question_by_post_id() doesn't request question aggregations, and (a real
+quirk in the forecasting_tools library itself) that also blanks out your own
+forecast history even when the API actually returned it, because both are
+parsed in one shared try/except block. --single works around this with its
+own direct call to the same legacy api2 detail endpoint already proven
+reliable elsewhere in this codebase (update_community_predictions, the old
+fetch_question_by_id) — matched by POST id, authenticated as mike_iz_,
+parsing community prediction and your own forecast history independently so
+one being missing doesn't blank the other.
 """
 
 import asyncio
@@ -47,6 +65,7 @@ from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 import anthropic
 import aiohttp
+import requests
 
 load_dotenv()
 
@@ -60,12 +79,20 @@ client_anthropic = anthropic.Anthropic()
 # Metaculus support for general use, not just tournaments). Falls back to
 # METACULUS_TOKEN if METAC_TOURNAMENT_TOKEN isn't set, so this doesn't break
 # if .env hasn't been updated yet.
+# NOTE: this is used by the BATCH/REFRESH paths (--submit/--check/main), which
+# legitimately run as the bot. --single deliberately does NOT use this — see
+# personal_client below and the module docstring.
 ACTIVE_TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN") or os.getenv("METACULUS_TOKEN")
 if os.getenv("METAC_TOURNAMENT_TOKEN"):
     print("Auth: using METAC_TOURNAMENT_TOKEN (mike_iz_-bot)")
 else:
     print("Auth: METAC_TOURNAMENT_TOKEN not set — falling back to METACULUS_TOKEN (mike_iz_)")
 client_metaculus = MetaculusClient(token=ACTIVE_TOKEN)
+
+# --single always acts as the PERSONAL account specifically — see module
+# docstring for why this is intentionally separate from ACTIVE_TOKEN above.
+PERSONAL_TOKEN = os.getenv("METACULUS_TOKEN")
+personal_client = MetaculusClient(token=PERSONAL_TOKEN) if PERSONAL_TOKEN else None
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 MODEL = "claude-haiku-4-5"
@@ -634,10 +661,10 @@ def _save_single_result(
 ):
     """Write a one-entry batch_jobs/batch_results pair in the same schema the
     rest of the codebase uses, so the dashboard and future refresh-eligibility
-    scans pick this up automatically. Also records post_id alongside
-    question_id — existing history doesn't have post_id on file, but every
-    new entry from here on will, narrowing the gap described in this file's
-    module docstring."""
+    scans pick this up automatically. Records post_id AND account alongside
+    question_id — existing history has neither, but every new entry from
+    here on will, so future --single lookups can tell at a glance whether a
+    locally-found forecast was actually yours or the bot's."""
     ensure_batch_dir()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     custom_id = f"single_{q_id}_{timestamp}"
@@ -646,6 +673,7 @@ def _save_single_result(
         "batch_id": custom_id,
         "submitted_at": datetime.now().isoformat(),
         "batch_type": "single",
+        "account": "personal",  # --single always submits as mike_iz_ — see module docstring
         "num_requests": 1,
         "question_ids": {custom_id: q_id},
         "post_ids": {custom_id: post_id},
@@ -668,6 +696,7 @@ def _save_single_result(
         custom_id: {
             "question_id": q_id,
             "post_id": post_id,
+            "account": "personal",
             "question_text": question.question_text,
             "question_type": "binary",
             "probability": prob,
@@ -685,21 +714,89 @@ def _save_single_result(
     print(f"  Saved to {results_file}")
 
 
+def fetch_live_personal_context(
+    post_id: int, expected_title: str
+) -> tuple[float | None, str | None, float | None]:
+    """Direct GET against the legacy api2 detail endpoint (matched by POST id
+    — see module docstring), authenticated as the PERSONAL account, to pull
+    two things get_question_by_post_id doesn't reliably surface: your own
+    last forecast on this question, and the current community prediction.
+    Parsed independently (separate try/except each) so one being missing
+    doesn't blank the other — unlike the forecasting_tools library's own
+    bundled property, which shares one try/except for both.
+    Returns (my_last_prob, my_last_forecast_timestamp_iso, community_pred)."""
+    if not PERSONAL_TOKEN:
+        return None, None, None
+    try:
+        url = f"https://www.metaculus.com/api2/questions/{post_id}/"
+        resp = requests.get(
+            url, headers={"Authorization": f"Token {PERSONAL_TOKEN}"}, timeout=20
+        )
+        if resp.status_code != 200:
+            print(f"    (live personal-context fetch: HTTP {resp.status_code})")
+            return None, None, None
+        data = resp.json()
+        fetched_title = data.get("title") or (data.get("question") or {}).get("title") or ""
+        if expected_title and not titles_match(expected_title, fetched_title):
+            print(f"    ⚠️  api2 lookup for post {post_id} returned a different title — "
+                  f"skipping live personal-context (proceeding without it).")
+            print(f"       Expected: {expected_title[:90]}")
+            print(f"       Got:      {fetched_title[:90]}")
+            return None, None, None
+        q = data.get("question", {})
+
+        my_prob = my_ts = None
+        try:
+            history = q["my_forecasts"]["history"]
+            if history:
+                latest = history[-1]
+                my_prob = latest["forecast_values"][1]
+                my_ts = datetime.fromtimestamp(
+                    latest["start_time"], tz=timezone.utc
+                ).isoformat()
+        except (KeyError, TypeError, IndexError):
+            pass
+
+        cp = None
+        try:
+            agg = q["aggregations"]["recency_weighted"]["latest"]
+            centers = agg.get("centers", [])
+            cp = centers[1] if len(centers) > 1 else (centers[0] if centers else None)
+        except (KeyError, TypeError, IndexError):
+            pass
+
+        return my_prob, my_ts, cp
+    except Exception as e:
+        print(f"    (live personal-context fetch failed: {e})")
+        return None, None, None
+
+
 def run_single():
     """python meta_refresh_forecast.py --single
     Prompts for a Metaculus URL or post ID, fetches it via the post-id-based
-    get_question_by_post_id, shows your last forecast (if any) next to the
-    current community prediction, gets a fresh forecast from Claude
-    synchronously, confirms, then submits."""
+    get_question_by_post_id AS YOUR PERSONAL ACCOUNT (mike_iz_ — see module
+    docstring for why this is deliberately not the bot token), shows your
+    real last forecast on this question next to the current community
+    prediction, gets a fresh forecast from Claude synchronously, confirms,
+    then submits."""
+    if personal_client is None:
+        print("  ❌ METACULUS_TOKEN not set in .env — --single needs your PERSONAL "
+              "account's token specifically (these refresh emails are about mike_iz_'s "
+              "own predictions, not the bot's).")
+        return
+
+    print("Auth: --single acts as mike_iz_ (personal) via METACULUS_TOKEN — "
+          "not mike_iz_-bot, even if METAC_TOURNAMENT_TOKEN is also set.")
+
     raw = input("Paste the Metaculus question URL or post ID: ").strip()
     post_id = parse_post_id(raw)
     if post_id is None:
         print(f"Could not find a post ID in '{raw}'. Paste the full URL or just the numeric ID.")
         return
 
-    print(f"Fetching post {post_id} from Metaculus...")
+    print(f"Fetching post {post_id} from Metaculus (as mike_iz_)...")
     try:
-        result = client_metaculus.get_question_by_post_id(post_id)
+        result = personal_client.get_question_by_post_id(post_id)
     except Exception as e:
         print(f"  ❌ Could not fetch post {post_id}: {e}")
         return
@@ -715,17 +812,28 @@ def run_single():
     print(f"  Found: {question.question_text}")
     print(f"  (post id {confirmed_post_id} -> question id {q_id})")
 
-    all_forecasts = load_all_batches()
-    prior = [
-        f for f in all_forecasts
-        if f["question_id"] == q_id and f.get("probability") is not None
-    ]
-    prior.sort(key=lambda f: f.get("submitted_at") or "", reverse=True)
-    original_prob = prior[0]["probability"] if prior else None
+    my_prob, my_ts, cp = fetch_live_personal_context(confirmed_post_id, question.question_text)
+    question.community_prediction_at_access_time = cp  # used by build_refresh_prompt below
 
-    cp = getattr(question, "community_prediction_at_access_time", None)
+    original_prob = my_prob
+    source = "live (mike_iz_'s own forecast history)"
+    if original_prob is None:
+        # Fall back to local batch history — but that only ever contains
+        # BOT-submitted forecasts (your own manual predictions made via the
+        # website are never logged locally), and now title-checked, which
+        # the original version of this fallback was missing.
+        all_forecasts = load_all_batches()
+        prior = [
+            f for f in all_forecasts
+            if f["question_id"] == q_id and f.get("probability") is not None
+            and titles_match(f.get("question_text", ""), question.question_text)
+        ]
+        prior.sort(key=lambda f: f.get("submitted_at") or "", reverse=True)
+        original_prob = prior[0]["probability"] if prior else None
+        source = "local file — likely the BOT's forecast, not yours" if original_prob is not None else None
+
     print(f"  Your last forecast on file: "
-          f"{f'{original_prob:.0%}' if original_prob is not None else 'none found'}")
+          f"{f'{original_prob:.0%} ({source})' if original_prob is not None else 'none found'}")
     print(f"  Current community prediction: "
           f"{f'{cp:.0%}' if cp is not None else 'hidden/unavailable'}")
 
@@ -765,16 +873,16 @@ def run_single():
         change_str = f" ({'+' if change >= 0 else ''}{change}pt vs your last forecast of {original_prob:.0%})"
 
     print(f"\n  New forecast: {prob:.0%}{change_str}")
-    confirm = input("  Submit this to Metaculus? [Y/n]: ").strip().lower()
+    confirm = input("  Submit this to Metaculus (as mike_iz_)? [Y/n]: ").strip().lower()
     if confirm == "n":
         print("  Cancelled — nothing submitted.")
         return
 
     try:
-        client_metaculus.post_binary_question_prediction(
+        personal_client.post_binary_question_prediction(
             question_id=q_id, prediction_in_decimal=prob
         )
-        print(f"  ✅ Submitted {prob:.0%} on question {q_id} (post {confirmed_post_id})")
+        print(f"  ✅ Submitted {prob:.0%} on question {q_id} (post {confirmed_post_id}) as mike_iz_")
     except Exception as e:
         print(f"  ❌ Submission failed: {e}")
         return
