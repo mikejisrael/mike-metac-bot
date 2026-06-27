@@ -714,6 +714,43 @@ def _save_single_result(
     print(f"  Saved to {results_file}")
 
 
+def _latest_centers(agg_bucket) -> list | None:
+    """Given one aggregation bucket (e.g. aggregations['recency_weighted']),
+    return its centers list — preferring the 'latest' snapshot, falling back
+    to the most recent entry in 'history' when 'latest' is null. Confirmed in
+    practice: Metaculus doesn't always keep 'latest' populated even when the
+    community prediction is known and shown elsewhere (e.g. email alerts)."""
+    if not isinstance(agg_bucket, dict):
+        return None
+    latest = agg_bucket.get("latest")
+    if isinstance(latest, dict):
+        centers = latest.get("centers")
+        if isinstance(centers, list) and centers:
+            return centers
+    history = agg_bucket.get("history")
+    if isinstance(history, list) and history:
+        last_entry = history[-1]
+        if isinstance(last_entry, dict):
+            centers = last_entry.get("centers")
+            if isinstance(centers, list) and centers:
+                return centers
+    return None
+
+
+def _safe_dig(d, *keys):
+    """Walk a chain of dict keys, returning None the moment anything along
+    the way isn't a dict — including when a key is PRESENT but explicitly
+    null (Metaculus does this, e.g. "latest": null rather than omitting the
+    key), which plain chained .get() calls don't protect against: .get()
+    only supplies a default for a MISSING key, not a present-but-None one,
+    so the next .get() in the chain throws AttributeError on None."""
+    for k in keys:
+        if not isinstance(d, dict):
+            return None
+        d = d.get(k)
+    return d
+
+
 def fetch_live_personal_context(
     post_id: int, expected_title: str
 ) -> tuple[float | None, str | None, float | None]:
@@ -721,10 +758,9 @@ def fetch_live_personal_context(
     — see module docstring), authenticated as the PERSONAL account, to pull
     two things get_question_by_post_id doesn't reliably surface: your own
     last forecast on this question, and the current community prediction.
-    Parsed independently (separate try/except each) so one being missing
-    doesn't blank the other — unlike the forecasting_tools library's own
-    bundled property, which shares one try/except for both.
-    Returns (my_last_prob, my_last_forecast_timestamp_iso, community_pred)."""
+    Parsed independently via _safe_dig (not chained .get()/bracket access)
+    so a present-but-null value anywhere in either chain can't throw and
+    take the other one down with it."""
     if not PERSONAL_TOKEN:
         return None, None, None
     try:
@@ -736,34 +772,48 @@ def fetch_live_personal_context(
             print(f"    (live personal-context fetch: HTTP {resp.status_code})")
             return None, None, None
         data = resp.json()
-        fetched_title = data.get("title") or (data.get("question") or {}).get("title") or ""
+        if not isinstance(data, dict):
+            print(f"    (live personal-context fetch: unexpected response shape "
+                  f"{type(data).__name__}, raw: {resp.text[:200]!r})")
+            return None, None, None
+
+        fetched_title = data.get("title") or _safe_dig(data, "question", "title") or ""
         if expected_title and not titles_match(expected_title, fetched_title):
             print(f"    ⚠️  api2 lookup for post {post_id} returned a different title — "
                   f"skipping live personal-context (proceeding without it).")
             print(f"       Expected: {expected_title[:90]}")
             print(f"       Got:      {fetched_title[:90]}")
             return None, None, None
-        q = data.get("question", {})
 
         my_prob = my_ts = None
-        try:
-            history = q["my_forecasts"]["history"]
-            if history:
-                latest = history[-1]
-                my_prob = latest["forecast_values"][1]
-                my_ts = datetime.fromtimestamp(
-                    latest["start_time"], tz=timezone.utc
-                ).isoformat()
-        except (KeyError, TypeError, IndexError):
-            pass
+        history = _safe_dig(data, "question", "my_forecasts", "history")
+        if history:
+            latest = history[-1] if isinstance(history, list) else None
+            if isinstance(latest, dict):
+                values = latest.get("forecast_values")
+                if isinstance(values, list) and len(values) > 1:
+                    my_prob = values[1]
+                start_time = latest.get("start_time")
+                if start_time is not None:
+                    try:
+                        my_ts = datetime.fromtimestamp(start_time, tz=timezone.utc).isoformat()
+                    except (TypeError, ValueError, OSError):
+                        pass
 
         cp = None
-        try:
-            agg = q["aggregations"]["recency_weighted"]["latest"]
-            centers = agg.get("centers", [])
-            cp = centers[1] if len(centers) > 1 else (centers[0] if centers else None)
-        except (KeyError, TypeError, IndexError):
-            pass
+        rw_bucket = _safe_dig(data, "question", "aggregations", "recency_weighted")
+        centers = _latest_centers(rw_bucket)
+        if not centers:
+            uw_bucket = _safe_dig(data, "question", "aggregations", "unweighted")
+            centers = _latest_centers(uw_bucket)
+        if centers:
+            cp = centers[1] if len(centers) > 1 else centers[0]
+
+        # Note: recency_weighted (and unweighted) sometimes comes back fully
+        # null across history/latest/score_data/movement for a given
+        # question via this endpoint — confirmed in practice, not a parsing
+        # bug. When that happens cp is genuinely unavailable; the prompt
+        # just proceeds without community-prediction context.
 
         return my_prob, my_ts, cp
     except Exception as e:
