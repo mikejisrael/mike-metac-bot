@@ -14,8 +14,8 @@ BATCH_DIR = "Meta batches"
 
 # ─── File registry ─────────────────────────────────────────────────────────────
 METACULUS_FILES = [
-    ("batch_forecast.py",           "Main batch forecasting script"),
-    ("refresh_forecasts.py",        "Re-forecast closing-soon / stale questions"),
+    ("meta_batch_forecast.py",      "Main batch forecasting script"),
+    ("meta_refresh_forecast.py",    "Re-forecast closing-soon / stale questions"),
     ("export_forecasts.py",         "Export forecasts to CSV"),
     ("show_reasoning.py",           "Display bot reasoning for a question ID"),
     ("meta_status.py",              "This status dashboard"),
@@ -273,17 +273,18 @@ def main():
         for q in closing:
             prob_str = f"{q['probability']:.0%}" if q['probability'] is not None else " n/a"
             print(f"  [{q['days_left']:>2}d] {prob_str:>4}  Q{q['question_id']}  {q['question_text']}")
-        print(f"\n  ⚡ Run: python refresh_forecasts.py --submit  to refresh these")
+        print(f"\n  ⚡ Run: python meta_refresh_forecast.py --submit  to refresh these")
 
     # Quick commands
     print(f"\n{'─'*70}")
     print(f"  QUICK COMMANDS")
     print(f"{'─'*70}")
-    print(f"  python batch_forecast.py              # submit new batch of 50")
-    print(f"  python batch_forecast.py --check      # retrieve completed batch")
-    print(f"  python refresh_forecasts.py           # dry run — see what needs refresh")
-    print(f"  python refresh_forecasts.py --submit  # submit refresh batch")
-    print(f"  python refresh_forecasts.py --check   # retrieve refresh results")
+    print(f"  python meta_batch_forecast.py              # submit new batch of 50")
+    print(f"  python meta_batch_forecast.py --check      # retrieve completed batch")
+    print(f"  python meta_refresh_forecast.py           # dry run — see what needs refresh")
+    print(f"  python meta_refresh_forecast.py --submit  # submit refresh batch")
+    print(f"  python meta_refresh_forecast.py --check   # retrieve refresh results")
+    print(f"  python meta_refresh_forecast.py --single  # refresh one question now, by URL/post ID")
     print(f"  python show_reasoning.py <id>         # show bot reasoning for question")
     print(f"  python meta_status.py                 # this dashboard")
     print(f"\n{'='*70}\n")

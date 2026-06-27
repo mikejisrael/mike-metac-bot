@@ -5,12 +5,12 @@ Metaculus question IDs are not guaranteed stable indefinitely: an ID can end
 up referring to a different question than the one you originally stored it
 against (confirmed by querying the old /api2/questions/?ids= list-filter
 with a nonsense ID and getting back an unrelated real question instead of an
-empty result — see refresh_forecasts.py's fetch_question_by_id for the full
+empty result — see meta_refresh_forecast.py's fetch_question_by_id for the full
 story). Any code that matches a stored question_id against a freshly fetched
 question should run that match through titles_match() before treating it as
 the same question.
 
-Used by: batch_forecast.py, tournament_forecast.py, refresh_forecasts.py.
+Used by: meta_batch_forecast.py, tournament_forecast.py, meta_refresh_forecast.py.
 Keep this file as the single source of truth — don't re-copy the function
 body into individual scripts again.
 """

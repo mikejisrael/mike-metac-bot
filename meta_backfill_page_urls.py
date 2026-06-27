@@ -4,7 +4,7 @@ batch_results files so show_reasoning links resolve instead of 404-ing.
 
 IMPORTANT FINDING: the api2 `?ids=<question_id>` filter is IGNORED by the
 endpoint — it returns the newest feed question regardless of the id passed.
-(fetch_question_by_id in refresh_forecasts.py uses that same broken query.)
+(fetch_question_by_id in meta_refresh_forecast.py uses that same broken query.)
 
 So this script does NOT filter. It pages through the posts feed, where each
 post has a top-level `id` (the POST id, used in the URL) and a nested

@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import anthropic
-import batch_forecast as bf
+import meta_batch_forecast as bf
 from forecasting_tools import (
     MetaculusApi, MetaculusClient,
     BinaryQuestion, NumericQuestion, MultipleChoiceQuestion
@@ -42,7 +42,7 @@ MAX_TOKENS           = 2000
 # ─── Clients ──────────────────────────────────────────────────────────────────
 client_anthropic = anthropic.Anthropic()
 # Tournament submissions should authenticate as the dedicated bot account
-# (mike_iz_-bot), not the shared personal-account token batch_forecast.py
+# (mike_iz_-bot), not the shared personal-account token meta_batch_forecast.py
 # uses. Set METAC_TOURNAMENT_TOKEN in .env once mike_iz_-bot's own API token
 # is generated; falls back to METACULUS_TOKEN so this doesn't silently break
 # before that's set up.
@@ -53,7 +53,7 @@ else:
     print("Auth: METAC_TOURNAMENT_TOKEN not set — falling back to shared METACULUS_TOKEN (mike_iz_)")
 client_metaculus = MetaculusClient(token=TOURNAMENT_TOKEN)
 
-# ─── Redirect batch_forecast's namespace (keeps dedup isolated) ───────────────
+# ─── Redirect meta_batch_forecast's namespace (keeps dedup isolated) ─────────
 bf.BATCH_DIR    = TOURNAMENT_BATCH_DIR
 bf.BATCH_FILE   = os.path.join(TOURNAMENT_BATCH_DIR, "batch_jobs.json")
 bf.RESULTS_FILE = os.path.join(TOURNAMENT_BATCH_DIR, "batch_results.json")

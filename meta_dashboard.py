@@ -4,36 +4,58 @@ mirroring the bybit_sim.py / bybit_dashboard.py pattern: a small local Flask
 app that collates everything in one page instead of clicking through
 Metaculus's own UI question-by-question.
 
-IMPORTANT CAVEAT — read this before assuming the live score numbers are
-exact: I built the live-score lookup (fetch_question_live / extract_score_info
-below) without being able to authenticate against the real Metaculus API from
-my environment, so the exact field names Metaculus uses for an individual
-forecaster's peer/baseline score on a resolved question are a best-effort
-guess based on third-party docs, not a verified schema. Use the "raw" debug
-link next to each resolved question to see the actual JSON Metaculus returns
-— if extract_score_info() picked the wrong field, that raw view tells us
-exactly what to fix.
+ACCOUNTS — there ARE two real, separate Metaculus identities, confirmed by
+Metaculus staff and visible on both profile pages:
+  - mike_iz_       (personal account, user id 302314) — auth: METACULUS_TOKEN
+  - mike_iz_-bot   (dedicated bot account)             — auth: METAC_TOURNAMENT_TOKEN
+A single client/token can only ever authenticate as ONE of these, so the
+dashboard now builds one MetaculusClient per token and renders a separate
+tab per account instead of merging everything under one label.
 
 Two data sources, combined differently per profile:
   - BOT profile:      local batch_results_*.json (tournament_batches/ and
                        "Meta batches/") for question text/type/status/the
                        actual submitted forecast, ENRICHED with a live
-                       per-question lookup for resolution + score once
-                       available.
-  - PERSONAL profile:  live API only (?guessed_by=<your user id>) — there's
-                       no local log of your own manual predictions, so this
+                       per-question lookup for resolution + score.
+  - PERSONAL profile: live API only (is_previously_forecasted_by_user) —
+                       there's no local log of manual predictions, so this
                        tab is entirely Metaculus-API-driven.
+
+PREDICTED vs SCORED — "questions predicted" and "questions scored" are NOT
+the same population, and the gap between them isn't one mystery bucket.
+Every predicted question lands in exactly one of:
+  - Open            — not yet closed/resolved
+  - Resolved+Scored — resolved AND has a peer score (this is what Metaculus's
+                       own "questions scored" stat counts)
+  - Resolved, no score — resolved but Annulled/Ambiguous (Metaculus does not
+                       score these — see metaculus.com/faq), or scored but
+                       not yet reflected in the API
+  - Not found live  — no longer appears in this account's live
+                       "previously forecasted" list at all, almost always
+                       because the forecast was withdrawn before close
+The dashboard now computes and displays all four buckets per account instead
+of lumping everything not currently "open" into one "withdrawn" pile.
+
+IMPORTANT CAVEAT — read this before assuming the live score numbers are
+exact: the live-score lookup (fetch_my_predicted_questions / extract_score_info
+below) was built without being able to authenticate against the real
+Metaculus API from my dev environment, so exact field names for an
+individual forecaster's peer/baseline score on a resolved question are a
+best-effort guess based on third-party docs, not a verified schema. Use the
+"raw" debug link next to each resolved question to see the actual JSON
+Metaculus returns — if extract_score_info() picked the wrong field, that raw
+view tells us exactly what to fix.
 
 Run:
   python meta_dashboard.py
-Then open http://localhost:5002
+Then open http://localhost:5002  (?profile=personal or ?profile=bot, default personal)
 """
 
 import os
 import glob
 import json
 import asyncio
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template_string
 from dotenv import load_dotenv
 from forecasting_tools import MetaculusClient, ApiFilter
 
@@ -41,33 +63,51 @@ load_dotenv()
 
 app = Flask(__name__)
 
-METACULUS_TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN") or os.getenv("METACULUS_TOKEN")
-if os.getenv("METAC_TOURNAMENT_TOKEN"):
-    print("Auth: using METAC_TOURNAMENT_TOKEN (mike_iz_-bot)")
+# ─── Two accounts, two tokens, two clients ──────────────────────────────────
+PERSONAL_TOKEN = os.getenv("METACULUS_TOKEN")
+BOT_TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN")
+
+PERSONAL_USER_ID_FALLBACK = int(os.getenv("METAC_USER_ID", "302314"))  # display-only fallback
+
+personal_client = MetaculusClient(token=PERSONAL_TOKEN) if PERSONAL_TOKEN else None
+bot_client = MetaculusClient(token=BOT_TOKEN) if BOT_TOKEN else None
+
+if personal_client:
+    print("Personal client ready (mike_iz_) — METACULUS_TOKEN set")
 else:
-    print("Auth: METAC_TOURNAMENT_TOKEN not set — falling back to METACULUS_TOKEN (mike_iz_)")
+    print("⚠️  METACULUS_TOKEN not set — personal (mike_iz_) tab will be empty")
+if bot_client:
+    print("Bot client ready (mike_iz_-bot) — METAC_TOURNAMENT_TOKEN set")
+else:
+    print("⚠️  METAC_TOURNAMENT_TOKEN not set — bot (mike_iz_-bot) tab will be empty")
 
 TOURNAMENT_ID = os.getenv("METAC_TOURNAMENT_ID", "33022")
-
-# Confirmed via a Metaculus compliance email (549 API forecasts flagged on
-# this account): there is only ONE real account behind all the automation —
-# mike_iz_, 302314. The earlier "bot account 303026" was not a separate
-# posting identity; both local result folders and all live API activity
-# belong to this single account. No profile split needed unless/until a
-# genuinely separate account is registered for manual-only forecasting.
-ACCOUNT_USER_ID = int(os.getenv("METAC_USER_ID", "302314"))  # fallback display value only
-
-
-def get_confirmed_user_id() -> int:
-    """Ask the API directly which account this token actually belongs to,
-    rather than trusting a hardcoded guess. Falls back to ACCOUNT_USER_ID
-    only if the call itself fails (e.g. no network)."""
-    try:
-        return ft_client.get_current_user_id()
-    except Exception as e:
-        print(f"  get_confirmed_user_id failed, falling back to configured default: {e}")
-        return ACCOUNT_USER_ID
 LOCAL_RESULT_DIRS = ["tournament_batches", "Meta batches"]
+
+ACCOUNTS = {
+    "personal": {
+        "label": "mike_iz_ (personal)",
+        "client": personal_client,
+        "local_dirs": [],  # no local logs for manual personal forecasts
+    },
+    "bot": {
+        "label": "mike_iz_-bot",
+        "client": bot_client,
+        "local_dirs": LOCAL_RESULT_DIRS,
+    },
+}
+
+
+def get_confirmed_user_id(client) -> int | None:
+    """Ask the API directly which account this token belongs to, rather
+    than trusting a hardcoded guess."""
+    if client is None:
+        return None
+    try:
+        return client.get_current_user_id()
+    except Exception as e:
+        print(f"  get_confirmed_user_id failed: {e}")
+        return None
 
 
 def load_local_results(dirs: list[str]) -> dict[int, dict]:
@@ -99,57 +139,60 @@ def load_local_results(dirs: list[str]) -> dict[int, dict]:
     return by_qid
 
 
-# ─── Live Metaculus API ─────────────────────────────────────────────────────
-# ─── Live Metaculus API ─────────────────────────────────────────────────────
-# Using forecasting_tools' own MetaculusClient + ApiFilter rather than the
-# guessed_by list-filter trick from earlier — that trick came from browser
-# bookmarklets relying on cookie/session auth, and returned a genuine 403
-# when used with Token auth from this account. is_previously_forecasted_by_user
-# is a real, documented ApiFilter field, and it's the same client class
-# batch_forecast.py already uses successfully for its own question fetching.
-ft_client = MetaculusClient(token=METACULUS_TOKEN)
-
-
-def fetch_my_predicted_questions() -> dict[int, dict]:
-    """All questions the authenticated account (whoever METACULUS_TOKEN
-    belongs to) has predicted on, keyed by question id. Returns each
-    question's raw api_json — same dict shape extract_score_info() already
-    expects, so no parsing changes needed downstream."""
-    try:
-        api_filter = ApiFilter(is_previously_forecasted_by_user=True)
-        questions = asyncio.run(
-            ft_client.get_questions_matching_filter(
-                api_filter, num_questions=1000, error_if_question_target_missed=False
-            )
-        )
-    except Exception as e:
-        print(f"  fetch_my_predicted_questions failed: {e}")
+def fetch_my_predicted_questions(client) -> dict[int, dict]:
+    """All questions this client's account has ever predicted on, keyed by
+    question id. Makes a default (no status filter) pass first, then a
+    second explicit allowed_statuses=['resolved'] pass merged in — belt-and-
+    suspenders against any resolved questions getting pushed off the
+    default -published_time-ordered page. Returns each question's raw
+    api_json — same dict shape extract_score_info() expects."""
+    if client is None:
         return {}
-    by_qid = {q.id_of_question: q.api_json for q in questions}
-    print(f"  fetch_my_predicted_questions: collected {len(by_qid)} questions")
+
+    by_qid: dict[int, dict] = {}
+
+    def _run(api_filter: ApiFilter) -> list:
+        try:
+            return asyncio.run(
+                client.get_questions_matching_filter(
+                    api_filter, num_questions=1000, error_if_question_target_missed=False
+                )
+            )
+        except Exception as e:
+            print(f"  fetch_my_predicted_questions pass failed: {e}")
+            return []
+
+    default_pass = _run(ApiFilter(is_previously_forecasted_by_user=True))
+    for q in default_pass:
+        by_qid[q.id_of_question] = q.api_json
+
+    resolved_pass = _run(
+        ApiFilter(is_previously_forecasted_by_user=True, allowed_statuses=["resolved"])
+    )
+    for q in resolved_pass:
+        by_qid.setdefault(q.id_of_question, q.api_json)
+
+    print(f"  fetch_my_predicted_questions: {len(default_pass)} default + "
+          f"{len(resolved_pass)} resolved-pass -> {len(by_qid)} unique questions")
     return by_qid
-
-
-
 
 
 def extract_score_info(raw: dict) -> dict:
     """Extraction based on the confirmed real schema (seen via /raw debug
     output): top-level 'resolved' bool and 'status', nested question.resolution,
     and an individual forecaster's score living under question.my_forecasts
-    (which is only populated for whichever account METACULUS_TOKEN
-    authenticates as — this will be empty for the personal-account tab
-    unless a second token for that account is configured)."""
+    (only populated for whichever account the calling client authenticates as)."""
     info = {"resolved": False, "resolution": None, "peer_score": None,
-            "baseline_score": None, "close_time": None, "title": None}
+            "baseline_score": None, "close_time": None, "title": None,
+            "status": None}
     if not raw or "_error" in raw:
         return info
 
     q = raw.get("question", raw)
     info["title"] = raw.get("title") or q.get("title")
     info["close_time"] = raw.get("scheduled_close_time") or q.get("scheduled_close_time")
-    # Top-level 'resolved' is the authoritative flag where present; fall back
-    # to "does the nested question have a non-null resolution" otherwise.
+    info["status"] = raw.get("status") or q.get("status")
+
     if "resolved" in raw:
         info["resolved"] = bool(raw["resolved"])
     else:
@@ -196,7 +239,7 @@ def extract_score_info(raw: dict) -> dict:
 
 def summarize_forecast(q_type: str, forecast) -> str:
     """Short human-readable summary of a submitted_forecast value for the
-    table — same shapes tournament_forecast.py now logs."""
+    table — same shapes tournament_forecast.py logs."""
     if forecast is None:
         return "—"
     try:
@@ -207,9 +250,6 @@ def summarize_forecast(q_type: str, forecast) -> str:
             frac = idx / (len(forecast) - 1) if len(forecast) > 1 else 0.5
             return f"median≈{frac:.0%} through range"
         if q_type == "numeric" and isinstance(forecast, (int, float)):
-            # Older entries (e.g. Q44150, corrected via a one-off resubmit
-            # script before the full-CDF audit trail existed) only ever
-            # logged the median value itself, not the full distribution.
             return f"median≈{forecast:,.0f}"
         if q_type == "multiple_choice" and isinstance(forecast, dict):
             top = max(forecast, key=forecast.get)
@@ -219,14 +259,30 @@ def summarize_forecast(q_type: str, forecast) -> str:
     return str(forecast)[:60]
 
 
-# ─── Page assembly ──────────────────────────────────────────────────────────
-def build_profile_data(local_dirs: list[str], profile_name: str) -> dict:
-    local = load_local_results(local_dirs)
-    live_by_qid = fetch_my_predicted_questions()
-    rows = []
+# Resolutions Metaculus does not score, per their FAQ (annulled / ambiguous).
+UNSCORED_RESOLUTIONS = {"annulled", "ambiguous"}
 
-    # Local-first: every locally-logged question, enriched with live data if found
+
+def classify_bucket(row: dict) -> str:
+    """One of: open / resolved_scored / resolved_unscored / not_found_live."""
+    if not row["live_match_found"]:
+        return "not_found_live"
+    if not row["resolved"]:
+        return "open"
+    if row["peer_score"] is not None:
+        return "resolved_scored"
+    return "resolved_unscored"
+
+
+# ─── Page assembly ──────────────────────────────────────────────────────────
+def build_profile_data(account_key: str) -> dict:
+    account = ACCOUNTS[account_key]
+    client = account["client"]
+    local = load_local_results(account["local_dirs"]) if account["local_dirs"] else {}
+    live_by_qid = fetch_my_predicted_questions(client)
+    rows = []
     seen_qids = set()
+
     for qid, r in sorted(local.items(), key=lambda kv: kv[0], reverse=True):
         post = live_by_qid.get(qid)
         score = extract_score_info(post) if post else extract_score_info(None)
@@ -248,9 +304,8 @@ def build_profile_data(local_dirs: list[str], profile_name: str) -> dict:
         })
         seen_qids.add(qid)
 
-    # Anything this account predicted on live but with no local record at all
-    # (e.g. predictions made before logging existed, or made manually).
-    # Can't reliably tell tournament vs general for these — default general.
+    # Anything this account predicted on live with no local record at all
+    # (manual predictions, or predictions made before logging existed).
     for qid, post in live_by_qid.items():
         if qid in seen_qids:
             continue
@@ -269,8 +324,37 @@ def build_profile_data(local_dirs: list[str], profile_name: str) -> dict:
             "category": "general",
         })
 
+    for row in rows:
+        row["bucket"] = classify_bucket(row)
+
     rows.sort(key=lambda r: r["question_id"], reverse=True)
-    return {"rows": rows, "profile": profile_name}
+
+    buckets = {
+        "open": [r for r in rows if r["bucket"] == "open"],
+        "resolved_scored": [r for r in rows if r["bucket"] == "resolved_scored"],
+        "resolved_unscored": [r for r in rows if r["bucket"] == "resolved_unscored"],
+        "not_found_live": [r for r in rows if r["bucket"] == "not_found_live"],
+    }
+    avg_score = (
+        sum(r["peer_score"] for r in buckets["resolved_scored"])
+        / len(buckets["resolved_scored"])
+    ) if buckets["resolved_scored"] else None
+
+    chart_points = [
+        {"x": r["close_time"], "y": r["peer_score"]}
+        for r in buckets["resolved_scored"] if r["close_time"]
+    ]
+
+    return {
+        "rows": rows,
+        "buckets": buckets,
+        "avg_score": avg_score,
+        "chart_points": chart_points,
+        "total_predicted": len(rows),
+        "user_id": get_confirmed_user_id(client),
+        "label": account["label"],
+        "token_configured": client is not None,
+    }
 
 
 # ─── Routes ─────────────────────────────────────────────────────────────────
@@ -292,7 +376,7 @@ PAGE_TEMPLATE = """
     .tabs a { padding: 8px 16px; border-radius: 6px; text-decoration: none; color: #333;
               background: #e8e8ec; margin-right: 8px; font-size: 14px; }
     .tabs a.active { background: #2563eb; color: white; }
-    .cards { display: flex; gap: 16px; margin-bottom: 24px; }
+    .cards { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
     .card { background: white; border-radius: 8px; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08);
             min-width: 140px; }
     .card .label { font-size: 12px; color: #888; }
@@ -305,83 +389,98 @@ PAGE_TEMPLATE = """
     .pos { color: #16a34a; font-weight: 600; }
     .neg { color: #dc2626; font-weight: 600; }
     .muted { color: #999; }
-    .chart-wrap { background: white; border-radius: 8px; padding: 16px; margin-bottom: 24px;
-                  box-shadow: 0 1px 3px rgba(0,0,0,.08); height: 280px; }
+    .chart-wrap { background: white; border-radius: 8px; padding: 16px; margin-bottom: 8px;
+                  height: 280px; }
+    .chart-note { color: #999; font-size: 12px; margin: 0 0 24px; }
     a.raw { font-size: 11px; color: #888; }
+    .bucket-explainer { color: #999; font-size: 12px; margin: -8px 0 20px; }
   </style>
 </head>
 <body>
   <h1>Metaculus Track Record</h1>
-  <div class="sub">Account: mike_iz_ ({{ user_id }}). All local result folders + live Metaculus scores, one account — confirmed there's no separate bot identity behind the automation.</div>
+  <div class="sub">
+    Account: {{ data.label }}{% if data.user_id %} (user id {{ data.user_id }}){% endif %}
+    {% if not data.token_configured %} — ⚠️ no token configured for this account in .env{% endif %}
+  </div>
+
+  <div class="tabs">
+    <a href="/?profile=personal" class="{{ 'active' if profile == 'personal' else '' }}">mike_iz_ (personal)</a>
+    <a href="/?profile=bot" class="{{ 'active' if profile == 'bot' else '' }}">mike_iz_-bot</a>
+  </div>
 
   <div class="cards">
-    <div class="card"><div class="label">Total questions</div><div class="value">{{ tournament_rows|length + general_rows|length + archived_rows|length }}</div></div>
-    <div class="card"><div class="label">Resolved</div><div class="value">{{ resolved_count }}</div></div>
+    <div class="card"><div class="label">Total predicted</div><div class="value">{{ data.total_predicted }}</div></div>
+    <div class="card"><div class="label">Open</div><div class="value">{{ data.buckets.open|length }}</div></div>
+    <div class="card"><div class="label">Resolved &amp; scored</div><div class="value">{{ data.buckets.resolved_scored|length }}</div></div>
+    <div class="card"><div class="label">Resolved, no score</div><div class="value">{{ data.buckets.resolved_unscored|length }}</div></div>
+    <div class="card"><div class="label">Withdrawn / not found live</div><div class="value">{{ data.buckets.not_found_live|length }}</div></div>
     <div class="card"><div class="label">Avg peer score</div>
-      <div class="value {{ 'pos' if avg_score and avg_score > 0 else ('neg' if avg_score and avg_score < 0 else '') }}">
-        {{ '%.2f'|format(avg_score) if avg_score is not none else '—' }}
+      <div class="value {{ 'pos' if data.avg_score and data.avg_score > 0 else ('neg' if data.avg_score and data.avg_score < 0 else '') }}">
+        {{ '%.2f'|format(data.avg_score) if data.avg_score is not none else '—' }}
       </div>
     </div>
   </div>
+  <p class="bucket-explainer">
+    Total predicted = Open + Resolved&amp;scored + Resolved,no score + Withdrawn/not found live.
+    "Resolved, no score" = Annulled/Ambiguous (Metaculus doesn't score these) or scoring not yet posted.
+    "Withdrawn / not found live" = no longer in this account's live forecasted-questions list at all.
+  </p>
 
   <div class="chart-wrap" id="chartWrap" style="display:none;"><canvas id="scoreChart"></canvas></div>
+  <p class="chart-note">X-axis = each question's <b>scheduled close date</b>, not the date you submitted a forecast.</p>
   <div id="noChartMsg" style="background:white;border-radius:8px;padding:24px;margin-bottom:24px;
        text-align:center;color:#999;box-shadow:0 1px 3px rgba(0,0,0,.08);">
     No resolved &amp; scored questions yet — the chart will appear once at least one shows a peer score.
   </div>
 
-  {% macro render_rows(rows, show_category=false) %}
+  {% macro render_rows(rows) %}
     {% for row in rows %}
     <tr>
       <td>{{ row.question_id }}</td>
       <td>{{ row.question_text[:70] }}</td>
       <td>{{ row.question_type or '—' }}</td>
       <td>{{ row.submitted_summary }}</td>
-      <td>{{ row.status }}</td>
       <td>{{ '✅' if row.resolved else '⏳' }}</td>
       <td>{{ row.resolution if row.resolution is not none else '—' }}</td>
       <td class="{{ 'pos' if row.peer_score and row.peer_score > 0 else ('neg' if row.peer_score and row.peer_score < 0 else 'muted') }}">
         {{ '%.2f'|format(row.peer_score) if row.peer_score is not none else (row.resolved and 'unknown field — check raw' or '—') }}
       </td>
-      {% if show_category %}<td>{{ row.category }}</td>{% endif %}
-      <td><a class="raw" href="/raw/{{ row.question_id }}" target="_blank">raw</a></td>
+      <td>{{ row.category }}</td>
+      <td><a class="raw" href="/raw/{{ profile }}/{{ row.question_id }}" target="_blank">raw</a></td>
     </tr>
     {% endfor %}
   {% endmacro %}
 
-  <h2 style="font-size:16px;margin:24px 0 10px;">🏆 Tournament questions ({{ tournament_rows|length }})</h2>
+  {% macro section(title, rows) %}
+  <h2 style="font-size:16px;margin:24px 0 10px;">{{ title }} ({{ rows|length }})</h2>
   <table>
     <tr>
-      <th>ID</th><th>Question</th><th>Type</th><th>Submitted</th><th>Status</th>
-      <th>Resolved?</th><th>Resolution</th><th>Peer score</th><th></th>
+      <th>ID</th><th>Question</th><th>Type</th><th>Submitted</th>
+      <th>Resolved?</th><th>Resolution</th><th>Peer score</th><th>Category</th><th></th>
     </tr>
-    {{ render_rows(tournament_rows) }}
+    {{ render_rows(rows) }}
   </table>
+  {% endmacro %}
 
-  <h2 style="font-size:16px;margin:24px 0 10px;">📋 General questions ({{ general_rows|length }})</h2>
-  <table>
-    <tr>
-      <th>ID</th><th>Question</th><th>Type</th><th>Submitted</th><th>Status</th>
-      <th>Resolved?</th><th>Resolution</th><th>Peer score</th><th></th>
-    </tr>
-    {{ render_rows(general_rows) }}
-  </table>
+  {{ section('⏳ Open', data.buckets.open) }}
+  {{ section('✅ Resolved &amp; scored', data.buckets.resolved_scored) }}
+  {{ section('🚫 Resolved, no score (annulled / ambiguous / pending)', data.buckets.resolved_unscored) }}
 
   <details style="margin-top:24px;">
     <summary style="font-size:16px;cursor:pointer;padding:8px 0;color:#666;">
-      🗄️ Withdrawn / no longer active ({{ archived_rows|length }}) — click to expand
+      🗄️ Withdrawn / not found live ({{ data.buckets.not_found_live|length }}) — click to expand
     </summary>
     <p style="color:#999;font-size:13px;margin:8px 0;">
-      These were successfully submitted at the time but no longer show up in this account's
-      currently-forecasted questions — almost always because they were withdrawn (e.g. during
-      the period auto-withdrawal was enabled on this account), not because anything failed.
+      Submitted at the time, but no longer present in this account's current live
+      "previously forecasted" list — most often because the forecast was withdrawn
+      before close.
     </p>
     <table>
       <tr>
-        <th>ID</th><th>Question</th><th>Type</th><th>Submitted</th><th>Status</th>
+        <th>ID</th><th>Question</th><th>Type</th><th>Submitted</th>
         <th>Resolved?</th><th>Resolution</th><th>Peer score</th><th>Category</th><th></th>
       </tr>
-      {{ render_rows(archived_rows, true) }}
+      {{ render_rows(data.buckets.not_found_live) }}
     </table>
   </details>
 
@@ -392,12 +491,16 @@ PAGE_TEMPLATE = """
       document.getElementById('noChartMsg').style.display = 'none';
       new Chart(document.getElementById('scoreChart'), {
         type: 'scatter',
-        data: { datasets: [{ label: 'Peer score (resolved questions)', data: points,
+        data: { datasets: [{ label: 'Peer score (resolved & scored questions)', data: points,
                               backgroundColor: '#2563eb' }] },
         options: {
           responsive: true, maintainAspectRatio: false,
           scales: {
-            x: { type: 'time', title: { display: true, text: 'Scheduled close time' } },
+            x: {
+              type: 'time',
+              time: { unit: 'day', tooltipFormat: 'MMM D, YYYY', displayFormats: { day: 'MMM D' } },
+              title: { display: true, text: 'Scheduled close date' }
+            },
             y: { title: { display: true, text: 'Peer score' } }
           }
         }
@@ -411,60 +514,35 @@ PAGE_TEMPLATE = """
 
 @app.route("/")
 def dashboard():
-    data = build_profile_data(LOCAL_RESULT_DIRS, "mike_iz_")
-    rows = data["rows"]
-
-    tournament_rows = [r for r in rows if r["category"] == "tournament" and r["live_match_found"]]
-    general_rows = [r for r in rows if r["category"] == "general" and r["live_match_found"]]
-    archived_rows = [r for r in rows if not r["live_match_found"]]
-
-    resolved_rows = [r for r in rows if r["resolved"]]
-    scored_rows = [r for r in resolved_rows if r["peer_score"] is not None]
-    avg_score = (sum(r["peer_score"] for r in scored_rows) / len(scored_rows)) if scored_rows else None
-
-    chart_points = [
-        {"x": r["close_time"], "y": r["peer_score"]}
-        for r in scored_rows if r["close_time"]
-    ]
-
-    # Diagnostic for the local-vs-live count gap: of the rows NOT found live,
-    # how many were locally marked "failed" to begin with? If that accounts
-    # for most of the gap, the explanation is mundane (failed submissions
-    # never existed on Metaculus's side). If most not-found rows are locally
-    # "success", the gap is more likely withdrawals.
-    not_found_rows = [r for r in rows if not r["live_match_found"]]
-    not_found_failed = sum(1 for r in not_found_rows if r["status"] == "failed")
-    not_found_success = sum(1 for r in not_found_rows if r["status"] == "success")
-    print(f"  Local-vs-live gap diagnostic: {len(not_found_rows)} not found live — "
-          f"{not_found_failed} were locally 'failed', {not_found_success} were locally "
-          f"'success' (these are the ones likely withdrawn, not failed)")
-
-    from flask import render_template_string
+    profile = request.args.get("profile", "personal")
+    if profile not in ACCOUNTS:
+        profile = "personal"
+    data = build_profile_data(profile)
     return render_template_string(
         PAGE_TEMPLATE,
-        tournament_rows=tournament_rows,
-        general_rows=general_rows,
-        archived_rows=archived_rows,
-        resolved_count=len(resolved_rows),
-        avg_score=avg_score,
-        chart_points=chart_points,
-        user_id=get_confirmed_user_id(),
+        data=data,
+        profile=profile,
+        chart_points=data["chart_points"],
     )
 
 
-@app.route("/raw/<int:question_id>")
-def raw(question_id):
-    posts = fetch_my_predicted_questions()
+@app.route("/raw/<profile>/<int:question_id>")
+def raw(profile, question_id):
+    if profile not in ACCOUNTS:
+        return jsonify({"_error": f"unknown profile '{profile}'"})
+    client = ACCOUNTS[profile]["client"]
+    posts = fetch_my_predicted_questions(client)
     if question_id in posts:
         return jsonify(posts[question_id])
-    return jsonify({"_error": f"Question id {question_id} not found among this account's "
-                              f"predicted questions. It may not have a forecast registered "
-                              f"yet under this token."})
+    return jsonify({"_error": f"Question id {question_id} not found among the {profile} "
+                              f"account's predicted questions. It may not have a forecast "
+                              f"registered yet under this token, or was withdrawn."})
 
 
 if __name__ == "__main__":
-    if not METACULUS_TOKEN:
-        print("⚠️  Neither METAC_TOURNAMENT_TOKEN nor METACULUS_TOKEN found in .env — live score lookups will fail.")
+    if not PERSONAL_TOKEN and not BOT_TOKEN:
+        print("⚠️  Neither METACULUS_TOKEN nor METAC_TOURNAMENT_TOKEN found in .env — "
+              "both tabs will be empty.")
     # use_reloader=False: the default reloader watches the whole working
     # directory recursively for .py changes, which includes venv312/ sitting
     # inside this same project folder — any package writing to its own files
