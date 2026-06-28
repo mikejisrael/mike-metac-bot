@@ -96,6 +96,15 @@ personal_client = MetaculusClient(token=PERSONAL_TOKEN) if PERSONAL_TOKEN else N
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 MODEL = "claude-haiku-4-5"
+# --single uses Sonnet instead of Haiku: it's a low-volume, manual,
+# synchronous path (cost is a non-issue here), and Haiku was confirmed to
+# confidently invent specific "verbatim" sourced claims (a fake/coincidental
+# Spring 2026 tournament precedent) across three separate runs on the same
+# question, despite an explicit anti-fabrication clause already present in
+# the system prompt. Sonnet is less prone to this failure mode. The batch
+# path (--submit/--check, main()) stays on Haiku/MODEL — unaffected by this
+# issue and changing it would have cost implications not yet opted into.
+SINGLE_MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 2000
 CLOSING_SOON_DAYS = 14
 STALE_DAYS = 30
@@ -121,13 +130,45 @@ def community_weight(days_remaining: float, total_days: float) -> float:
     return round(w, 2)
 
 
-def build_community_context(days_remaining: float, total_days: float, cp: float | None) -> str:
+def build_community_context(
+    days_remaining: float, total_days: float, cp: float | None,
+    has_live_data: bool = True,
+) -> str:
     """Return a prompt fragment instructing the model how much to weight the
-    community prediction, scaling with how close the question is to closing."""
+    community prediction, scaling with how close the question is to closing.
+
+    has_live_data: whether live_data.py actually returned anything for this
+    question (it only covers crypto/stock/index/FRED keywords — most
+    politics/sports/legal/geopolitics questions get nothing). Confirmed via
+    Console cost breakdown (Total web search cost: $0.00 for the full month)
+    that NO script in this pipeline has real web search/research wired in —
+    so for questions outside live_data's coverage, the model is reasoning
+    from a static, frozen-at-creation-time background text only. In that
+    case we anchor hard to the community prediction regardless of how much
+    time is left, since CP reflects real people reacting to real current
+    events the model cannot see at all.
+    """
     if cp is None:
         return ""
-    w = community_weight(days_remaining, total_days)
     pct = f"{cp:.0%}"
+
+    if not has_live_data:
+        return (
+            f"\nCurrent community prediction: {pct}. "
+            "IMPORTANT: you have NO live data, news, or search results for "
+            "this question — only the static background/resolution text "
+            "above, which was frozen at question-creation time. You cannot "
+            "see anything that has happened since then. The community "
+            "prediction, by contrast, is made by real people reacting to "
+            "real, current events as they happen. Stay within 10 "
+            "percentage points of the community prediction unless the "
+            "background/resolution text above gives you a specific, "
+            "concrete reason to diverge — do not diverge based on general "
+            "reasoning or instinct alone, since you are working from "
+            "stale information and the community is not.\n"
+        )
+
+    w = community_weight(days_remaining, total_days)
     if w < 0.10:
         return (
             f"\nCurrent community prediction: {pct}. "
@@ -146,16 +187,18 @@ def build_community_context(days_remaining: float, total_days: float, cp: float 
         return (
             f"\nCurrent community prediction: {pct} (high weight). "
             "Anchor close to this — the community has aggregated substantial "
-            "information at this stage. Only deviate if your research reveals "
-            "a clear recent development the community hasn't priced in yet.\n"
+            "information at this stage. Only deviate if the background or "
+            "resolution text above gives a clear, specific reason the "
+            "community hasn't priced in yet.\n"
         )
     else:
         return (
             f"\nCurrent community prediction: {pct} (very high weight — {w:.0%}). "
-            "Stay within 5-10 percentage points of this unless you find something "
-            "genuinely explosive and recent that is clearly not yet reflected. "
-            "At this late stage the community aggregation is more reliable than "
-            "independent web search.\n"
+            "Stay within 5-10 percentage points of this unless the background "
+            "or resolution text above gives something genuinely explosive and "
+            "specific that is clearly not yet reflected. At this late stage "
+            "the community aggregation is far more reliable than your own "
+            "static, frozen-at-creation-time information.\n"
         )
 
 
@@ -252,10 +295,16 @@ def find_questions_to_refresh(all_forecasts: list[dict]) -> tuple[list[dict], li
         q_id = f["question_id"]
         if q_id in seen_question_ids:
             continue
-        seen_question_ids.add(q_id)
 
         if f["probability"] is None:
+            # Don't mark as seen yet — this is just the newest entry for
+            # this question_id, and it happens to lack a usable probability
+            # (e.g. a results file that didn't line up with its jobs file).
+            # An older entry for the same question_id, later in this sorted
+            # list, may still have a valid probability — let it through
+            # instead of permanently dropping the question here.
             continue
+        seen_question_ids.add(q_id)
 
         resolve_time_str = f.get("resolve_time")
         submitted_at_str = f.get("submitted_at")
@@ -317,24 +366,31 @@ async def fetch_question_by_id(
         headers = {"Authorization": f"Token {ACTIVE_TOKEN}"}
         url = f"https://www.metaculus.com/api2/questions/{question_id}/"
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers) as resp:
-                if resp.status == 404:
-                    print(f"    ℹ️  Q{question_id}: 404 — question no longer exists (retired/removed). Skipping.")
-                    return None
-                if resp.status != 200:
-                    print(f"    ⚠️  Q{question_id}: unexpected status {resp.status}")
-                    return None
-                fetched = await resp.json()
-                fetched_title = fetched.get("title") or (fetched.get("question") or {}).get("title") or ""
-                if expected_text:
-                    if not titles_match(expected_text, fetched_title):
-                        print(f"    🛑 MISMATCH on Q{question_id}: stored title vs API title don't match.")
-                        print(f"       Stored:  {expected_text[:90]}")
-                        print(f"       API:     {fetched_title[:90]}")
-                        print(f"       Skipping — will NOT forecast on the wrong question. "
-                              f"This may be a post-id/question-id mismatch rather than true ID recycling.")
+            for attempt in range(3):
+                async with session.get(url, headers=headers) as resp:
+                    if resp.status == 429:
+                        wait = 5 * (attempt + 1)
+                        print(f"    ⏳ Q{question_id}: rate limited (429), "
+                              f"waiting {wait}s before retry {attempt + 1}/3...")
+                        await asyncio.sleep(wait)
+                        continue
+                    if resp.status == 404:
+                        print(f"    ℹ️  Q{question_id}: 404 — question no longer exists (retired/removed). Skipping.")
                         return None
-                return BinaryQuestion.from_metaculus_api_json(fetched)
+                    if resp.status != 200:
+                        print(f"    ⚠️  Q{question_id}: unexpected status {resp.status}")
+                        return None
+                    fetched = await resp.json()
+                    fetched_title = fetched.get("title") or (fetched.get("question") or {}).get("title") or ""
+                    if expected_text:
+                        if not titles_match(expected_text, fetched_title):
+                            print(f"    🛑 MISMATCH on Q{question_id}: stored title vs API title don't match.")
+                            print(f"       Stored:  {expected_text[:90]}")
+                            print(f"       API:     {fetched_title[:90]}")
+                            print(f"       Skipping — will NOT forecast on the wrong question. "
+                                  f"This may be a post-id/question-id mismatch rather than true ID recycling.")
+                            return None
+                    return BinaryQuestion.from_metaculus_api_json(fetched)
     except Exception as e:
         print(f"  Warning: could not fetch Q{question_id}: {e}")
         return None
@@ -350,14 +406,27 @@ def build_refresh_prompt(
 ) -> str:
     live_data = detect_data_needs(question.question_text)
     live_data_text = format_live_data_for_prompt(live_data)
+    has_live_data = bool(live_data)  # live_data.py only covers crypto/stock/
+    # index/FRED keywords — empty dict means no real current information at
+    # all for this question (confirmed: no script in this pipeline has web
+    # search wired in, per Console cost breakdown showing $0.00 spent on it).
 
     cp = getattr(question, 'community_prediction_at_access_time', None)
-    community = build_community_context(days_to_close, total_days, cp)
+    community = build_community_context(days_to_close, total_days, cp, has_live_data)
 
     if original_prob is not None:
         original_note = f"\nNote: This question was previously forecast at {original_prob:.0%}. Review whether this remains appropriate given current information.\n"
     else:
         original_note = "\nNote: No prior forecast on file for this question — treat this as a fresh, independent forecast.\n"
+
+    no_data_note = ""
+    if not has_live_data:
+        no_data_note = (
+            "\nNOTE: No live data was found for this question (it falls "
+            "outside live_data.py's coverage — crypto/stock/index/FRED "
+            "questions only). You have no current information beyond the "
+            "static background/resolution text above.\n"
+        )
 
     return f"""Question: {question.question_text}
 
@@ -370,7 +439,7 @@ Resolution criteria:
 {question.fine_print or ''}
 
 {live_data_text}
-
+{no_data_note}
 {community}
 {original_note}
 
@@ -382,8 +451,16 @@ Before answering write:
 (b) Status quo outcome if nothing changes
 (c) Scenario for NO outcome
 (d) Scenario for YES outcome
-(e) Base rate — how often do similar events occur?
-(f) How current data/news moves you from base rate
+(e) Base rate. HARD RULE: do not reference any specific past tournament
+    edition, named forecaster, or quoted/paraphrased tournament outcome
+    UNLESS it appears verbatim in the Background or Resolution criteria
+    sections above. Do not invent or recall a "Spring" edition, a prior
+    head-to-head result, or any other specific precedent from memory — you
+    do not have reliable knowledge of this tournament's history beyond what
+    is given above. If no real base-rate data is given above, write exactly:
+    "No reliable base rate available — proceeding on priors." and move on.
+(f) How the live data/background above (NOT general news — you have none
+    unless explicitly given above) moves you from base rate
 (g) How your view has changed (or not) since the original forecast
 (h) If community prediction exists and differs >10%, explain why you diverge
 
@@ -405,6 +482,12 @@ async def submit_refresh_batch(to_refresh: list[dict]):
         print(f"  [{i+1}/{len(to_refresh)}] Fetching Q{q_id}...")
 
         question = await fetch_question_by_id(q_id, expected_text=forecast.get("question_text"))
+        # Always pause between fetch attempts, success or failure — a run of
+        # 404s/mismatches previously fired back-to-back with zero delay
+        # (the old sleep only sat on the success path below), which is what
+        # tripped Metaculus's rate limiting in practice. Bumped to 1.5s after
+        # 0.5s still wasn't enough headroom across a run of ~15+ requests.
+        await asyncio.sleep(1.5)
         if question is None:
             print(f"    ⚠️  Could not fetch Q{q_id} (or title mismatch — see above), skipping")
             continue
@@ -432,6 +515,14 @@ async def submit_refresh_batch(to_refresh: list[dict]):
             "refresh_reason":         forecast.get("refresh_reason", ""),
             "question_id":            q_id,
             "original_question_text": forecast.get("question_text", ""),
+            # Carried forward from local history. The live scheduled_resolution_time
+            # fetched just above is unreliable: when Metaculus hasn't set a real
+            # scheduled resolution date yet, forecasting_tools returns a generic
+            # placeholder (seen in practice as 2028-01-01T13:00:00) instead of None,
+            # which would otherwise silently corrupt a question's resolve_time on
+            # every refresh. We already know a good resolve_time from when this
+            # question was first forecast, so prefer that unless we don't have one.
+            "known_resolve_time":     resolve_time_str,
         }
 
         prompt = build_refresh_prompt(
@@ -451,8 +542,6 @@ async def submit_refresh_batch(to_refresh: list[dict]):
                 "messages": [{"role": "user", "content": prompt}]
             }
         })
-
-        await asyncio.sleep(0.2)
 
     if not requests:
         print("No questions to submit after fetching.")
@@ -491,8 +580,11 @@ async def submit_refresh_batch(to_refresh: list[dict]):
             for custom_id, info in question_map.items()
         },
         "resolve_times": {
-            custom_id: info["question"].scheduled_resolution_time.isoformat()
-            if info["question"].scheduled_resolution_time else None
+            custom_id: (
+                info["known_resolve_time"]
+                or (info["question"].scheduled_resolution_time.isoformat()
+                    if info["question"].scheduled_resolution_time else None)
+            )
             for custom_id, info in question_map.items()
         },
     }
@@ -630,10 +722,11 @@ def parse_post_id(raw: str) -> int | None:
 
 def call_claude_single(prompt: str) -> tuple[float | None, str]:
     """Synchronous (non-batch) Claude call for the single-question refresh
-    path — no 24h batch wait, since the point of --single is reacting now."""
+    path — no 24h batch wait, since the point of --single is reacting now.
+    Uses SINGLE_MODEL (Sonnet), not MODEL (Haiku) — see SINGLE_MODEL comment."""
     system_prompt = build_forecaster_system_prompt()
     response = client_anthropic.messages.create(
-        model=MODEL,
+        model=SINGLE_MODEL,
         max_tokens=MAX_TOKENS,
         system=system_prompt,
         messages=[{"role": "user", "content": prompt}],
@@ -704,6 +797,13 @@ def _save_single_result(
             "original_prob": original_prob,
             "refresh_reason": refresh_reason,
             "reasoning": reasoning,
+            # Was previously only saved in the jobs file (batch_info above),
+            # making the results file look like CP data was lost/missing
+            # whenever someone audited it on its own. Saved here too now so
+            # the results file is self-contained.
+            "community_prediction": getattr(
+                question, "community_prediction_at_access_time", None
+            ),
             "status": "success",
         }
     }
@@ -862,6 +962,15 @@ def run_single():
     print(f"  Found: {question.question_text}")
     print(f"  (post id {confirmed_post_id} -> question id {q_id})")
 
+    # DEBUG: print the raw background_info exactly as fetched, so we can
+    # verify ground truth ourselves instead of trusting the model's claims
+    # about what is/isn't "in the background." Remove once resolved.
+    print(f"\n  {'─'*60}")
+    print("  DEBUG — raw background_info as fetched from Metaculus:")
+    print(f"  {'─'*60}")
+    print(f"  {question.background_info!r}")
+    print(f"  {'─'*60}\n")
+
     my_prob, my_ts, cp = fetch_live_personal_context(confirmed_post_id, question.question_text)
     question.community_prediction_at_access_time = cp  # used by build_refresh_prompt below
 
@@ -921,6 +1030,12 @@ def run_single():
     if original_prob is not None:
         change = round((prob - original_prob) * 100, 1)
         change_str = f" ({'+' if change >= 0 else ''}{change}pt vs your last forecast of {original_prob:.0%})"
+
+    print(f"\n{'─'*60}")
+    print("  Full reasoning:")
+    print(f"{'─'*60}")
+    print(f"  {reasoning}")
+    print(f"{'─'*60}")
 
     print(f"\n  New forecast: {prob:.0%}{change_str}")
     confirm = input("  Submit this to Metaculus (as mike_iz_)? [Y/n]: ").strip().lower()

@@ -44,6 +44,17 @@ BATCH_DIR = "Meta batches"
 BATCH_FILE = os.path.join(BATCH_DIR, "batch_jobs.json")
 RESULTS_FILE = os.path.join(BATCH_DIR, "batch_results.json")
 
+# Tournament(s) to pull questions from. ApiFilter.allowed_tournaments accepts
+# a list of str|int (numeric ID or slug), so adding more is just adding here.
+# tournament_forecast.py imports this same list as its single source of truth.
+#   33022                        = Summer 2026 FutureEval Bot Tournament
+#   "ACX2026"                    = ACX 2026 Prediction Contest
+#   "climate"                    = Climate Tipping Points
+#   "metaculus-cup-summer-2026"  = Metaculus Cup Summer 2026 (bots can forecast
+#                                  here for calibration data, but are NOT prize-
+#                                  eligible in this one — humans-only for prizes)
+ALLOWED_TOURNAMENTS = [33022, "ACX2026", "climate", "metaculus-cup-summer-2026"]
+
 
 def ensure_batch_dir():
     os.makedirs(BATCH_DIR, exist_ok=True)
@@ -74,6 +85,7 @@ async def fetch_questions() -> list[BinaryQuestion]:
     api_filter = ApiFilter(
         allowed_types=["binary"],
         allowed_statuses=["open"],
+        allowed_tournaments=ALLOWED_TOURNAMENTS,
         close_time_gt=now,
         close_time_lt=now + timedelta(days=DAYS_AHEAD),
         num_forecasters_gte=MIN_FORECASTERS,
@@ -115,11 +127,37 @@ async def fetch_questions() -> list[BinaryQuestion]:
 def build_user_prompt(question: BinaryQuestion) -> str:
     live_data = detect_data_needs(question.question_text)
     live_data_text = format_live_data_for_prompt(live_data)
+    has_live_data = bool(live_data)  # live_data.py only covers crypto/stock/
+    # index/FRED keywords. Confirmed via Console cost breakdown (Total web
+    # search cost: $0.00 for the month) that no script in this pipeline has
+    # real web search/research wired in — so for everything outside that
+    # keyword coverage (politics, sports, legal, geopolitics, tournament
+    # questions, etc.) the model has zero current information at all.
 
     community = ""
     cp = getattr(question, 'community_prediction_at_access_time', None)
     if cp is not None:
-        community = f"\nCurrent community prediction: {cp:.0%}. If your estimate differs by more than 10%, explain why.\n"
+        if has_live_data:
+            community = f"\nCurrent community prediction: {cp:.0%}. If your estimate differs by more than 10%, explain why.\n"
+        else:
+            community = (
+                f"\nCurrent community prediction: {cp:.0%}. "
+                "IMPORTANT: you have NO live data, news, or search results for "
+                "this question — only the static background/resolution text "
+                "above, frozen at question-creation time. The community "
+                "prediction reflects real people reacting to real, current "
+                "events you cannot see. Stay within 10 percentage points of "
+                "it unless the background/resolution text above gives a "
+                "specific, concrete reason to diverge.\n"
+            )
+
+    no_data_note = ""
+    if not has_live_data:
+        no_data_note = (
+            "\nNOTE: No live data was found for this question (outside "
+            "live_data.py's coverage — crypto/stock/index/FRED only). You "
+            "have no current information beyond the static text above.\n"
+        )
 
     return f"""Question: {question.question_text}
 
@@ -132,7 +170,7 @@ Resolution criteria:
 {question.fine_print or ''}
 
 {live_data_text}
-
+{no_data_note}
 {community}
 
 Today is {datetime.now().strftime("%Y-%m-%d")}.
@@ -143,7 +181,8 @@ Before answering write:
 (c) Scenario for NO outcome
 (d) Scenario for YES outcome
 (e) Base rate — how often do similar events occur?
-(f) How current data/news moves you from base rate
+(f) How the live data/background above (NOT general news — you have none
+    unless explicitly given above) moves you from base rate
 (g) If community prediction exists and differs >10%, explain why you diverge
 
 The last thing you write is: "Probability: ZZ%"
