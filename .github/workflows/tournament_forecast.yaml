@@ -47,6 +47,9 @@ jobs:
           # Optional: override the tournament ID without editing the script.
           # Set as a Repository variable (not secret) under Settings → Variables → Actions.
           METAC_TOURNAMENT_ID: ${{ vars.METAC_TOURNAMENT_ID }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
       - name: Commit forecast results for dedup
         run: |
