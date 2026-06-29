@@ -624,6 +624,35 @@ Option probabilities:
 """
 
 
+def _normalize_option_text(s: str) -> str:
+    """Normalize an option label (or Claude's generated option text) so
+    symbolic and worded versions of the same comparison are recognized as
+    equal — e.g. '≤45' and 'Less than or equal to 45' must match.
+
+    This is exactly the bug that zeroed out a real FutureEval submission
+    on 2026-06-29 (Q44216, 'How many mass shootings...'): the site's real
+    option was 'Less than or equal to 45', Claude wrote '≤45', and neither
+    exact-match nor substring-match recognized them as the same option —
+    '≤45' literally never appears as a substring of the worded version,
+    since the symbol itself isn't in that text at all."""
+    s = s.strip().lower()
+    # Order matters: handle two-character symbols before the single ones,
+    # so "<=" doesn't get split into "<" + "=" first.
+    replacements = [
+        ("≤", " less than or equal to "),
+        ("<=", " less than or equal to "),
+        ("≥", " greater than or equal to "),
+        (">=", " greater than or equal to "),
+        ("<", " less than "),
+        (">", " greater than "),
+    ]
+    for sym, word in replacements:
+        s = s.replace(sym, word)
+    s = re.sub(r"[^\w\s]", " ", s)  # drop remaining punctuation (commas, periods, etc.)
+    s = re.sub(r"\s+", " ", s).strip()  # collapse whitespace from the replacements above
+    return s
+
+
 def parse_multiple_choice_response(text: str, question: MultipleChoiceQuestion) -> dict[str, float] | None:
     """Parse option probabilities from Claude's response."""
     # Find the "Option probabilities:" section
@@ -657,13 +686,29 @@ def parse_multiple_choice_response(text: str, question: MultipleChoiceQuestion) 
         matched_opt = next(
             (opt for opt in question.options if opt.lower() == option_text.lower()), None
         )
-        # Fall back to substring containment only if no exact match.
+        # Fall back to substring containment on the RAW text.
         if matched_opt is None:
             matched_opt = next(
                 (opt for opt in question.options
                  if opt.lower() in option_text.lower() or option_text.lower() in opt.lower()),
                 None
             )
+        # Final fallback: normalize symbols to words on BOTH sides before
+        # comparing — catches "≤45" vs "Less than or equal to 45" and
+        # similar symbol/word mismatches that survive the raw checks above.
+        if matched_opt is None:
+            norm_option_text = _normalize_option_text(option_text)
+            matched_opt = next(
+                (opt for opt in question.options
+                 if _normalize_option_text(opt) == norm_option_text), None
+            )
+            if matched_opt is None:
+                matched_opt = next(
+                    (opt for opt in question.options
+                     if _normalize_option_text(opt) in norm_option_text
+                     or norm_option_text in _normalize_option_text(opt)),
+                    None
+                )
 
         if matched_opt is not None:
             probs[matched_opt] = probs.get(matched_opt, 0.0) + prob
