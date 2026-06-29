@@ -20,6 +20,9 @@ load_dotenv()
 from forecasting_tools import MetaculusClient, ApiFilter, BinaryQuestion
 from live_data import detect_data_needs, format_live_data_for_prompt
 from cached_llm import build_forecaster_system_prompt
+from meta_cp_extract import extract_live_cp
+from meta_alerts import send_alert
+from meta_research import research_question
 
 client_anthropic = anthropic.Anthropic()
 
@@ -120,6 +123,23 @@ async def fetch_questions() -> list[BinaryQuestion]:
         if len(fresh) >= NUM_QUESTIONS:
             break
     print(f"Fetched {len(binary)} questions, {len(fresh)} are new")
+
+    # Fetch CP BEFORE forecasting (not after) so build_user_prompt's
+    # CP-anchoring instructions actually have something to anchor to —
+    # previously community_prediction_at_access_time was only ever set
+    # post-hoc via --update-community, meaning the anchoring logic was
+    # always operating on None. Uses q.api_json (set by the
+    # forecasting_tools client on fetch) — field path for binary confirmed
+    # working elsewhere in this file (update_community_predictions).
+    cp_found = 0
+    for q in fresh:
+        cp = extract_live_cp(getattr(q, "api_json", None), "binary")
+        q.community_prediction_at_access_time = cp
+        if cp is not None:
+            cp_found += 1
+    print(f"  Live CP found for {cp_found}/{len(fresh)} questions before forecasting "
+          f"(rest will forecast without CP-anchoring this run)")
+
     return fresh
 
 
@@ -128,16 +148,24 @@ def build_user_prompt(question: BinaryQuestion) -> str:
     live_data = detect_data_needs(question.question_text)
     live_data_text = format_live_data_for_prompt(live_data)
     has_live_data = bool(live_data)  # live_data.py only covers crypto/stock/
-    # index/FRED keywords. Confirmed via Console cost breakdown (Total web
-    # search cost: $0.00 for the month) that no script in this pipeline has
-    # real web search/research wired in — so for everything outside that
-    # keyword coverage (politics, sports, legal, geopolitics, tournament
-    # questions, etc.) the model has zero current information at all.
+    # index/FRED keywords — most non-financial questions get nothing here.
+
+    research_text = research_question(question.question_text, question.background_info or "")
+    has_research = research_text is not None
+    research_block = (
+        f"\nCURRENT RESEARCH (real-time web search, fetched for this question):\n{research_text}\n"
+        if has_research else ""
+    )
+
+    # Either source counts as "real grounding" for anchoring purposes — a
+    # question can have research but no live_data (e.g. politics) or vice
+    # versa (e.g. a plain BTC-price question with nothing notable to search).
+    has_real_grounding = has_live_data or has_research
 
     community = ""
     cp = getattr(question, 'community_prediction_at_access_time', None)
     if cp is not None:
-        if has_live_data:
+        if has_real_grounding:
             community = f"\nCurrent community prediction: {cp:.0%}. If your estimate differs by more than 10%, explain why.\n"
         else:
             community = (
@@ -152,11 +180,11 @@ def build_user_prompt(question: BinaryQuestion) -> str:
             )
 
     no_data_note = ""
-    if not has_live_data:
+    if not has_real_grounding:
         no_data_note = (
-            "\nNOTE: No live data was found for this question (outside "
-            "live_data.py's coverage — crypto/stock/index/FRED only). You "
-            "have no current information beyond the static text above.\n"
+            "\nNOTE: No live market data and no research results were found "
+            "for this question. You have no current information beyond the "
+            "static text above.\n"
         )
 
     return f"""Question: {question.question_text}
@@ -170,6 +198,7 @@ Resolution criteria:
 {question.fine_print or ''}
 
 {live_data_text}
+{research_block}
 {no_data_note}
 {community}
 
@@ -180,9 +209,12 @@ Before answering write:
 (b) Status quo outcome if nothing changes
 (c) Scenario for NO outcome
 (d) Scenario for YES outcome
-(e) Base rate — how often do similar events occur?
-(f) How the live data/background above (NOT general news — you have none
-    unless explicitly given above) moves you from base rate
+(e) Base rate — how often do similar events occur? Only cite a specific
+    historical precedent, named individual, or past event if it appears
+    word-for-word in the Background/Resolution criteria/Research above —
+    otherwise say "No reliable base rate available" and proceed on priors.
+(f) How the live data/research/background above (NOT general knowledge or
+    assumed news — only what's literally given above) moves you from base rate
 (g) If community prediction exists and differs >10%, explain why you diverge
 
 The last thing you write is: "Probability: ZZ%"
@@ -303,6 +335,11 @@ async def check_batch():
                 "probability":   prob,
                 "submitted_forecast": prob,  # standardized field name, matches tournament_forecast.py
                 "reasoning":     text,
+                # Was previously only in batch_info (the jobs file), making
+                # the results file look CP-blind on its own. Saved here too
+                # now — also reflects the pre-forecast value if the live
+                # prefetch in fetch_questions() found one.
+                "community_prediction": batch_info.get("community_predictions", {}).get(custom_id),
                 "status":        "success"
             }
         else:
@@ -312,6 +349,7 @@ async def check_batch():
                 "question_type": "binary",
                 "probability":   None,
                 "submitted_forecast": None,
+                "community_prediction": batch_info.get("community_predictions", {}).get(custom_id),
                 "status":        "failed",
                 "error":         str(result.result)
             }
@@ -387,6 +425,10 @@ async def submit_to_metaculus(results: dict, current_results_file: str = None):
                 prediction_in_decimal=result["probability"]
             )
             print(f"  ✅ Q{q_id}: {result['probability']:.0%} — {result['question_text'][:50]}")
+            send_alert(
+                f"Q{q_id}: {result['probability']:.0%}\n{result['question_text'][:100]}",
+                title="New forecast submitted (batch)"
+            )
             submitted += 1
             await asyncio.sleep(0.5)
 

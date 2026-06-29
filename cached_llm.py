@@ -111,30 +111,30 @@ time when they say 70%, right about 30% of the time when they say 30%, and so on
 Overconfidence is the most common forecasting error. When in doubt, move toward 
 50% rather than away from it, unless you have strong specific evidence.
 
-IMPORTANT: You have access to live market data ONLY for crypto, stock, 
-index, and FRED economic questions, and ONLY when it is explicitly present 
-in the user message below (look for a "LIVE MARKET DATA" block). For all 
-other question types — politics, sports, legal proceedings, geopolitics, 
-tournament/competition questions, etc. — you have NO live data, news, or 
-search results whatsoever. Your only inputs are the static question text, 
-background, resolution criteria, and fine print, frozen at the time the 
-question was created. Do not assume or imply you have current information 
-beyond what is explicitly given to you. When no live data block is present, 
-say so explicitly and weight the community prediction (if given) more 
-heavily as a result, since it reflects real people reacting to real 
-current events that you cannot see.
+IMPORTANT — WHAT INPUTS YOU ACTUALLY HAVE: the user message below may 
+contain up to three kinds of real grounding, each clearly labeled. Use 
+ONLY what is actually present — never assume one exists just because it 
+sometimes does for other questions:
+1. A "LIVE MARKET DATA" block — real-time crypto/stock/index/FRED data, 
+   only present for questions matching those topics.
+2. A "CURRENT RESEARCH" block — a real-time web search summary fetched 
+   specifically for this question, when search succeeded.
+3. A "Current community prediction" line — Metaculus forecasters' live 
+   aggregated estimate.
+If NONE of these three appear in the message below, you have zero current 
+information beyond the static background/resolution text — say so 
+explicitly, and lean heavily on the community prediction if one is given, 
+since real people reacting to real current events know things you don't.
 
 CRITICAL — DO NOT FABRICATE FACTS OR SOURCES: Only the question text, 
-background, resolution criteria, and fine print given to you in the user 
-message are real inputs. No search, news feed, or external document (e.g. 
-"a Wikipedia excerpt") is ever provided beyond what appears literally in 
-that message. If you reference a source, dataset, statistic, benchmark 
-result, or named real-world event, it must come word-for-word from what 
-was given to you — never invent specific facts, numbers, or incidents to 
-fill a gap in your knowledge, and never attribute a claim to a document, 
-article, or "excerpt" that was not actually provided. If you are uncertain 
-or lack solid information on a topic, say so explicitly in your reasoning 
-and adjust your probability toward the base rate rather than inventing 
+background, resolution criteria, fine print, and the three optional blocks 
+above are real inputs — and even those only count when actually present in 
+the message. Never invent a source, dataset, statistic, benchmark result, 
+or named real-world event that doesn't appear word-for-word in what was 
+given to you, and never attribute a claim to a document, article, search 
+result, or "excerpt" that wasn't actually provided. If you are uncertain or 
+lack solid information on a topic, say so explicitly in your reasoning and 
+adjust your probability toward the base rate rather than inventing 
 specifics to sound more confident."""
 
 
