@@ -100,12 +100,32 @@ async def fetch_questions() -> list[BinaryQuestion]:
             api_filter=api_filter,
             num_questions=fetch_count,
         )
-    except ValueError:
-        # Fewer questions available than requested — fetch whatever exists
-        questions = await client_metaculus.get_questions_matching_filter(
-            api_filter=api_filter,
-            num_questions=50,  # fallback to base amount
-        )
+    except ValueError as e:
+        # The library raises if the count found doesn't EXACTLY match what
+        # was requested, instead of just returning what's available. The
+        # old fallback here hardcoded num_questions=50 — which hits this
+        # exact same error a second time, uncaught, the moment fewer than
+        # 50 questions are actually available (confirmed live 2026-06-29:
+        # 43 available, fallback asked for 50, crashed the whole run).
+        # Parse the real count out of the error message and retry with
+        # that exact number instead of guessing.
+        import re as _re
+        match = _re.search(r"number of questions found \((\d+)\)", str(e))
+        if not match:
+            print(f"  ⚠️  Could not parse available question count from error — "
+                  f"returning no questions this run. Raw error: {e}")
+            questions = []
+        else:
+            actual_count = int(match.group(1))
+            print(f"  Requested {fetch_count}, but only {actual_count} questions "
+                  f"currently match the filter — retrying with the exact count...")
+            if actual_count == 0:
+                questions = []
+            else:
+                questions = await client_metaculus.get_questions_matching_filter(
+                    api_filter=api_filter,
+                    num_questions=actual_count,
+                )
     binary = [q for q in questions if isinstance(q, BinaryQuestion)]
 
     # Filter out already-done questions (title-checked — see titles_match)
@@ -257,6 +277,14 @@ async def submit_batch(questions: list[BinaryQuestion]) -> str:
             custom_id: q.id_of_question
             for custom_id, q in question_map.items()
         },
+        # Separate from question_id — needed because /api2/questions/{id}/
+        # (used by meta_refresh_forecast.py's fetch_question_by_id) is keyed
+        # by POST id, not question id. Without this saved, refresh has no
+        # way to re-fetch the right question.
+        "post_ids": {
+            custom_id: q.id_of_post
+            for custom_id, q in question_map.items()
+        },
         "question_texts": {
             custom_id: q.question_text
             for custom_id, q in question_map.items()
@@ -330,6 +358,7 @@ async def check_batch():
 
             results[custom_id] = {
                 "question_id":   batch_info['question_ids'][custom_id],
+                "post_id":       batch_info.get('post_ids', {}).get(custom_id),
                 "question_text": batch_info['question_texts'][custom_id],
                 "question_type": "binary",
                 "probability":   prob,
@@ -345,6 +374,7 @@ async def check_batch():
         else:
             results[custom_id] = {
                 "question_id":   batch_info['question_ids'][custom_id],
+                "post_id":       batch_info.get('post_ids', {}).get(custom_id),
                 "question_text": batch_info['question_texts'][custom_id],
                 "question_type": "binary",
                 "probability":   None,
@@ -443,7 +473,31 @@ async def submit_to_metaculus(results: dict, current_results_file: str = None):
 
 # ─── Step 6: Update community predictions ─────────────────────────────────────
 async def update_community_predictions():
-    """Fetch community predictions for the latest batch."""
+    """Fetch community predictions for the latest batch.
+
+    REWRITTEN 2026-06-29: previously chunked through api2/questions/?ids=,
+    which meta_debug_ids_probe.py proved ignores its filter entirely and
+    returns unrelated recent questions regardless of what's requested —
+    meaning this was silently fetching nothing useful, ever, no matter
+    what "still hidden" looked like in the logs. Now loops single calls
+    through api2/questions/{id}/ — the SINGULAR detail endpoint, proven
+    correct via the same probe — keyed by POST id (confirmed: that
+    endpoint is keyed by post_id, not question_id; the two are NOT
+    interchangeable here).
+
+    Sequential, not concurrent: this is the manual/--update-community
+    path with no time pressure (unlike tournament_forecast.py's
+    synchronous fetch-before-forecast path), so simple one-at-a-time
+    calls with a politeness delay are fine and easier to reason about.
+
+    This script only ever forecasts BINARY questions (see fetch_questions's
+    allowed_types=["binary"] filter) — extract_live_cp is always called
+    with "binary" here for that reason.
+
+    post_id is only available for batches submitted after this same date
+    (see submit_batch's post_ids field, added alongside this fix) — older
+    batches have no reliable ID to re-fetch by and are skipped with a
+    count, not guessed at."""
     if not os.path.exists(BATCH_FILE):
         print(f"No {BATCH_FILE} found. Run a batch first.")
         return
@@ -452,6 +506,7 @@ async def update_community_predictions():
         batch_info = json.load(f)
 
     question_ids = batch_info.get("question_ids", {})
+    post_ids = batch_info.get("post_ids", {})
     community_preds = batch_info.get("community_predictions", {})
 
     already_filled = sum(1 for v in community_preds.values() if v is not None)
@@ -460,21 +515,26 @@ async def update_community_predictions():
     headers = {"Authorization": f"Token {ACTIVE_TOKEN}"}
     updated = 0
     still_hidden = 0
+    no_post_id = 0
+    errors = 0
 
-    ids_to_fetch = [
-        q_id for custom_id, q_id in question_ids.items()
+    to_fetch = [
+        custom_id for custom_id in question_ids
         if community_preds.get(custom_id) is None
     ]
 
-    print(f"Fetching {len(ids_to_fetch)} questions in chunks of 10...")
+    print(f"Fetching {len(to_fetch)} questions one at a time via the singular endpoint...")
 
     async with aiohttp.ClientSession() as session:
-        chunk_size = 10
-        for i in range(0, len(ids_to_fetch), chunk_size):
-            chunk = ids_to_fetch[i:i + chunk_size]
-            ids_str = ",".join(str(q_id) for q_id in chunk)
-            url = f"https://www.metaculus.com/api2/questions/?ids={ids_str}&limit={chunk_size}"
+        for i, custom_id in enumerate(to_fetch, 1):
+            post_id = post_ids.get(custom_id)
+            q_id = question_ids.get(custom_id)
 
+            if post_id is None:
+                no_post_id += 1
+                continue  # pre-fix batch — no reliable ID to fetch by, skip rather than guess
+
+            url = f"https://www.metaculus.com/api2/questions/{post_id}/"
             retries = 3
             while retries > 0:
                 try:
@@ -485,42 +545,30 @@ async def update_community_predictions():
                             retries -= 1
                             continue
                         if resp.status != 200:
-                            print(f"  ❌ HTTP {resp.status}")
+                            print(f"  ❌ post {post_id} (Q{q_id}): HTTP {resp.status}")
+                            errors += 1
                             break
 
                         data = await resp.json()
-                        results = data.get("results", [])
+                        cp = extract_live_cp(data, "binary")
 
-                        for item in results:
-                            q = item.get("question", {})
-                            q_id = q.get("id") or item.get("id")
-                            agg = q.get("aggregations", {}).get("recency_weighted", {}).get("latest")
-                            cp = None
-                            if agg:
-                                centers = agg.get("centers", [])
-                                if len(centers) > 1:
-                                    cp = centers[1]
-                                elif centers:
-                                    cp = centers[0]
-
-                            for custom_id, cid in question_ids.items():
-                                if cid == q_id:
-                                    if cp is not None:
-                                        community_preds[custom_id] = cp
-                                        updated += 1
-                                        q_text = batch_info.get("question_texts", {}).get(custom_id, "")[:50]
-                                        print(f"  ✅ Q{q_id}: {cp:.0%} — {q_text}")
-                                    else:
-                                        still_hidden += 1
-                                    break
+                        if cp is not None:
+                            community_preds[custom_id] = cp
+                            updated += 1
+                            q_text = batch_info.get("question_texts", {}).get(custom_id, "")[:50]
+                            print(f"  ✅ post {post_id} (Q{q_id}): {cp:.0%} — {q_text}")
+                        else:
+                            still_hidden += 1
                         break
 
                 except Exception as e:
-                    print(f"  ❌ Chunk error: {e}")
+                    print(f"  ❌ post {post_id} (Q{q_id}): {e}")
+                    errors += 1
                     break
 
-            print(f"  Chunk {i//chunk_size + 1}/{(len(ids_to_fetch) + chunk_size - 1)//chunk_size} done")
-            await asyncio.sleep(3)
+            if i % 10 == 0:
+                print(f"  ...{i}/{len(to_fetch)} done")
+            await asyncio.sleep(1.2)
 
     batch_info["community_predictions"] = community_preds
     with open(BATCH_FILE, "w") as f:
@@ -543,7 +591,10 @@ async def update_community_predictions():
 
     filled = sum(1 for v in community_preds.values() if v is not None)
     print(f"\n✅ Updated {updated} new community predictions")
-    print(f"   {filled}/{len(question_ids)} total filled | {still_hidden} still hidden")
+    print(f"   {filled}/{len(question_ids)} total filled | {still_hidden} still hidden "
+          f"(genuinely no CP from this endpoint — check include_bots_in_aggregates if "
+          f"this number seems high) | {no_post_id} skipped (no post_id on file — "
+          f"predates the post_id fix) | {errors} fetch error(s)")
     if still_hidden > 0:
         print(f"   Run again later to pick up remaining hidden predictions")
 

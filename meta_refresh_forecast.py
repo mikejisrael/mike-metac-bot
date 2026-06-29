@@ -25,16 +25,21 @@ endpoint requires. They are NOT always the same number.
 through MetaculusClient.get_question_by_post_id (the one library method that
 is genuinely post-id-based), then reads the real id_of_question back off the
 fetched question object for the actual submission.
-(The older fetch_question_by_id() below, used only by --submit/--check for
-re-fetching STALE/CLOSING_SOON questions from local history, still keys off
-the stored "question_id" value against the /api2/questions/{id}/ endpoint.
-Per a prior, separately-confirmed investigation that endpoint matches on
-POST id — so for any historical entry where post id and question id differ,
-that path can silently miss or mismatch. titles_match() catches genuine
-mismatches and skips them, which is most likely the real explanation behind
-at least some of the "ID likely recycled" messages seen in the past — not
-necessarily actual ID recycling. Flagging this here rather than fixing it
-now since it's a separate, larger cleanup from the --single feature.)
+
+FIXED (2026-06-29): fetch_question_by_id(), used by --submit/--check for
+re-fetching STALE/CLOSING_SOON questions from local history, previously hit
+/api2/questions/{question_id}/ using the stored question_id — but that
+endpoint's path parameter is keyed by POST id, not question id. This meant
+it was silently fetching whatever unrelated question happened to share that
+number as its post id (caught live: Q38099 returning a mortgage-rate
+question instead of the real AI-moratorium question at post 38766).
+fetch_question_by_id now takes post_id and uses get_question_by_post_id —
+the same proven method --single already used. meta_batch_forecast.py was
+updated to save post_ids alongside question_ids so this data exists going
+forward. Local history saved BEFORE this fix has no post_id on file and is
+skipped by fetch_question_by_id with a warning rather than guessed at —
+those questions will just get freshly forecast next time they come up
+through the normal tournament/batch path.
 
 IMPORTANT — --single always authenticates as your PERSONAL account
 (mike_iz_, via METACULUS_TOKEN), never the bot's METAC_TOURNAMENT_TOKEN.
@@ -259,10 +264,13 @@ def load_all_batches() -> list[dict]:
             categories      = batch_info.get("categories", {})
             community_preds = batch_info.get("community_predictions", {})
 
+            post_ids = batch_info.get("post_ids", {})
+
             for custom_id, q_id in question_ids.items():
                 all_forecasts.append({
                     "custom_id":      custom_id,
                     "question_id":    q_id,
+                    "post_id":        post_ids.get(custom_id),  # None for pre-fix history
                     "question_text":  question_texts.get(custom_id, ""),
                     "submitted_at":   submitted_at,
                     "resolve_time":   resolve_times.get(custom_id),
@@ -350,49 +358,48 @@ from meta_question_matching import titles_match
 
 
 async def fetch_question_by_id(
-    question_id: int, expected_text: str | None = None
+    post_id: int | None, question_id: int, expected_text: str | None = None
 ) -> BinaryQuestion | None:
-    """Fetch a question by ID using the path-based detail endpoint
-    (/api2/questions/{id}/). See the post-id-vs-question-id caveat in this
-    file's module docstring — this is the path still used by --submit/--check
-    for re-fetching STALE/CLOSING_SOON questions from local history, where
-    only the stored question_id (not post_id) is on file.
+    """Fetch a question by its POST id, using MetaculusClient.get_question_by_post_id
+    — the same method --single already uses successfully (see module docstring).
+
+    Previously this hit /api2/questions/{question_id}/ directly with the
+    stored question_id (id_of_question). That endpoint's path parameter is
+    actually keyed by POST id, not question id — so it was silently fetching
+    whatever unrelated question happened to have that number as its post id
+    (this is the bug Mike found: Q38099 returning a mortgage-rate question
+    instead of the AI moratorium question, whose real post id is 38766).
+
+    post_id is None for any local history saved before this fix — those
+    entries have no reliable way to be re-fetched and are skipped rather
+    than risking another silent mismatch.
 
     If expected_text is provided (the title we have on file from when we
     originally forecast it), this also verifies the fetched question's
-    title actually matches before returning it — a safety net in case the ID
-    being queried doesn't correspond to the question we think it does."""
+    title actually matches before returning it — a safety net in case the
+    post id on file doesn't correspond to the question we think it does."""
+    if post_id is None:
+        print(f"    ⚠️  Q{question_id}: no post_id on file (forecast predates the "
+              f"post_id fix) — skipping rather than guessing. Will be re-forecast "
+              f"fresh next time this question is fetched from the tournament.")
+        return None
     try:
-        headers = {"Authorization": f"Token {ACTIVE_TOKEN}"}
-        url = f"https://www.metaculus.com/api2/questions/{question_id}/"
-        async with aiohttp.ClientSession() as session:
-            for attempt in range(3):
-                async with session.get(url, headers=headers) as resp:
-                    if resp.status == 429:
-                        wait = 5 * (attempt + 1)
-                        print(f"    ⏳ Q{question_id}: rate limited (429), "
-                              f"waiting {wait}s before retry {attempt + 1}/3...")
-                        await asyncio.sleep(wait)
-                        continue
-                    if resp.status == 404:
-                        print(f"    ℹ️  Q{question_id}: 404 — question no longer exists (retired/removed). Skipping.")
-                        return None
-                    if resp.status != 200:
-                        print(f"    ⚠️  Q{question_id}: unexpected status {resp.status}")
-                        return None
-                    fetched = await resp.json()
-                    fetched_title = fetched.get("title") or (fetched.get("question") or {}).get("title") or ""
-                    if expected_text:
-                        if not titles_match(expected_text, fetched_title):
-                            print(f"    🛑 MISMATCH on Q{question_id}: stored title vs API title don't match.")
-                            print(f"       Stored:  {expected_text[:90]}")
-                            print(f"       API:     {fetched_title[:90]}")
-                            print(f"       Skipping — will NOT forecast on the wrong question. "
-                                  f"This may be a post-id/question-id mismatch rather than true ID recycling.")
-                            return None
-                    return BinaryQuestion.from_metaculus_api_json(fetched)
+        result = client_metaculus.get_question_by_post_id(post_id)
+        question = result[0] if isinstance(result, list) else result
+        if not isinstance(question, BinaryQuestion):
+            print(f"    ⚠️  Post {post_id} is not a binary question "
+                  f"({type(question).__name__}). Skipping.")
+            return None
+        fetched_title = question.question_text or ""
+        if expected_text and not titles_match(expected_text, fetched_title):
+            print(f"    🛑 MISMATCH on post {post_id} (Q{question_id}): stored title vs API title don't match.")
+            print(f"       Stored:  {expected_text[:90]}")
+            print(f"       API:     {fetched_title[:90]}")
+            print(f"       Skipping — will NOT forecast on the wrong question.")
+            return None
+        return question
     except Exception as e:
-        print(f"  Warning: could not fetch Q{question_id}: {e}")
+        print(f"  Warning: could not fetch post {post_id} (Q{question_id}): {e}")
         return None
 
 
@@ -481,7 +488,9 @@ async def submit_refresh_batch(to_refresh: list[dict]):
         q_id = forecast["question_id"]
         print(f"  [{i+1}/{len(to_refresh)}] Fetching Q{q_id}...")
 
-        question = await fetch_question_by_id(q_id, expected_text=forecast.get("question_text"))
+        question = await fetch_question_by_id(
+            forecast.get("post_id"), q_id, expected_text=forecast.get("question_text")
+        )
         # Always pause between fetch attempts, success or failure — a run of
         # 404s/mismatches previously fired back-to-back with zero delay
         # (the old sleep only sat on the success path below), which is what

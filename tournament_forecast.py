@@ -117,6 +117,21 @@ os.makedirs(TOURNAMENT_BATCH_DIR, exist_ok=True)
 from meta_question_matching import titles_match
 
 
+# ─── Pydantic-safe attribute setter ────────────────────────────────────────
+def _set_cp(obj, cp) -> None:
+    """Set community_prediction_at_access_time regardless of whether the
+    underlying pydantic model declares that field. BinaryQuestion allows
+    extra attributes; NumericQuestion and MultipleChoiceQuestion do not and
+    raise on a plain attribute assignment (confirmed via a live
+    bot-testing-area run — this silently dropped 3 of 5 real forecastable
+    questions into 'parse errors' before this fix, since the crash happened
+    inside the same try block that builds the whole question object)."""
+    try:
+        obj.community_prediction_at_access_time = cp
+    except Exception:
+        object.__setattr__(obj, "community_prediction_at_access_time", cp)
+
+
 # ─── Step 1: Fetch open tournament questions ───────────────────────────────────
 async def fetch_tournament_questions() -> list:
     # already_done maps question_id -> the title we forecast it under, so a
@@ -217,21 +232,35 @@ async def fetch_tournament_questions() -> list:
 
     now = datetime.now(timezone.utc)
     questions = []
+    closed_count = 0
+    no_question_field_count = 0
     for post in raw_posts:
         q = post.get("question")
         if not q:
+            no_question_field_count += 1
             continue
         # Skip if close time has passed
         close_time = q.get("scheduled_close_time")
         if close_time:
             close_dt = datetime.fromisoformat(close_time.replace("Z", "+00:00"))
             if close_dt < now:
+                closed_count += 1
                 continue
         questions.append(post)
+
+    print(f"  Funnel: {len(raw_posts)} raw posts -> {no_question_field_count} missing question field, "
+          f"{closed_count} already closed -> {len(questions)} still open", flush=True)
 
     # Convert to library question objects using from_metaculus_api_json
     from forecasting_tools import NumericQuestion, MultipleChoiceQuestion
     supported = []
+    supported_post_ids = []  # parallel list, same index as `supported` —
+    # needed for the CP fetch below, which is keyed by POST id (confirmed
+    # via meta_debug_ids_probe.py — the singular detail endpoint is keyed
+    # by post_id, NOT question_id; they are not interchangeable).
+    unsupported_type_counts: dict[str, int] = {}
+    dedup_skipped = 0
+    parse_errors = 0
     for post in questions:
         q = post.get("question", {})
         q_type = q.get("type")
@@ -243,30 +272,114 @@ async def fetch_tournament_questions() -> list:
             elif q_type == "multiple_choice":
                 obj = MultipleChoiceQuestion.from_metaculus_api_json(post)
             else:
+                unsupported_type_counts[q_type] = unsupported_type_counts.get(q_type, 0) + 1
                 continue
             if obj.id_of_question in already_done:
                 stored_title = already_done[obj.id_of_question]
                 if titles_match(stored_title, obj.question_text):
+                    dedup_skipped += 1
                     continue  # genuine duplicate — already forecast this question
                 print(f"  🛑 Q{obj.id_of_question}: ID was previously forecast under a different "
                       f"title — treating as a NEW question (ID likely recycled).")
                 print(f"       Previously: {stored_title[:90]}")
                 print(f"       Now:        {obj.question_text[:90]}")
             # Live CP, extracted from the post data we already fetched above
-            # (no extra API call). Previously never set anywhere in this
-            # file, meaning binary's CP-anchoring instructions (in
-            # bf.build_user_prompt) were always operating on None despite
-            # existing. NOTE: the field path this relies on is confirmed
-            # for binary, best-effort/unverified for numeric and
-            # multiple_choice in this sandbox — check the printed hit rate
-            # below on first real run.
-            obj.community_prediction_at_access_time = extract_live_cp(post, q_type)
+            # (no extra API call). The listing endpoint (api/posts/) never
+            # carries real aggregation values — confirmed via
+            # meta_debug_cp_probe.py, it returns the correct shape with
+            # everything nulled out. This is left as a harmless no-op
+            # placeholder (will set None) until the real fetch below runs.
+            _set_cp(obj, extract_live_cp(post, q_type))
             supported.append(obj)
+            supported_post_ids.append(post.get("id"))
         except Exception as e:
+            parse_errors += 1
             print(f"  ⚠️  Could not parse Q{q.get('id')}: {e}")
 
-    cp_found = sum(1 for o in supported if getattr(o, "community_prediction_at_access_time", None) is not None)
-    print(f"  Live CP found for {cp_found}/{len(supported)} questions before forecasting")
+    # Real CP fetch — CONCURRENT, capped, via the SINGULAR /api2/questions/
+    # {id}/ endpoint, keyed by post_id.
+    #
+    # REWRITTEN 2026-06-29: the previous version chunked through
+    # api2/questions/?ids=, which meta_debug_ids_probe.py proved ignores
+    # its filter entirely and returns unrelated recent questions regardless
+    # of what's requested — so this was silently fetching nothing useful,
+    # ever. The singular endpoint is proven correct (same probe), but it's
+    # keyed by post_id, not question_id, which is why this now needs
+    # supported_post_ids built above.
+    #
+    # CONCURRENT (not sequential like meta_batch_forecast.py's version) on
+    # purpose: this function runs synchronously before forecasting even
+    # starts, and some tournament questions are only open ~90 minutes —
+    # ~200 sequential calls at ~1.2s apart would burn several minutes of
+    # that window before a single forecast is made. Capped at
+    # MAX_CONCURRENT_CP_FETCHES to stay polite to the API.
+    #
+    # NOTE: binary CP extraction via this endpoint is proven (see
+    # meta_debug_ids_probe.py --single output, 2026-06-29). numeric/
+    # multiple_choice extraction is NOT yet separately verified — check the
+    # cp_found breakdown by type below on first real run.
+    MAX_CONCURRENT_CP_FETCHES = 8
+    if supported:
+        import aiohttp
+        headers_cp = {"Authorization": f"Token {TOURNAMENT_TOKEN}"}
+        sem = asyncio.Semaphore(MAX_CONCURRENT_CP_FETCHES)
+        cp_no_post_id = 0
+        cp_errors = 0
+
+        async def _fetch_one_cp(session, obj, post_id):
+            nonlocal cp_no_post_id, cp_errors
+            if post_id is None:
+                cp_no_post_id += 1
+                return
+            q_type_for_target = (
+                "binary" if isinstance(obj, BinaryQuestion)
+                else "multiple_choice" if isinstance(obj, MultipleChoiceQuestion)
+                else "numeric"
+            )
+            url = f"https://www.metaculus.com/api2/questions/{post_id}/"
+            async with sem:
+                for attempt in range(2):
+                    try:
+                        async with session.get(
+                            url, headers=headers_cp,
+                            timeout=aiohttp.ClientTimeout(total=15)
+                        ) as resp:
+                            if resp.status == 429:
+                                await asyncio.sleep(5)
+                                continue
+                            if resp.status != 200:
+                                cp_errors += 1
+                                return
+                            data = await resp.json()
+                            cp = extract_live_cp(data, q_type_for_target)
+                            _set_cp(obj, cp)
+                            return
+                    except Exception:
+                        cp_errors += 1
+                        return
+
+        async with aiohttp.ClientSession() as session:
+            await asyncio.gather(*[
+                _fetch_one_cp(session, obj, post_id)
+                for obj, post_id in zip(supported, supported_post_ids)
+            ])
+
+        print(f"  CP fetch (concurrent, capped at {MAX_CONCURRENT_CP_FETCHES}): "
+              f"{len(supported) - cp_no_post_id - cp_errors} attempted cleanly, "
+              f"{cp_no_post_id} had no post_id, {cp_errors} errored")
+
+    cp_found_by_type: dict[str, list[int, int]] = {}
+    for o in supported:
+        t = type(o).__name__
+        cp_found_by_type.setdefault(t, [0, 0])
+        cp_found_by_type[t][1] += 1
+        if getattr(o, "community_prediction_at_access_time", None) is not None:
+            cp_found_by_type[t][0] += 1
+    print(f"  Live CP found by type: "
+          f"{ {t: f'{found}/{total}' for t, (found, total) in cp_found_by_type.items()} }")
+    print(f"  Funnel: {len(questions)} open -> {dedup_skipped} already forecast, "
+          f"{parse_errors} parse errors, {unsupported_type_counts or 'no'} unsupported types "
+          f"-> {len(supported)} to forecast", flush=True)
     print(f"Open in tournament: {len(supported)} questions")
     print(f"New to forecast: {len(supported)}")
     return supported
@@ -706,6 +819,7 @@ async def run():
         if forecast is None:
             results[f"q_{q.id_of_question}"] = {
                 "question_id":   q.id_of_question,
+                "post_id":       getattr(q, "id_of_post", None),
                 "question_text": q.question_text,
                 "question_type": q_type,
                 "status":        "failed",
@@ -720,6 +834,7 @@ async def run():
 
         results[f"q_{q.id_of_question}"] = {
             "question_id":   q.id_of_question,
+            "post_id":       getattr(q, "id_of_post", None),
             "question_text": q.question_text,
             "question_type": q_type,
             # Reflects whether the forecast actually reached Metaculus, not
