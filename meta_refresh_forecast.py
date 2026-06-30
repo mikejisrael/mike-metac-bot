@@ -66,6 +66,7 @@ import json
 import os
 import re
 import glob
+import time
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 import anthropic
@@ -100,6 +101,50 @@ client_metaculus = MetaculusClient(token=ACTIVE_TOKEN)
 # docstring for why this is intentionally separate from ACTIVE_TOKEN above.
 PERSONAL_TOKEN = os.getenv("METACULUS_TOKEN")
 personal_client = MetaculusClient(token=PERSONAL_TOKEN) if PERSONAL_TOKEN else None
+
+# ─── Fail fast on permanently-closed questions ───────────────────────────────
+# FIXED 2026-06-30: copied from tournament_forecast.py's identical fix —
+# forecasting_tools' _post_question_prediction retries ANY HTTPError 3x
+# with exponential backoff (up to 75s per attempt, ~100s+ total per call).
+# Correct for transient errors, but wasteful for a question that's
+# permanently closed: confirmed live, refreshing a batch of 11 questions
+# where several had closed between fetch and submit added 90-150+ seconds
+# of pure dead time PER closed question, retrying a 405 "already closed"
+# response that can never succeed no matter how many times it's retried.
+# This file never had the fix tournament_forecast.py already has — applied
+# here to BOTH clients (client_metaculus for --submit/--check, AND
+# personal_client for --single, since --single can hit the exact same
+# closed-question scenario when refreshing a single question that closed
+# since it was last checked).
+import types as _types
+
+_original_post_question_prediction = type(client_metaculus)._post_question_prediction.__wrapped__
+
+def _post_question_prediction_fail_fast_on_closed(self, question_id, forecast_payload):
+    max_retries = 3
+    delay = 2.5
+    for attempt in range(max_retries + 1):
+        try:
+            return _original_post_question_prediction(self, question_id, forecast_payload)
+        except Exception as e:
+            if "already closed to forecasting" in str(e):
+                print(f"  ⏭️  Q{question_id}: already closed to forecasting — skipping, no retry.")
+                raise
+            if attempt >= max_retries:
+                raise
+            import random as _random
+            sleep_time = min(delay * _random.uniform(1, 8.0), 75.0)
+            print(f"  Retry {attempt + 1}/{max_retries} for submission after {sleep_time:.1f}s. Error: {e}")
+            time.sleep(sleep_time)
+            delay *= 3
+
+client_metaculus._post_question_prediction = _types.MethodType(
+    _post_question_prediction_fail_fast_on_closed, client_metaculus
+)
+if personal_client is not None:
+    personal_client._post_question_prediction = _types.MethodType(
+        _post_question_prediction_fail_fast_on_closed, personal_client
+    )
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 MODEL = "claude-haiku-4-5"
