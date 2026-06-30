@@ -70,6 +70,28 @@ def ensure_batch_dir():
     os.makedirs(BATCH_DIR, exist_ok=True)
 
 
+# ─── Pydantic-safe attribute setter ────────────────────────────────────────
+def _set_research_text(obj, text) -> None:
+    """Set research_text_at_access_time regardless of whether the underlying
+    pydantic model declares that field. Added 2026-06-30 after a live
+    GitHub Actions run crashed every single forecast in a batch with
+    `ValueError: "BinaryQuestion" object has no field
+    "research_text_at_access_time"` — plain attribute assignment on a
+    pydantic model with strict extra-field validation raises instead of
+    silently allowing it. This is the same failure mode tournament_forecast.py's
+    _set_cp() defends against for NumericQuestion/MultipleChoiceQuestion —
+    except here it hit BinaryQuestion too, since (unlike
+    community_prediction_at_access_time, which is apparently a genuinely
+    declared field in forecasting_tools) research_text_at_access_time has
+    no such declaration anywhere. Tournament_forecast.py's docstring
+    claiming "BinaryQuestion allows extra attributes" was an incorrect
+    assumption — this crash is the proof."""
+    try:
+        obj.research_text_at_access_time = text
+    except Exception:
+        object.__setattr__(obj, "research_text_at_access_time", text)
+
+
 # ─── Question identity guard ────────────────────────────────────────────────
 from meta_question_matching import titles_match
 
@@ -187,7 +209,7 @@ def build_user_prompt(question: BinaryQuestion) -> str:
     # community_prediction_at_access_time below) so submit_batch can persist
     # it into batch_info/results JSON without re-running research_question
     # or threading a second return value through this function's signature.
-    question.research_text_at_access_time = research_text
+    _set_research_text(question, research_text)
 
     # Either source counts as "real grounding" for anchoring purposes — a
     # question can have research but no live_data (e.g. politics) or vice

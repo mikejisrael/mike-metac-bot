@@ -131,12 +131,24 @@ from meta_question_matching import titles_match
 # ─── Pydantic-safe attribute setter ────────────────────────────────────────
 def _set_cp(obj, cp) -> None:
     """Set community_prediction_at_access_time regardless of whether the
-    underlying pydantic model declares that field. BinaryQuestion allows
-    extra attributes; NumericQuestion and MultipleChoiceQuestion do not and
-    raise on a plain attribute assignment (confirmed via a live
-    bot-testing-area run — this silently dropped 3 of 5 real forecastable
-    questions into 'parse errors' before this fix, since the crash happened
-    inside the same try block that builds the whole question object)."""
+    underlying pydantic model declares that field. NumericQuestion and
+    MultipleChoiceQuestion do not declare it and raise on a plain attribute
+    assignment (confirmed via a live bot-testing-area run — this silently
+    dropped 3 of 5 real forecastable questions into 'parse errors' before
+    this fix, since the crash happened inside the same try block that
+    builds the whole question object).
+
+    CORRECTION 2026-06-30: this docstring previously claimed "BinaryQuestion
+    allows extra attributes" — that was never actually verified, just
+    assumed because community_prediction_at_access_time happens to be a
+    genuinely declared field on BinaryQuestion specifically (so plain
+    assignment of THIS field works fine there). It does NOT generalize:
+    a live GitHub Actions run crashed when meta_batch_forecast.py tried
+    plain-assigning a DIFFERENT, undeclared field
+    (research_text_at_access_time) onto a BinaryQuestion object. Use this
+    pydantic-safe pattern for any new per-question attribute on ANY
+    question type, not just Numeric/MultipleChoice — don't assume Binary
+    is exempt."""
     try:
         obj.community_prediction_at_access_time = cp
     except Exception:

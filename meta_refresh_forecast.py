@@ -124,6 +124,18 @@ def ensure_batch_dir():
     os.makedirs(BATCH_DIR, exist_ok=True)
 
 
+# ─── Pydantic-safe attribute setter ────────────────────────────────────────
+def _set_research_text(obj, text) -> None:
+    """See meta_batch_forecast.py's identical helper for the full
+    explanation — plain attribute assignment crashed BinaryQuestion in a
+    live GitHub Actions run; this fixes it here too, since build_refresh_prompt
+    below has the same assignment pattern."""
+    try:
+        obj.research_text_at_access_time = text
+    except Exception:
+        object.__setattr__(obj, "research_text_at_access_time", text)
+
+
 # ─── Sliding community weight ─────────────────────────────────────────────────
 def community_weight(days_remaining: float, total_days: float) -> float:
     """Return a 0→1 weight for how much to defer to the community prediction.
@@ -434,7 +446,7 @@ def build_refresh_prompt(
     )
     # Stashed for submit_refresh_batch to persist below — same pattern as
     # meta_batch_forecast.py and as community_prediction_at_access_time.
-    question.research_text_at_access_time = research_text
+    _set_research_text(question, research_text)
 
     # Either source counts as real grounding for anchoring purposes — see
     # build_community_context's docstring for why has_live_data alone is no
