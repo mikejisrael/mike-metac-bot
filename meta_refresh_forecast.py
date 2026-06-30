@@ -115,7 +115,11 @@ SINGLE_MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 2000
 CLOSING_SOON_DAYS = 14
 STALE_DAYS = 30
-BATCH_DIR = "Meta batches"
+# FIXED 2026-06-30: was "Meta batches" (capital M) — see meta_batch_forecast.py's
+# identical fix for the full explanation. This file hadn't been bitten by
+# it yet only because it has never run on a case-sensitive (Linux) runner
+# either — same latent bug, fixed proactively before it gets the chance.
+BATCH_DIR = "meta batches"
 REFRESH_BATCH_PREFIX = os.path.join(BATCH_DIR, "batch_jobs_refresh")
 REFRESH_RESULTS_PREFIX = os.path.join(BATCH_DIR, "batch_results_refresh")
 

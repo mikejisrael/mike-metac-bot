@@ -21,7 +21,7 @@ jobs:
     # this is a guard against the JOB hanging, not the normal-case runtime.
     timeout-minutes: 15
     permissions:
-      contents: write  # needed to push Meta batches/ results back — both
+      contents: write  # needed to push meta batches/ results back — both
       # for dedup (fetch_questions's already_done check) AND so the
       # batch_jobs file this run creates actually exists on Mike's local
       # machine after a `git pull`, which --check (run locally, not via
@@ -68,7 +68,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "Meta batches/"
+          git add "meta batches/"
           git diff --cached --quiet && echo "No new batch files to commit." || (
             git commit -m "chore: meta batch forecast submission [skip ci]" &&
             git push

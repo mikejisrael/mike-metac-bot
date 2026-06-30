@@ -44,7 +44,17 @@ MAX_TOKENS = 2000
 NUM_QUESTIONS = 50
 DAYS_AHEAD = 365
 MIN_FORECASTERS = 5
-BATCH_DIR = "Meta batches"
+# FIXED 2026-06-30: was "Meta batches" (capital M) — harmless on Windows
+# (case-insensitive filesystem, so it silently aliased to the real,
+# long-established "meta batches" folder used by 50+ historical files
+# going back to May 28). But this script had never run on a case-SENSITIVE
+# filesystem until today's new GitHub Actions cron workflow (Linux) —
+# which created a genuinely SEPARATE, empty "Meta batches" folder there,
+# silently bypassing fetch_questions()'s entire dedup history (logged as
+# "Excluding 0 already-forecasted questions" — not because there were none,
+# but because it was looking in the wrong, empty folder). Lowercase now,
+# matching every historical file on disk and in git history.
+BATCH_DIR = "meta batches"
 BATCH_FILE = os.path.join(BATCH_DIR, "batch_jobs.json")
 RESULTS_FILE = os.path.join(BATCH_DIR, "batch_results.json")
 
@@ -686,15 +696,28 @@ async def wait_and_alert_when_ready(batch_id: str, poll_interval: int = 10, max_
     while elapsed < max_wait:
         batch = client_anthropic.messages.batches.retrieve(batch_id)
         if batch.processing_status == "ended":
-            send_alert(
+            alert_sent = send_alert(
                 f"Batch {batch_id} finished processing after {elapsed}s.\n"
                 f"On your machine: git pull, then run "
                 f"python meta_batch_forecast.py --check\n"
                 f"(git pull first — the batch_jobs file this run just "
                 f"committed won't exist locally until you pull it.)",
-                title="📦 Batch ready — git pull then --check"
+                title="Batch ready - git pull then --check"
             )
-            print(f"  ✅ Batch ready after {elapsed}s — alert sent.")
+            if alert_sent:
+                print(f"  ✅ Batch ready after {elapsed}s — alert sent.")
+            else:
+                # Caught live 2026-06-30: this used to print "alert sent"
+                # unconditionally right after calling send_alert(), even on
+                # the run where the send had actually just failed (an
+                # emoji in the title crashed the HTTP header — see
+                # meta_alerts.py). Batch results are real regardless of
+                # whether the notification made it, so this still says so
+                # explicitly rather than leaving Mike to find out by
+                # checking his phone and seeing nothing.
+                print(f"  ⚠️  Batch ready after {elapsed}s, but the alert FAILED "
+                      f"to send (see error above) — results are still ready: "
+                      f"git pull, then python meta_batch_forecast.py --check")
             return
         await asyncio.sleep(poll_interval)
         elapsed += poll_interval
