@@ -77,6 +77,7 @@ load_dotenv()
 from forecasting_tools import MetaculusClient, BinaryQuestion
 from live_data import detect_data_needs, format_live_data_for_prompt
 from cached_llm import build_forecaster_system_prompt
+from meta_prompt_cache import cacheable_system_block
 from meta_research import research_question
 
 client_anthropic = anthropic.Anthropic()
@@ -504,6 +505,11 @@ async def submit_refresh_batch(to_refresh: list[dict]):
     print(f"\nFetching fresh data for {len(to_refresh)} questions...")
 
     system_prompt = build_forecaster_system_prompt()
+    # See meta_prompt_cache.py — same caching treatment as
+    # meta_batch_forecast.py's submit_batch, NOT applied to --single
+    # below (call_claude_single), which is a one-off call that would
+    # never recover the cache-write premium.
+    cached_system = cacheable_system_block(system_prompt)
     requests = []
     question_map = {}
 
@@ -570,7 +576,7 @@ async def submit_refresh_batch(to_refresh: list[dict]):
             "params": {
                 "model": MODEL,
                 "max_tokens": MAX_TOKENS,
-                "system": system_prompt,
+                "system": cached_system,
                 "messages": [{"role": "user", "content": prompt}]
             }
         })
@@ -663,11 +669,17 @@ async def check_refresh_batch():
     print("\nBatch complete! Processing results...")
 
     results = {}
+    total_cache_read = 0
+    total_cache_write = 0
     for result in client_anthropic.messages.batches.results(batch_id):
         custom_id = result.custom_id
 
         if result.result.type == "succeeded":
             text = result.result.message.content[0].text
+            usage = getattr(result.result.message, "usage", None)
+            if usage is not None:
+                total_cache_read += getattr(usage, "cache_read_input_tokens", 0) or 0
+                total_cache_write += getattr(usage, "cache_creation_input_tokens", 0) or 0
             prob = None
             for line in reversed(text.split('\n')):
                 if 'probability:' in line.lower():
@@ -714,6 +726,12 @@ async def check_refresh_batch():
     with open(results_file, "w") as f:
         json.dump(results, f, indent=2)
     print(f"\nSaved results to {results_file}")
+    if total_cache_read or total_cache_write:
+        print(f"  💰 Prompt cache: {total_cache_read} tokens read, "
+              f"{total_cache_write} tokens written across this batch")
+    else:
+        print(f"  ⚠️  Prompt cache: 0 read, 0 written — caching isn't engaging "
+              f"(system prompt may be under Haiku 4.5's 4,096-token minimum).")
 
     await submit_to_metaculus(results)
 
@@ -763,7 +781,12 @@ def parse_post_id(raw: str) -> int | None:
 def call_claude_single(prompt: str) -> tuple[float | None, str]:
     """Synchronous (non-batch) Claude call for the single-question refresh
     path — no 24h batch wait, since the point of --single is reacting now.
-    Uses SINGLE_MODEL (Sonnet), not MODEL (Haiku) — see SINGLE_MODEL comment."""
+    Uses SINGLE_MODEL (Sonnet), not MODEL (Haiku) — see SINGLE_MODEL comment.
+
+    Deliberately NOT using meta_prompt_cache.cacheable_system_block here —
+    see that module's docstring. This is a one-off manual call; the cache
+    write premium (1.25x base input price) would never be recovered by a
+    subsequent cached read, so caching here would cost slightly MORE."""
     system_prompt = build_forecaster_system_prompt()
     response = client_anthropic.messages.create(
         model=SINGLE_MODEL,

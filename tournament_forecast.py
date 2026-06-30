@@ -35,6 +35,7 @@ from forecasting_tools import (
     BinaryQuestion, NumericQuestion, MultipleChoiceQuestion
 )
 from cached_llm import build_forecaster_system_prompt
+from meta_prompt_cache import cacheable_system_block
 from meta_cp_extract import extract_live_cp
 from meta_alerts import send_alert
 from meta_research import research_question
@@ -42,16 +43,25 @@ from live_data import detect_data_needs, format_live_data_for_prompt
 from meta_watch import check_new_futureeval_questions, check_resolutions, FUTUREEVAL_TOURNAMENT_ID
 
 # ─── Config ───────────────────────────────────────────────────────────────────
-# Tournament list comes from meta_batch_forecast.ALLOWED_TOURNAMENTS — single
-# source of truth shared between both scripts. Override without editing either
-# file: set METAC_TOURNAMENT_IDS to a comma-separated list, e.g.
+# Cost optimization split (2026-06-30): this script previously fetched and
+# synchronously forecast ALL of bf.ALLOWED_TOURNAMENTS — including ACX2026,
+# Climate Tipping Points, and Metaculus Cup, none of which are remotely as
+# time-sensitive as FutureEval (90-minute close windows). Those three now
+# only get forecast via meta_batch_forecast.py's Batch API path (50%
+# cheaper, on its own ~every-3-days cron schedule, separate from this
+# script's tighter cadence) — see meta_batch_forecast.py's ALLOWED_TOURNAMENTS
+# for the other side of this split. This script now defaults to FutureEval
+# ONLY, using meta_watch.FUTUREEVAL_TOURNAMENT_ID as the single source of
+# truth (same constant meta_watch.py's new-question alert already uses).
+# Override without editing either file: set METAC_TOURNAMENT_IDS to a
+# comma-separated list, e.g.
 #     set METAC_TOURNAMENT_IDS=32977
 # (32977 = bot-testing-area, useful for testing in isolation from real tournaments)
 _env_override = os.getenv("METAC_TOURNAMENT_IDS")
 if _env_override:
     TOURNAMENT_IDS = [t.strip() for t in _env_override.split(",") if t.strip()]
 else:
-    TOURNAMENT_IDS = bf.ALLOWED_TOURNAMENTS
+    TOURNAMENT_IDS = [FUTUREEVAL_TOURNAMENT_ID]
 TOURNAMENT_BATCH_DIR = "tournament_batches"
 MODEL                = "claude-haiku-4-5"
 MAX_TOKENS           = 2000
@@ -818,10 +828,27 @@ def forecast_question(question) -> tuple[str, any, str | None]:
         response = client_anthropic.messages.create(
             model=MODEL,
             max_tokens=MAX_TOKENS,
-            system=system_prompt,
+            system=cacheable_system_block(system_prompt),
             messages=[{"role": "user", "content": user_prompt}]
         )
         text = response.content[0].text
+
+        # Visibility for the prompt-caching change above: this is the only
+        # way to actually confirm caching is working rather than assuming
+        # it (Haiku 4.5's 4,096-token minimum cacheable prefix means a
+        # too-short system prompt would silently cache nothing, with no
+        # error). cache_read > 0 means a previous call's cache was reused
+        # (cheap); cache_creation > 0 with cache_read == 0 means this was
+        # the first call writing a fresh cache entry (slightly more
+        # expensive than uncached, recovered by the next cached read).
+        # Both staying at 0 across an entire run means caching isn't
+        # engaging at all — check system prompt length if that's the case.
+        usage = getattr(response, "usage", None)
+        if usage is not None:
+            cache_read = getattr(usage, "cache_read_input_tokens", 0) or 0
+            cache_write = getattr(usage, "cache_creation_input_tokens", 0) or 0
+            if cache_read or cache_write:
+                print(f"    💰 cache: {cache_read} read, {cache_write} written")
 
         if q_type == "binary":
             result = parse_binary_response(text)

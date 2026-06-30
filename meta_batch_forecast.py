@@ -20,6 +20,7 @@ load_dotenv()
 from forecasting_tools import MetaculusClient, ApiFilter, BinaryQuestion
 from live_data import detect_data_needs, format_live_data_for_prompt
 from cached_llm import build_forecaster_system_prompt
+from meta_prompt_cache import cacheable_system_block
 from meta_cp_extract import extract_live_cp
 from meta_alerts import send_alert
 from meta_research import research_question
@@ -49,14 +50,20 @@ RESULTS_FILE = os.path.join(BATCH_DIR, "batch_results.json")
 
 # Tournament(s) to pull questions from. ApiFilter.allowed_tournaments accepts
 # a list of str|int (numeric ID or slug), so adding more is just adding here.
-# tournament_forecast.py imports this same list as its single source of truth.
-#   33022                        = Summer 2026 FutureEval Bot Tournament
+#
+# Cost optimization split (2026-06-30): FutureEval (33022) REMOVED from this
+# list — it has 90-minute close windows and needs tournament_forecast.py's
+# synchronous path (now its ONLY tournament, see that file's FUTUREEVAL_
+# TOURNAMENT_ID-only config). The three remaining tournaments here are none
+# of them time-sensitive in the same way, so they stay on this script's
+# Batch API path (50% cheaper than synchronous) on its own ~every-3-days
+# cron schedule, decoupled from tournament_forecast.py's tighter cadence.
 #   "ACX2026"                    = ACX 2026 Prediction Contest
 #   "climate"                    = Climate Tipping Points
 #   "metaculus-cup-summer-2026"  = Metaculus Cup Summer 2026 (bots can forecast
 #                                  here for calibration data, but are NOT prize-
 #                                  eligible in this one — humans-only for prizes)
-ALLOWED_TOURNAMENTS = [33022, "ACX2026", "climate", "metaculus-cup-summer-2026"]
+ALLOWED_TOURNAMENTS = ["ACX2026", "climate", "metaculus-cup-summer-2026"]
 
 
 def ensure_batch_dir():
@@ -250,6 +257,14 @@ The last thing you write is: "Probability: ZZ%"
 async def submit_batch(questions: list[BinaryQuestion]) -> str:
     ensure_batch_dir()
     system_prompt = build_forecaster_system_prompt()
+    # Wrapped once, reused identically across every request in this batch
+    # below — same cached prefix on every request means only the first
+    # ever pays the cache-write premium; every subsequent one in the same
+    # batch (and any other request anywhere on this API key within the
+    # 5-minute TTL) reads the cache instead. See meta_prompt_cache.py for
+    # the Haiku 4.5 minimum-prefix-length caveat — not yet confirmed
+    # whether this prompt actually clears that threshold.
+    cached_system = cacheable_system_block(system_prompt)
 
     requests = []
     question_map = {}
@@ -263,7 +278,7 @@ async def submit_batch(questions: list[BinaryQuestion]) -> str:
             "params": {
                 "model": MODEL,
                 "max_tokens": MAX_TOKENS,
-                "system": system_prompt,
+                "system": cached_system,
                 "messages": [{"role": "user", "content": build_user_prompt(q)}]
             }
         })
@@ -358,11 +373,17 @@ async def check_batch():
     print(f"\nBatch complete! Processing results...")
 
     results = {}
+    total_cache_read = 0
+    total_cache_write = 0
     for result in client_anthropic.messages.batches.results(batch_id):
         custom_id = result.custom_id
 
         if result.result.type == "succeeded":
             text = result.result.message.content[0].text
+            usage = getattr(result.result.message, "usage", None)
+            if usage is not None:
+                total_cache_read += getattr(usage, "cache_read_input_tokens", 0) or 0
+                total_cache_write += getattr(usage, "cache_creation_input_tokens", 0) or 0
             prob = None
             for line in reversed(text.split('\n')):
                 if 'probability:' in line.lower():
@@ -410,6 +431,13 @@ async def check_batch():
         json.dump(results, f, indent=2)
 
     print(f"Saved {len(results)} results to {timestamped_results}")
+    if total_cache_read or total_cache_write:
+        print(f"  💰 Prompt cache: {total_cache_read} tokens read, "
+              f"{total_cache_write} tokens written across this batch")
+    else:
+        print(f"  ⚠️  Prompt cache: 0 read, 0 written across this batch — caching "
+              f"isn't engaging (system prompt may be under Haiku 4.5's "
+              f"4,096-token minimum cacheable length).")
     await submit_to_metaculus(results, current_results_file=timestamped_results)
 
 
@@ -617,13 +645,51 @@ async def update_community_predictions():
         print(f"   Run again later to pick up remaining hidden predictions")
 
 
+async def wait_and_alert_when_ready(batch_id: str, poll_interval: int = 10, max_wait: int = 300):
+    """Poll batch status after submission and alert ONLY once it's
+    genuinely ready to --check. Real-world turnaround for this batch size
+    has been observed at well under 30 seconds in practice, but Anthropic's
+    documented SLA is up to 24h — this loop is bounded (max_wait, default
+    5 minutes) so a run that doesn't finish quickly doesn't hang the
+    GitHub Actions job indefinitely or burn its runtime budget.
+
+    If the batch isn't ready within max_wait, this prints a message and
+    returns WITHOUT alerting — deliberately, so Mike is never told "go run
+    --check" on a batch that genuinely isn't finished yet. There's no
+    second automated --check cron (by design — see meta_batch_forecast.yml);
+    an un-alerted batch just waits for the next scheduled --submit run,
+    or a manual `python meta_batch_forecast.py --check` whenever convenient.
+    """
+    elapsed = 0
+    while elapsed < max_wait:
+        batch = client_anthropic.messages.batches.retrieve(batch_id)
+        if batch.processing_status == "ended":
+            send_alert(
+                f"Batch {batch_id} finished processing after {elapsed}s.\n"
+                f"On your machine: git pull, then run "
+                f"python meta_batch_forecast.py --check\n"
+                f"(git pull first — the batch_jobs file this run just "
+                f"committed won't exist locally until you pull it.)",
+                title="📦 Batch ready — git pull then --check"
+            )
+            print(f"  ✅ Batch ready after {elapsed}s — alert sent.")
+            return
+        await asyncio.sleep(poll_interval)
+        elapsed += poll_interval
+
+    print(f"  ⏳ Batch not ready after {max_wait}s — NOT alerting yet (would be "
+          f"premature). It'll be picked up by the next scheduled --submit run, "
+          f"or check manually anytime: python meta_batch_forecast.py --check")
+
+
 # ─── Main ──────────────────────────────────────────────────────────────────────
 async def main():
     print("METACULUS BATCH FORECASTER")
     print("=" * 50)
     questions = await fetch_questions()
     if questions:
-        await submit_batch(questions)
+        batch_id = await submit_batch(questions)
+        await wait_and_alert_when_ready(batch_id)
     else:
         print("No questions found matching filter")
 

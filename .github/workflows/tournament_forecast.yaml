@@ -50,6 +50,16 @@ jobs:
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # Added 2026-06-30: was missing entirely — send_alert() reads this
+          # from the environment, and GitHub Actions runners don't have
+          # local .env, only what's explicitly passed here. Without this,
+          # every ntfy alert (including today's new ones in meta_watch.py —
+          # new FutureEval question, resolved forecast, dropped tournament
+          # fetch) would silently never fire on scheduled runs, only when
+          # tested locally. Confirm ALERT_NTFY_TOPIC exists under
+          # Settings -> Secrets and variables -> Actions before relying on
+          # any of these alerts.
+          ALERT_NTFY_TOPIC: ${{ secrets.ALERT_NTFY_TOPIC }}
 
       - name: Commit forecast results for dedup
         run: |
