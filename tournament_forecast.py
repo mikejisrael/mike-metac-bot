@@ -39,6 +39,7 @@ from meta_cp_extract import extract_live_cp
 from meta_alerts import send_alert
 from meta_research import research_question
 from live_data import detect_data_needs, format_live_data_for_prompt
+from meta_watch import check_new_futureeval_questions, check_resolutions, FUTUREEVAL_TOURNAMENT_ID
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 # Tournament list comes from meta_batch_forecast.ALLOWED_TOURNAMENTS — single
@@ -164,6 +165,9 @@ async def fetch_tournament_questions() -> list:
 
     raw_posts_by_id: dict[int, dict] = {}
     for tid in TOURNAMENT_IDS:
+        tid_posts_by_id: dict[int, dict] = {}  # this tournament only — used
+        # below to scope the new-FutureEval-question check; raw_posts_by_id
+        # above stays the existing flat cross-tournament dict, unchanged.
         try:
             url = f"https://www.metaculus.com/api/posts/?tournaments={tid}&limit=100"
             tid_count = 0
@@ -180,9 +184,33 @@ async def fetch_tournament_questions() -> list:
                 time.sleep(1.5)
 
                 data = None
+                fetch_exhausted_on_connection_error = False
                 for attempt in range(3):
                     print(f"  ...fetching {tid} (attempt {attempt + 1}/3)...", flush=True)
-                    r = requests.get(url, headers=headers, timeout=30)
+                    # Added: previously a transient connection failure here
+                    # (DNS blip, connection reset, etc.) raised straight out
+                    # of this loop with zero retry, was caught by the outer
+                    # try/except at the tid level, and silently dropped the
+                    # ENTIRE tournament for the run — confirmed live: this is
+                    # exactly what happened to FutureEval (id 33022, the main
+                    # prize-eligible tournament) on one run, with nothing in
+                    # the logs beyond a single one-line warning easy to miss.
+                    # The existing 429 handling below already retries
+                    # correctly; this just extends the same retry budget and
+                    # backoff to connection-level failures instead of only
+                    # HTTP-level ones.
+                    try:
+                        r = requests.get(url, headers=headers, timeout=30)
+                    except (requests.exceptions.ConnectionError,
+                            requests.exceptions.Timeout) as e:
+                        wait = 5 * (attempt + 1)
+                        print(f"  ⏳ Tournament {tid}: connection error "
+                              f"({type(e).__name__}: {e}), waiting {wait}s "
+                              f"before retry {attempt + 1}/3...", flush=True)
+                        time.sleep(wait)
+                        fetch_exhausted_on_connection_error = (attempt == 2)
+                        continue
+                    fetch_exhausted_on_connection_error = False
                     if r.status_code == 429:
                         wait = 5 * (attempt + 1)
                         print(f"  ⏳ Tournament {tid}: rate limited (429), "
@@ -201,6 +229,18 @@ async def fetch_tournament_questions() -> list:
                     break
 
                 if data is None:
+                    if fetch_exhausted_on_connection_error:
+                        # Loud, not just a console print: this run is almost
+                        # always triggered headlessly via cron-job.org ->
+                        # GitHub Actions, where console output isn't watched
+                        # in real time. A dropped tournament — especially
+                        # FutureEval, the main prize-eligible one — needs to
+                        # surface somewhere Mike will actually see it.
+                        send_alert(
+                            f"Tournament {tid}: fetch failed after 3 connection-error "
+                            f"retries — this tournament was SKIPPED entirely for this run.",
+                            title="⚠️ Tournament fetch dropped"
+                        )
                     break  # exhausted retries or hit a non-200/non-JSON response
 
                 tid_posts = data.get("results", [])
@@ -212,6 +252,7 @@ async def fetch_tournament_questions() -> list:
                     post_id = post.get("id")
                     if post_id is not None:
                         raw_posts_by_id.setdefault(post_id, post)
+                        tid_posts_by_id.setdefault(post_id, post)
                 if not tid_posts:
                     # An empty page means we're past the real end of data —
                     # stop here even if the API still claims a 'next' link.
@@ -225,8 +266,19 @@ async def fetch_tournament_questions() -> list:
                       f"endpoint may be returning all historical posts, not just open ones.",
                       flush=True)
             print(f"  Tournament {tid}: {tid_count} posts", flush=True)
+            if str(tid) == str(FUTUREEVAL_TOURNAMENT_ID):
+                check_new_futureeval_questions(tid_posts_by_id)
         except Exception as e:
             print(f"  ⚠️  Could not fetch tournament {tid}: {e}", flush=True)
+            # Same reasoning as the connection-error alert above: an
+            # unexpected failure here (anything not already handled by the
+            # retry logic — e.g. a genuine library/parsing bug) still
+            # silently drops the whole tournament if all we do is print.
+            send_alert(
+                f"Tournament {tid}: fetch failed with an unexpected error — "
+                f"this tournament was SKIPPED entirely for this run.\n{str(e)[:150]}",
+                title="⚠️ Tournament fetch dropped"
+            )
 
     raw_posts = list(raw_posts_by_id.values())
 
@@ -921,6 +973,14 @@ async def run():
     print(f"\n{'=' * 50}")
     print(f"Submitted: {submitted} | Failed: {failed}")
     print(f"Results saved to {results_file}")
+
+    # Run AFTER forecasting/submission, deliberately — FutureEval questions
+    # can close in as little as 90 minutes, so nothing non-time-sensitive
+    # should delay getting forecasts submitted. Checking resolutions on
+    # already-forecast questions has no such urgency.
+    print(f"\n{'=' * 50}")
+    print("Checking for resolved questions (bot-submitted forecasts only)...")
+    check_resolutions()
 
 
 if __name__ == "__main__":

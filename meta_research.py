@@ -24,11 +24,20 @@ it's already wired in). If unset, research_question() returns None and
 callers fall back to the existing CP-anchoring safety net, same graceful-
 degradation contract as before.
 
-NOT YET LIVE-TESTED in this environment (api.anthropic.com web_search
-specifically — the messages.create() calls themselves work fine, but the
-search tool's actual behavior hasn't been observed end-to-end here). Watch
-the first real run closely, same caution as the original Perplexity
-integration got.
+VERIFICATION PASS added 2026-06-30: manual spot-checking across 7 sample
+questions found research_question() reliably fires and returns real,
+search-grounded content, but ~2/7 samples contained internal numeric/date
+contradictions — e.g. the same month's index value attributed to two
+different months, or a YTD count that decreases then jumps inconsistently
+across sequential "as of" dates. This is Haiku blending multiple web
+sources/timeframes without reconciling them, not a missing-search problem.
+A second, search-free Haiku call (_verify_research) now checks the first
+call's output for exactly this failure mode and resolves it automatically
+(preferring the most-recently-dated figure, discarding the rest, and
+saying so in one line) before the text ever reaches the forecaster. If
+verification itself fails or returns nothing usable, we fall back to the
+original unverified text rather than losing the research entirely — same
+graceful-degradation philosophy as the rest of this module.
 """
 
 import os
@@ -38,6 +47,59 @@ from dotenv import load_dotenv
 load_dotenv()
 
 MODEL = "claude-haiku-4-5"
+
+
+def _verify_research(raw_text: str, question_text: str, timeout: int = 20) -> str:
+    """
+    Second-pass, search-free check: ask Haiku to find and resolve internal
+    numeric/date contradictions in the research text it already produced
+    (e.g. the same index/count attributed to two different months, or a
+    YTD figure that decreases then jumps across sequential 'as of' dates).
+    Never raises and never returns empty — on any failure or empty result,
+    callers should keep using the original raw_text, same graceful-
+    degradation contract as research_question() itself.
+    """
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key or not raw_text:
+        return raw_text
+
+    prompt = (
+        f"Forecasting question: {question_text}\n\n"
+        f"Research summary to check:\n{raw_text}\n\n"
+        "Check the above summary ONLY for internal contradictions — the same "
+        "metric, index, or count attributed to two different values, dates, "
+        "or time periods (e.g. one figure said to be from 'May' and the same "
+        "number later said to be from 'April'; a year-to-date total that "
+        "decreases and then jumps inconsistently across sequential dates).\n\n"
+        "If you find no contradictions, return the summary UNCHANGED, "
+        "word-for-word.\n\n"
+        "If you find contradictions, rewrite the summary: keep all "
+        "non-contradictory content as-is, resolve each contradiction by "
+        "preferring the figure with the most recent or most specific date, "
+        "and add one short line at the end stating exactly what you "
+        "discarded and why (e.g. 'Note: discarded an earlier 40.8 figure "
+        "misattributed to May; June's confirmed value is 43.6.'). If the "
+        "contradiction can't be resolved from the text given, say so "
+        "explicitly in that same line rather than guessing."
+    )
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key, timeout=timeout)
+        response = client.messages.create(
+            model=MODEL,
+            max_tokens=700,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text_parts = [
+            block.text for block in response.content
+            if getattr(block, "type", None) == "text"
+        ]
+        verified = "\n".join(text_parts).strip()
+        return verified if verified else raw_text
+
+    except Exception as e:
+        print(f"  ⚠️  Research verification failed (non-fatal, using unverified research): {e}")
+        return raw_text
 
 
 def research_question(question_text: str, background_info: str = "", timeout: int = 25) -> str | None:
@@ -87,7 +149,9 @@ def research_question(question_text: str, background_info: str = "", timeout: in
             if getattr(block, "type", None) == "text"
         ]
         text = "\n".join(text_parts).strip()
-        return text if text else None
+        if not text:
+            return None
+        return _verify_research(text, question_text)
 
     except Exception as e:
         print(f"  ⚠️  Research call failed (non-fatal, forecasting will proceed without it): {e}")

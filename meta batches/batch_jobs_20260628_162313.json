@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_40916_20260628_162313",
+  "submitted_at": "2026-06-28T16:23:13.274830",
+  "batch_type": "single",
+  "account": "personal",
+  "num_requests": 1,
+  "question_ids": {
+    "single_40916_20260628_162313": 40916
+  },
+  "post_ids": {
+    "single_40916_20260628_162313": 41206
+  },
+  "question_texts": {
+    "single_40916_20260628_162313": "Will Anthropic file an initial registration statement (S-1) with the SEC to launch an IPO, before July 1, 2026?"
+  },
+  "original_probabilities": {
+    "single_40916_20260628_162313": 0.28
+  },
+  "refresh_reasons": {
+    "single_40916_20260628_162313": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_40916_20260628_162313": null
+  },
+  "resolve_times": {
+    "single_40916_20260628_162313": "2026-07-01T05:00:00+00:00"
+  }
+}

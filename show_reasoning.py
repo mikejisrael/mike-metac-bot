@@ -11,6 +11,8 @@ import glob
 import sys
 import os
 
+from meta_question_matching import titles_match
+
 BATCH_DIRS = ["Meta batches", "tournament_batches"]
 
 
@@ -34,13 +36,34 @@ def load_all_results() -> dict:
                 data = json.load(f)
             for custom_id, item in data.items():
                 q_id = item.get("question_id")
+                new_title = item.get("question_text", "")
                 if q_id and item.get("reasoning"):
+                    # Guard added 2026-06-30: previously this just overwrote
+                    # all_results[q_id] unconditionally, on the (never
+                    # actually confirmed) assumption that two entries with
+                    # the same question_id are always the same question. A
+                    # local-data check found that assumption did fail in
+                    # practice — but from a since-fixed post_id/question_id
+                    # endpoint bug, not from genuine Metaculus ID recycling.
+                    # Keeping this guard anyway: it's free when titles match
+                    # (the normal case) and loudly flags it instead of
+                    # silently showing the wrong question's reasoning if a
+                    # mismatch ever happens again, for any reason.
+                    existing = all_results.get(q_id)
+                    if existing and not titles_match(existing["question_text"], new_title):
+                        print(f"  🛑 Q{q_id}: title mismatch between source files — "
+                              f"NOT silently merging.")
+                        print(f"       {existing['source_file']}: {existing['question_text'][:80]}")
+                        print(f"       {rf}: {new_title[:80]}")
+                        print(f"       Keeping the most recently loaded entry — if this is "
+                              f"unexpected, check both source files.")
                     # Keep most recent if duplicate (later files overwrite earlier)
                     all_results[q_id] = {
-                        "question_text":  item.get("question_text", ""),
+                        "question_text":  new_title,
                         "probability":    item.get("probability") or item.get("submitted_forecast"),
                         "original_prob":  item.get("original_prob"),
                         "reasoning":      item.get("reasoning", ""),
+                        "research_text":  item.get("research_text"),
                         "refresh_reason": item.get("refresh_reason", ""),
                         "community_pred": item.get("community_pred"),
                         "gap_pts":        item.get("gap_pts"),
@@ -67,6 +90,7 @@ def display_reasoning(q_id: int, all_results: dict):
     community = item.get("community_pred")
     gap_pts = item.get("gap_pts")
     challenge = item.get("challenge")
+    research_text = item.get("research_text")
     # Prefer the library-verified URL; fall back to the question-id URL only if absent.
     url = item.get("page_url") or f"https://www.metaculus.com/questions/{q_id}/"
 
@@ -88,6 +112,15 @@ def display_reasoning(q_id: int, all_results: dict):
 
     print(f"Metaculus:    {url}")
     print("-" * 70)
+
+    if research_text:
+        print("📡 RESEARCH (real-time web search, fetched for this question):")
+        print(research_text)
+        print("-" * 70)
+    else:
+        print("📡 RESEARCH: none (no live_data match and no research result for this question)")
+        print("-" * 70)
+
     print(item["reasoning"])
 
     if challenge:

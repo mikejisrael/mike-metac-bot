@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43363_20260628_122509",
+  "submitted_at": "2026-06-28T12:25:09.814994",
+  "batch_type": "single",
+  "account": "personal",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43363_20260628_122509": 43363
+  },
+  "post_ids": {
+    "single_43363_20260628_122509": 43367
+  },
+  "question_texts": {
+    "single_43363_20260628_122509": "Will the Community beat Dylan Matthews in the Metaculus Cup Summer 2026?"
+  },
+  "original_probabilities": {
+    "single_43363_20260628_122509": 0.51
+  },
+  "refresh_reasons": {
+    "single_43363_20260628_122509": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43363_20260628_122509": null
+  },
+  "resolve_times": {
+    "single_43363_20260628_122509": "2026-09-03T04:00:00+00:00"
+  }
+}

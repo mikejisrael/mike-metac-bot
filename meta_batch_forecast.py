@@ -176,6 +176,11 @@ def build_user_prompt(question: BinaryQuestion) -> str:
         f"\nCURRENT RESEARCH (real-time web search, fetched for this question):\n{research_text}\n"
         if has_research else ""
     )
+    # Stashed on the question object (same pattern as
+    # community_prediction_at_access_time below) so submit_batch can persist
+    # it into batch_info/results JSON without re-running research_question
+    # or threading a second return value through this function's signature.
+    question.research_text_at_access_time = research_text
 
     # Either source counts as "real grounding" for anchoring purposes — a
     # question can have research but no live_data (e.g. politics) or vice
@@ -285,6 +290,17 @@ async def submit_batch(questions: list[BinaryQuestion]) -> str:
             custom_id: q.id_of_post
             for custom_id, q in question_map.items()
         },
+        # Added alongside the dashboard/raw-view persistence fix: previously
+        # research_question()'s output only ever existed transiently inside
+        # the prompt sent to the forecaster — once submitted, there was no
+        # way to see what research a question got (or whether it got any)
+        # without manually re-running research_question() by hand. Saved
+        # here, then carried into the results JSON by check_batch below,
+        # next to reasoning.
+        "research_texts": {
+            custom_id: getattr(q, 'research_text_at_access_time', None)
+            for custom_id, q in question_map.items()
+        },
         "question_texts": {
             custom_id: q.question_text
             for custom_id, q in question_map.items()
@@ -369,6 +385,7 @@ async def check_batch():
                 # now — also reflects the pre-forecast value if the live
                 # prefetch in fetch_questions() found one.
                 "community_prediction": batch_info.get("community_predictions", {}).get(custom_id),
+                "research_text": batch_info.get("research_texts", {}).get(custom_id),
                 "status":        "success"
             }
         else:
@@ -380,6 +397,7 @@ async def check_batch():
                 "probability":   None,
                 "submitted_forecast": None,
                 "community_prediction": batch_info.get("community_predictions", {}).get(custom_id),
+                "research_text": batch_info.get("research_texts", {}).get(custom_id),
                 "status":        "failed",
                 "error":         str(result.result)
             }

@@ -77,6 +77,7 @@ load_dotenv()
 from forecasting_tools import MetaculusClient, BinaryQuestion
 from live_data import detect_data_needs, format_live_data_for_prompt
 from cached_llm import build_forecaster_system_prompt
+from meta_research import research_question
 
 client_anthropic = anthropic.Anthropic()
 
@@ -144,14 +145,13 @@ def build_community_context(
 
     has_live_data: whether live_data.py actually returned anything for this
     question (it only covers crypto/stock/index/FRED keywords — most
-    politics/sports/legal/geopolitics questions get nothing). Confirmed via
-    Console cost breakdown (Total web search cost: $0.00 for the full month)
-    that NO script in this pipeline has real web search/research wired in —
-    so for questions outside live_data's coverage, the model is reasoning
-    from a static, frozen-at-creation-time background text only. In that
-    case we anchor hard to the community prediction regardless of how much
-    time is left, since CP reflects real people reacting to real current
-    events the model cannot see at all.
+    politics/sports/legal/geopolitics questions get nothing). Note: this
+    flag alone no longer means "no real grounding" — meta_research.py's
+    research_question() (native Claude web search, wired into this file's
+    build_refresh_prompt below) can independently supply real grounding
+    for exactly the kinds of questions live_data.py misses. Callers should
+    pass has_real_grounding (live_data OR research), not has_live_data
+    alone, when deciding how hard to anchor to CP.
     """
     if cp is None:
         return ""
@@ -415,11 +415,33 @@ def build_refresh_prompt(
     live_data_text = format_live_data_for_prompt(live_data)
     has_live_data = bool(live_data)  # live_data.py only covers crypto/stock/
     # index/FRED keywords — empty dict means no real current information at
-    # all for this question (confirmed: no script in this pipeline has web
-    # search wired in, per Console cost breakdown showing $0.00 spent on it).
+    # all for this question from that source alone.
+
+    # Added 2026-06-30: was previously missing entirely from this file —
+    # tournament_forecast.py and meta_batch_forecast.py both got real-time
+    # web search research wired in, but refresh (this file, both --submit
+    # batch and --single) had no research call at all, meaning refreshed
+    # forecasts on non-live_data questions (most politics/sports/legal/
+    # geopolitics questions) were still reasoning from static,
+    # frozen-at-creation-time background text only, exactly the failure
+    # mode this fix addresses everywhere else.
+    research_text = research_question(question.question_text, question.background_info or "")
+    has_research = research_text is not None
+    research_block = (
+        f"\nCURRENT RESEARCH (real-time web search, fetched for this question):\n{research_text}\n"
+        if has_research else ""
+    )
+    # Stashed for submit_refresh_batch to persist below — same pattern as
+    # meta_batch_forecast.py and as community_prediction_at_access_time.
+    question.research_text_at_access_time = research_text
+
+    # Either source counts as real grounding for anchoring purposes — see
+    # build_community_context's docstring for why has_live_data alone is no
+    # longer the right signal now that research_question exists.
+    has_real_grounding = has_live_data or has_research
 
     cp = getattr(question, 'community_prediction_at_access_time', None)
-    community = build_community_context(days_to_close, total_days, cp, has_live_data)
+    community = build_community_context(days_to_close, total_days, cp, has_real_grounding)
 
     if original_prob is not None:
         original_note = f"\nNote: This question was previously forecast at {original_prob:.0%}. Review whether this remains appropriate given current information.\n"
@@ -427,11 +449,10 @@ def build_refresh_prompt(
         original_note = "\nNote: No prior forecast on file for this question — treat this as a fresh, independent forecast.\n"
 
     no_data_note = ""
-    if not has_live_data:
+    if not has_real_grounding:
         no_data_note = (
-            "\nNOTE: No live data was found for this question (it falls "
-            "outside live_data.py's coverage — crypto/stock/index/FRED "
-            "questions only). You have no current information beyond the "
+            "\nNOTE: No live market data and no research results were found "
+            "for this question. You have no current information beyond the "
             "static background/resolution text above.\n"
         )
 
@@ -446,6 +467,7 @@ Resolution criteria:
 {question.fine_print or ''}
 
 {live_data_text}
+{research_block}
 {no_data_note}
 {community}
 {original_note}
@@ -460,14 +482,15 @@ Before answering write:
 (d) Scenario for YES outcome
 (e) Base rate. HARD RULE: do not reference any specific past tournament
     edition, named forecaster, or quoted/paraphrased tournament outcome
-    UNLESS it appears verbatim in the Background or Resolution criteria
-    sections above. Do not invent or recall a "Spring" edition, a prior
-    head-to-head result, or any other specific precedent from memory — you
-    do not have reliable knowledge of this tournament's history beyond what
-    is given above. If no real base-rate data is given above, write exactly:
-    "No reliable base rate available — proceeding on priors." and move on.
-(f) How the live data/background above (NOT general news — you have none
-    unless explicitly given above) moves you from base rate
+    UNLESS it appears verbatim in the Background, Resolution criteria, or
+    Research sections above. Do not invent or recall a "Spring" edition, a
+    prior head-to-head result, or any other specific precedent from memory —
+    you do not have reliable knowledge of this tournament's history beyond
+    what is given above. If no real base-rate data is given above, write
+    exactly: "No reliable base rate available — proceeding on priors." and
+    move on.
+(f) How the live data/research/background above (NOT general news — you
+    have none unless explicitly given above) moves you from base rate
 (g) How your view has changed (or not) since the original forecast
 (h) If community prediction exists and differs >10%, explain why you diverge
 
@@ -588,6 +611,12 @@ async def submit_refresh_batch(to_refresh: list[dict]):
             custom_id: getattr(info["question"], 'community_prediction_at_access_time', None)
             for custom_id, info in question_map.items()
         },
+        # See meta_batch_forecast.py for why — same dashboard/raw-view
+        # persistence fix, applied here too.
+        "research_texts": {
+            custom_id: getattr(info["question"], 'research_text_at_access_time', None)
+            for custom_id, info in question_map.items()
+        },
         "resolve_times": {
             custom_id: (
                 info["known_resolve_time"]
@@ -665,6 +694,7 @@ async def check_refresh_batch():
                 "change_pts":     change,
                 "refresh_reason": batch_info.get("refresh_reasons", {}).get(custom_id, ""),
                 "reasoning":      text,
+                "research_text":  batch_info.get("research_texts", {}).get(custom_id),
                 "status":         "success"
             }
             print(f"  Q{q_id}: {original:.0%} → {prob:.0%} ({change_str}) — {q_text[:50]}")
@@ -676,6 +706,7 @@ async def check_refresh_batch():
                 "question_text": q_text,
                 "probability":   None,
                 "status":        "failed",
+                "research_text": batch_info.get("research_texts", {}).get(custom_id),
             }
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
@@ -813,6 +844,7 @@ def _save_single_result(
             "community_prediction": getattr(
                 question, "community_prediction_at_access_time", None
             ),
+            "research_text": getattr(question, "research_text_at_access_time", None),
             "status": "success",
         }
     }

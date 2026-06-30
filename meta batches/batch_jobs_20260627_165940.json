@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43360_20260627_165940",
+  "submitted_at": "2026-06-27T16:59:40.383903",
+  "batch_type": "single",
+  "account": "personal",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43360_20260627_165940": 43360
+  },
+  "post_ids": {
+    "single_43360_20260627_165940": 43360
+  },
+  "question_texts": {
+    "single_43360_20260627_165940": "Will the UK National Threat Level reduce from SEVERE before September 2026?"
+  },
+  "original_probabilities": {
+    "single_43360_20260627_165940": 0.05
+  },
+  "refresh_reasons": {
+    "single_43360_20260627_165940": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43360_20260627_165940": null
+  },
+  "resolve_times": {
+    "single_43360_20260627_165940": "2026-09-01T11:00:00+00:00"
+  }
+}
