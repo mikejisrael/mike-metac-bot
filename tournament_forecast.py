@@ -635,14 +635,36 @@ def parse_numeric_response(text: str, question: NumericQuestion) -> list[float] 
     if None in (low, median, high):
         return None
 
-    # Sanity check — catch parsing failures before they become a silent garbage submission
+    # Sanity check — catch parsing failures before they become a silent garbage submission.
     lower = question.lower_bound
     upper = question.upper_bound
-    if not (low <= median <= high):
-        print(f"  ⚠️  Parsed percentiles not ordered (low={low}, median={median}, high={high}) — rejecting")
+
+    # FIXED 2026-07-01: previously rejected the entire forecast if the parsed
+    # median fell outside the question's bounds, even by a tiny margin. Confirmed
+    # live: the model forecast 298,000 for a question with lower_bound 300,000
+    # (0.67% below) — a completely credible SPR value — and the hard reject threw
+    # away the entire research+forecast call and submitted nothing to FutureEval.
+    # Now clamps each percentile to [lower, upper] instead, with a warning so the
+    # clamping is always visible in the log. Still hard-rejects if the median is
+    # more than 20% outside bounds, since that's most likely a genuine unit error
+    # (e.g. model answered in barrels when the question is in thousand-barrels)
+    # rather than a rounding edge-case worth clamping.
+    CLAMP_TOLERANCE = 0.20
+    if median < lower * (1 - CLAMP_TOLERANCE) or median > upper * (1 + CLAMP_TOLERANCE):
+        print(f"  ⚠️  Parsed median {median} is >20% outside question bounds "
+              f"[{lower}, {upper}] — likely a unit error, rejecting")
         return None
-    if median < lower or median > upper:
-        print(f"  ⚠️  Parsed median {median} outside question bounds [{lower}, {upper}] — rejecting")
+    if low < lower or high > upper or median < lower or median > upper:
+        old_low, old_median, old_high = low, median, high
+        low    = max(low, lower)
+        median = max(min(median, upper), lower)
+        high   = min(high, upper)
+        print(f"  ℹ️  Clamped percentiles to question bounds [{lower}, {upper}]: "
+              f"({old_low}, {old_median}, {old_high}) -> ({low}, {median}, {high})")
+
+    if not (low <= median <= high):
+        print(f"  ⚠️  Parsed percentiles not ordered after clamping "
+              f"(low={low}, median={median}, high={high}) — rejecting")
         return None
 
     std = (high - low) / (2 * 1.2816)
