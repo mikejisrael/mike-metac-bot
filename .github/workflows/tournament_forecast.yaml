@@ -65,7 +65,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add tournament_batches/
+          git add tournament_batches/ watch_state/
           git diff --cached --quiet && echo "No new results to commit." || (
             git commit -m "chore: tournament forecast results [skip ci]" &&
             git push

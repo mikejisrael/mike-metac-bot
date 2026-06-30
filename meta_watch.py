@@ -115,20 +115,52 @@ def check_new_futureeval_questions(raw_posts_by_id: dict) -> None:
     Caller (tournament_forecast.py's fetch loop) is responsible for this
     scoping — that loop already separates posts per-tournament before
     merging everything into its own flat all-tournaments dict, so this
-    function never sees ACX2026/Climate/Metaculus Cup posts."""
+    function never sees ACX2026/Climate/Metaculus Cup posts.
+
+    FIXED 2026-06-30: previously sent ONE individual ntfy POST per newly-
+    detected question with zero delay between calls. On the very first run
+    against a tournament with many already-open questions, every single
+    one registers as "new" against an empty seen-state file simultaneously
+    — confirmed live: 158 FutureEval questions on a fresh watch_state file
+    fired 158 rapid-fire individual alerts, which hit ntfy.sh's rate limit
+    partway through (77 of 158 actually landed, the rest 429'd) and took
+    real wall-clock time away from FutureEval's tight close windows for no
+    benefit. Now batches all new questions from a single check into ONE
+    alert. The very-first-ever-run case (a large existing backlog, not
+    genuinely "new" events) gets special handling: silently seed the watch
+    list with one short summary notification instead of listing all of
+    them — only questions that appear between two CONSECUTIVE runs from
+    here on are genuinely new events worth detailing individually in the
+    alert body."""
     seen = set(_load_json(FUTUREEVAL_SEEN_FILE, []))
     new_ids = [pid for pid in raw_posts_by_id if pid not in seen]
+    is_first_run = len(seen) == 0 and len(new_ids) > 0
 
     if new_ids:
-        print(f"  📬 {len(new_ids)} new FutureEval question(s) detected — alerting...")
-        for pid in new_ids:
-            post = raw_posts_by_id[pid]
-            title = (post.get("question") or {}).get("title") or post.get("title") or "Unknown title"
-            url = f"https://www.metaculus.com/questions/{pid}/"
+        if is_first_run:
+            print(f"  📬 First-ever run: seeding watch list with {len(new_ids)} "
+                  f"currently-open FutureEval question(s) — sending ONE summary "
+                  f"alert, not {len(new_ids)} individual ones.")
             send_alert(
-                f"New FutureEval question: {title[:150]}\n{url}",
-                title="🆕 FutureEval question opened"
+                f"Watch list initialized with {len(new_ids)} currently-open "
+                f"FutureEval question(s). From now on you'll get an alert "
+                f"only for genuinely NEW questions between runs.",
+                title="FutureEval watch list initialized"
             )
+        else:
+            print(f"  📬 {len(new_ids)} new FutureEval question(s) detected — "
+                  f"alerting (single batched notification)...")
+            MAX_LISTED = 15  # ntfy has a practical body-size limit, and a
+            # notification listing 50+ questions stops being readable anyway
+            lines = []
+            for pid in new_ids[:MAX_LISTED]:
+                post = raw_posts_by_id[pid]
+                title = (post.get("question") or {}).get("title") or post.get("title") or "Unknown title"
+                lines.append(f"- {title[:100]}\n  https://www.metaculus.com/questions/{pid}/")
+            body = "\n".join(lines)
+            if len(new_ids) > MAX_LISTED:
+                body += f"\n...and {len(new_ids) - MAX_LISTED} more."
+            send_alert(body, title=f"{len(new_ids)} new FutureEval question(s)")
     else:
         print(f"  No new FutureEval questions since last check ({len(seen)} known).")
 
