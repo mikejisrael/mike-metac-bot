@@ -1,13 +1,18 @@
-import os, requests
-from dotenv import load_dotenv
-load_dotenv()
-headers = {"Authorization": f"Token {os.getenv('METACULUS_TOKEN')}"}
+import math
+from unittest.mock import MagicMock
+import tournament_forecast as tf
 
-for qid in [38265, 38099, 43167, 999999999]:
-    r = requests.get(f"https://www.metaculus.com/api2/questions/{qid}/", headers=headers, timeout=20)
-    print(qid, "->", r.status_code)
-    if r.status_code == 200:
-        d = r.json()
-        print("   title:", d.get("title"))
-    else:
-        print("   body:", r.text[:150])
+q = MagicMock()
+q.lower_bound = 300000.0
+q.upper_bound = 450000.0
+q.open_lower_bound = True
+q.open_upper_bound = False
+q.cdf_size = 201
+
+raw = '''
+10th percentile (low): 280,000
+50th percentile (median): 298,000
+90th percentile (high): 320,000
+'''
+result = tf.parse_numeric_response(raw, q)
+print('Result:', result[:5] if result else None)

@@ -160,19 +160,36 @@ async def fetch_tournament_questions() -> list:
     # already_done maps question_id -> the title we forecast it under, so a
     # recycled ID (genuinely a different question on Metaculus's side) can be
     # detected via _titles_match instead of being silently skipped as a dup.
-    already_done: dict[int, str] = {}
+    #
+    # FIXED 2026-06-30: previously loaded and printed here, UNSCOPED — every
+    # question_id ever recorded in ANY tournament_batches file, regardless
+    # of which tournament it came from. This script only got split to
+    # FutureEval-ONLY today; every historical file predates that split and
+    # mixes in ACX2026/Climate/Metaculus Cup forecasts too. Confirmed live:
+    # printed "Excluding 92" when the real FutureEval-specific count was
+    # ~17 — the other 75 were forecasts from other tournaments that happen
+    # to be sitting in the same folder, not genuinely already-forecast
+    # FutureEval questions. Result records don't store which tournament
+    # they came from (nothing to filter by directly), so this is now
+    # loaded raw here, then INTERSECTED against this run's actual fetched
+    # FutureEval question_ids further below before being used or printed.
+    # Trade-off: if a previously-forecast FutureEval question somehow
+    # doesn't appear in this run's fetch (e.g. genuinely removed from the
+    # tournament), it would no longer be excluded by this scoping — low
+    # risk given the listing has been complete (3 full pages, no
+    # MAX_PAGES truncation) every time so far.
+    already_done_raw: dict[int, str] = {}
     for rf in glob.glob(os.path.join(TOURNAMENT_BATCH_DIR, "batch_results_2*.json")):
         try:
             with open(rf) as f:
                 data = json.load(f)
             for r in data.values():
                 if r.get("question_id"):
-                    already_done.setdefault(r["question_id"], r.get("question_text", ""))
+                    already_done_raw.setdefault(r["question_id"], r.get("question_text", ""))
         except Exception:
             pass
 
     print(f"Tournaments: {TOURNAMENT_IDS}", flush=True)
-    print(f"Excluding {len(already_done)} already-forecast questions (tournament folder)...", flush=True)
 
     import requests
     headers = {
@@ -186,6 +203,30 @@ async def fetch_tournament_questions() -> list:
     }
 
     raw_posts_by_id: dict[int, dict] = {}
+    now = datetime.now(timezone.utc)
+
+    def _is_open_question(q: dict) -> bool:
+        """True if a Metaculus question dict (the NESTED 'question' object
+        within a post, not the post itself) is still open for forecasting
+        — i.e. has no scheduled_close_time already in the past. FIXED
+        2026-06-30: previously this check only existed inline, post-loop,
+        in the funnel below — check_new_futureeval_questions was being
+        called on RAW unfiltered posts (open AND closed) earlier in the
+        loop, with no open/closed filtering applied at all. Confirmed
+        live: this produced a misleading "158 new FutureEval questions"
+        alert where 157 of those were already closed — genuinely "never
+        logged before" (since this was the watch-list's first-ever run)
+        but not genuinely openable, alert-worthy new questions. Extracting
+        this as one shared helper, used by both the alert gating below
+        and the funnel further down, means they can no longer silently
+        disagree about what counts as "open" the way they just did."""
+        close_time = q.get("scheduled_close_time")
+        if close_time:
+            close_dt = datetime.fromisoformat(close_time.replace("Z", "+00:00"))
+            if close_dt < now:
+                return False
+        return True
+
     for tid in TOURNAMENT_IDS:
         tid_posts_by_id: dict[int, dict] = {}  # this tournament only — used
         # below to scope the new-FutureEval-question check; raw_posts_by_id
@@ -289,7 +330,11 @@ async def fetch_tournament_questions() -> list:
                       flush=True)
             print(f"  Tournament {tid}: {tid_count} posts", flush=True)
             if str(tid) == str(FUTUREEVAL_TOURNAMENT_ID):
-                check_new_futureeval_questions(tid_posts_by_id)
+                open_tid_posts_by_id = {
+                    pid: post for pid, post in tid_posts_by_id.items()
+                    if post.get("question") and _is_open_question(post["question"])
+                }
+                check_new_futureeval_questions(open_tid_posts_by_id)
         except Exception as e:
             print(f"  ⚠️  Could not fetch tournament {tid}: {e}", flush=True)
             # Same reasoning as the connection-error alert above: an
@@ -304,7 +349,23 @@ async def fetch_tournament_questions() -> list:
 
     raw_posts = list(raw_posts_by_id.values())
 
-    now = datetime.now(timezone.utc)
+    # Now that we know what's actually in THIS tournament, scope the dedup
+    # set down to only question_ids that genuinely belong here — see the
+    # FIXED comment above already_done_raw for why this matters.
+    current_tournament_question_ids = {
+        post["question"]["id"]
+        for post in raw_posts
+        if post.get("question") and post["question"].get("id") is not None
+    }
+    already_done = {
+        qid: title for qid, title in already_done_raw.items()
+        if qid in current_tournament_question_ids
+    }
+    print(f"Excluding {len(already_done)} already-forecast questions "
+          f"(scoped to tournament {TOURNAMENT_IDS}; "
+          f"{len(already_done_raw) - len(already_done)} other-tournament "
+          f"records ignored)...", flush=True)
+
     questions = []
     closed_count = 0
     no_question_field_count = 0
@@ -313,13 +374,9 @@ async def fetch_tournament_questions() -> list:
         if not q:
             no_question_field_count += 1
             continue
-        # Skip if close time has passed
-        close_time = q.get("scheduled_close_time")
-        if close_time:
-            close_dt = datetime.fromisoformat(close_time.replace("Z", "+00:00"))
-            if close_dt < now:
-                closed_count += 1
-                continue
+        if not _is_open_question(q):
+            closed_count += 1
+            continue
         questions.append(post)
 
     print(f"  Funnel: {len(raw_posts)} raw posts -> {no_question_field_count} missing question field, "
@@ -945,6 +1002,21 @@ async def run():
     submitted = 0
     failed    = 0
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+    # FIXED 2026-06-30: previously only written once, at the very end —
+    # confirmed live: a run was interrupted (terminal closed, exact cause
+    # unknown) partway through 66 questions; some had already been
+    # genuinely submitted to Metaculus (post_binary_question_prediction
+    # happens inside this loop, well before any save), but since nothing
+    # was written to disk until the end, the LOCAL dedup record lost all
+    # of that — the next run would have no way to know those questions
+    # were already done and would harmlessly-but-wastefully redo them.
+    # Now written after EVERY question, so an interruption only loses
+    # progress on whichever single question was in flight at the time.
+    results_file = os.path.join(TOURNAMENT_BATCH_DIR, f"batch_results_{timestamp}.json")
+
+    def _save_results_so_far():
+        with open(results_file, 'w') as f:
+            json.dump(results, f, indent=2)
 
     for i, q in enumerate(questions, 1):
         print(f"\n[{i}/{len(questions)}] Q{q.id_of_question} ({type(q).__name__}): {q.question_text[:70]}")
@@ -964,6 +1036,7 @@ async def run():
                 "community_prediction": cp,
             }
             failed += 1
+            _save_results_so_far()
             continue
 
         submission_ok = submit_forecast(q, q_type, forecast)
@@ -1002,12 +1075,8 @@ async def run():
         else:
             failed += 1
 
+        _save_results_so_far()
         await asyncio.sleep(0.5)
-
-    # Save results for dedup on next run
-    results_file = os.path.join(TOURNAMENT_BATCH_DIR, f"batch_results_{timestamp}.json")
-    with open(results_file, 'w') as f:
-        json.dump(results, f, indent=2)
 
     print(f"\n{'=' * 50}")
     print(f"Submitted: {submitted} | Failed: {failed}")
