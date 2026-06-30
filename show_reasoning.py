@@ -11,20 +11,21 @@ import glob
 import sys
 import os
 
-BATCH_DIR = "Meta batches"
+BATCH_DIRS = ["Meta batches", "tournament_batches"]
 
 
 def load_all_results() -> dict:
     """Load all batch results into a single dict keyed by question_id."""
     all_results = {}
 
-    # Find all results files (main + refresh) in Meta batches folder
+    # Find all results files across both batch folders
     result_files = sorted(
-        glob.glob(os.path.join(BATCH_DIR, "batch_results*.json"))
+        f for d in BATCH_DIRS
+        for f in glob.glob(os.path.join(d, "batch_results*.json"))
     )
 
     if not result_files:
-        print(f"No batch_results*.json files found in {BATCH_DIR}/")
+        print(f"No batch_results*.json files found in {BATCH_DIRS}")
         return {}
 
     for rf in result_files:
@@ -37,7 +38,7 @@ def load_all_results() -> dict:
                     # Keep most recent if duplicate (later files overwrite earlier)
                     all_results[q_id] = {
                         "question_text":  item.get("question_text", ""),
-                        "probability":    item.get("probability"),
+                        "probability":    item.get("probability") or item.get("submitted_forecast"),
                         "original_prob":  item.get("original_prob"),
                         "reasoning":      item.get("reasoning", ""),
                         "refresh_reason": item.get("refresh_reason", ""),
@@ -104,7 +105,7 @@ def main():
         print("No results found. Run a batch first.")
         return
 
-    total_files = len(glob.glob(os.path.join(BATCH_DIR, "batch_results*.json")))
+    total_files = sum(len(glob.glob(os.path.join(d, "batch_results*.json"))) for d in BATCH_DIRS)
     print(f"Loaded reasoning for {len(all_results)} questions across {total_files} result file(s)")
 
     # Get question ID from command line or prompt
@@ -125,4 +126,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

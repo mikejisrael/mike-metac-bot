@@ -263,6 +263,19 @@ def summarize_forecast(q_type: str, forecast) -> str:
 UNSCORED_RESOLUTIONS = {"annulled", "ambiguous"}
 
 
+def detect_category_from_api(raw: dict) -> str:
+    """Detect tournament vs general from the live API JSON when no local record exists."""
+    try:
+        projects = (raw or {}).get("projects", {})
+        if projects.get("default_project", {}).get("type") == "tournament":
+            return "tournament"
+        if any(t.get("type") == "tournament" for t in projects.get("tournament", [])):
+            return "tournament"
+    except Exception:
+        pass
+    return "general"
+
+
 def classify_bucket(row: dict) -> str:
     """One of: open / resolved_scored / resolved_unscored / not_found_live."""
     if not row["live_match_found"]:
@@ -321,7 +334,7 @@ def build_profile_data(account_key: str) -> dict:
             "peer_score": score["peer_score"],
             "close_time": score["close_time"],
             "live_match_found": True,
-            "category": "general",
+            "category": detect_category_from_api(post),
         })
 
     for row in rows:
