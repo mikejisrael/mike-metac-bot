@@ -181,3 +181,7 @@ cython_debug/
 # MacOS
 .DS_Store
 poll_tournament.log 
+
+reports/coverage_2*.json
+reports/calibration_2*.json
+watch_state/*.json

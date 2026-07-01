@@ -137,6 +137,27 @@ def load_local_results(dirs: list[str]) -> dict[int, dict]:
     return by_qid
 
 
+def load_phase0_reports() -> dict:
+    """Reads the latest coverage/calibration reports written by
+    meta_coverage_check.py and meta_calibration_report.py (Phase 0).
+    Purely additive — returns None-safe defaults if those scripts haven't
+    been run yet, so the dashboard never breaks on a missing reports/
+    folder."""
+    coverage = None
+    calibration = None
+    try:
+        with open(os.path.join("reports", "coverage_latest.json")) as f:
+            coverage = json.load(f)
+    except Exception:
+        pass
+    try:
+        with open(os.path.join("reports", "calibration_latest.json")) as f:
+            calibration = json.load(f)
+    except Exception:
+        pass
+    return {"coverage": coverage, "calibration": calibration}
+
+
 def fetch_predicted_questions(client, label: str) -> dict[int, dict]:
     """All questions a client's account has predicted on, keyed by question_id."""
     if client is None:
@@ -405,8 +426,11 @@ def build_dashboard_data():
     tournaments_present = [t for t in TOURNAMENT_ORDER
                            if any(t in r["tournaments"] for r in rows)]
 
+    phase0 = load_phase0_reports()
+
     data = {
         "rows":                rows,
+        "phase0":              phase0,
         "status_counts":       status_counts,
         "avg_score":           avg_score,
         "chart_bot":           chart_bot,
@@ -517,6 +541,31 @@ PAGE_TEMPLATE = """
       </div>
     </div>
   </div>
+
+  {% if data.phase0.coverage or data.phase0.calibration %}
+  <div class="cards" style="margin-top:-4px;">
+    {% if data.phase0.coverage %}
+    <div class="card">
+      <div class="label">Coverage gaps ({{ data.phase0.coverage.checked_at[:10] }})</div>
+      <div class="value {{ 'neg' if data.phase0.coverage.total_gaps else 'pos' }}">
+        {{ data.phase0.coverage.total_gaps }}
+      </div>
+    </div>
+    {% endif %}
+    {% if data.phase0.calibration %}
+    <div class="card">
+      <div class="label">Calibration sample</div>
+      <div class="value">{{ data.phase0.calibration.questions_scored }}</div>
+    </div>
+    <div class="card">
+      <div class="label">Avg peer score (own, resolved)</div>
+      <div class="value {{ 'pos' if data.phase0.calibration.average_peer_score and data.phase0.calibration.average_peer_score > 0 else 'neg' }}">
+        {{ '%.2f'|format(data.phase0.calibration.average_peer_score) if data.phase0.calibration.average_peer_score is not none else '—' }}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
 
   <div class="filter-bar">
     <div class="filter-group-label">Tournament</div>
