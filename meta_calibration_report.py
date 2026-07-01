@@ -1,0 +1,169 @@
+"""
+meta_calibration_report.py — Phase 0 measurement script (read-only).
+
+Reproduces the four Metaculus track-record charts you get from a profile
+page (calibration curve, score scatter, score histogram, summary stats)
+for mike_iz_-bot specifically, so you don't have to eyeball someone else's
+profile to know where your own bot stands.
+
+Run standalone, on demand or weekly via cron — read-only against the
+Metaculus API, never touches the forecasting pipelines.
+
+Output:
+  reports/calibration_latest.json   — always overwritten, dashboard reads this
+  reports/calibration_<ts>.json     — timestamped history
+
+CALIBRATION NOTE: only binary questions have a meaningful "predicted
+probability vs fraction resolved yes" calibration curve. Numeric and
+multiple-choice questions are included in the summary stats and score
+scatter, but excluded from the calibration buckets.
+"""
+
+import os
+import json
+import asyncio
+from datetime import datetime, timezone
+from collections import defaultdict
+
+from dotenv import load_dotenv
+load_dotenv()
+
+from forecasting_tools import MetaculusClient, ApiFilter
+
+REPORTS_DIR = "reports"
+os.makedirs(REPORTS_DIR, exist_ok=True)
+
+BOT_TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN")
+
+BUCKET_WIDTH = 0.10  # 10-point buckets, same convention as Metaculus's own chart
+
+
+def _bucket_for(p: float) -> str:
+    lo = int(p // BUCKET_WIDTH) * BUCKET_WIDTH
+    lo = min(lo, 0.9)  # clamp so p=1.0 lands in the 90-100% bucket, not a new one
+    hi = lo + BUCKET_WIDTH
+    return f"{lo:.0%}-{hi:.0%}"
+
+
+def _extract_binary_prediction(q_json: dict):
+    for path in [
+        ("my_forecasts", "latest", "forecast_values"),
+        ("my_forecasts", "latest", "probability_yes"),
+    ]:
+        val = q_json
+        try:
+            for key in path:
+                val = val[key]
+            if isinstance(val, list) and len(val) == 2:
+                return val[1]  # [P(no), P(yes)]
+            if isinstance(val, (int, float)):
+                return val
+        except (KeyError, TypeError):
+            continue
+    return None
+
+
+def _extract_resolution(q_json: dict):
+    q = q_json.get("question", q_json)
+    return q.get("resolution")
+
+
+def _extract_peer_score(q_json: dict):
+    for path in [
+        ("my_forecasts", "score_data", "peer_score"),
+        ("my_forecasts", "latest", "score_data", "peer_score"),
+        ("scoring", "peer_score"),
+    ]:
+        val = q_json
+        try:
+            for key in path:
+                val = val[key]
+            if val is not None:
+                return val
+        except (KeyError, TypeError):
+            continue
+    return None
+
+
+def run_calibration_report():
+    if not BOT_TOKEN:
+        print("⚠️  METAC_TOURNAMENT_TOKEN not set — cannot run calibration report.")
+        return
+
+    client = MetaculusClient(token=BOT_TOKEN)
+
+    try:
+        questions = asyncio.run(
+            client.get_questions_matching_filter(
+                ApiFilter(is_previously_forecasted_by_user=True, allowed_statuses=["resolved"]),
+                num_questions=1000,
+                error_if_question_target_missed=False,
+            )
+        )
+    except Exception as e:
+        print(f"  ⚠️  could not fetch resolved questions: {e}")
+        return
+
+    buckets = defaultdict(lambda: {"predicted_sum": 0.0, "count": 0, "resolved_yes": 0})
+    scatter = []
+    scores = []
+
+    for q in questions:
+        q_json = q.api_json
+        peer_score = _extract_peer_score(q_json)
+        close_time = (q_json.get("scheduled_close_time")
+                      or (q_json.get("question") or {}).get("scheduled_close_time"))
+
+        if peer_score is not None:
+            scores.append(peer_score)
+            scatter.append({
+                "question_id": q.id_of_question,
+                "close_time": close_time,
+                "peer_score": peer_score,
+            })
+
+        q_type = (q_json.get("question") or {}).get("type")
+        if q_type != "binary":
+            continue
+        prob = _extract_binary_prediction(q_json)
+        resolution = _extract_resolution(q_json)
+        if prob is None or resolution not in ("yes", "no"):
+            continue
+        b = _bucket_for(prob)
+        buckets[b]["predicted_sum"] += prob
+        buckets[b]["count"] += 1
+        if resolution == "yes":
+            buckets[b]["resolved_yes"] += 1
+
+    calibration = []
+    for b, d in sorted(buckets.items()):
+        calibration.append({
+            "bucket": b,
+            "avg_predicted": d["predicted_sum"] / d["count"],
+            "fraction_resolved_yes": d["resolved_yes"] / d["count"],
+            "count": d["count"],
+        })
+
+    report = {
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "questions_scored": len(scores),
+        "questions_predicted_total": len(questions),
+        "average_peer_score": (sum(scores) / len(scores)) if scores else None,
+        "calibration": calibration,
+        "score_scatter": scatter,
+    }
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    with open(os.path.join(REPORTS_DIR, f"calibration_{ts}.json"), "w") as f:
+        json.dump(report, f, indent=2)
+    with open(os.path.join(REPORTS_DIR, "calibration_latest.json"), "w") as f:
+        json.dump(report, f, indent=2)
+
+    if scores:
+        print(f"  ✅ {len(scores)} scored questions, avg peer score {report['average_peer_score']:.2f}")
+    else:
+        print("  No scored questions yet.")
+
+
+if __name__ == "__main__":
+    run_calibration_report()

@@ -1,0 +1,30 @@
+{
+  "checked_at": "2026-07-01T04:55:37.662144+00:00",
+  "tournaments": {
+    "FutureEval": {
+      "tournament_id": 33022,
+      "open_count": 0,
+      "forecasted_count": 0,
+      "missing_question_ids": []
+    },
+    "ACX2026": {
+      "tournament_id": 32880,
+      "open_count": 28,
+      "forecasted_count": 28,
+      "missing_question_ids": []
+    },
+    "Climate Tipping Points": {
+      "tournament_id": 1756,
+      "open_count": 6,
+      "forecasted_count": 6,
+      "missing_question_ids": []
+    },
+    "Metaculus Cup": {
+      "tournament_id": 33021,
+      "open_count": 26,
+      "forecasted_count": 26,
+      "missing_question_ids": []
+    }
+  },
+  "total_gaps": 0
+}

@@ -1,6 +1,6 @@
 """
-meta_watch.py — two alerting checks, run alongside tournament_forecast.py
-(same cadence — both are called from its run()):
+meta_watch.py — three alerting checks, run alongside tournament_forecast.py
+(same cadence — all three are called from its run()):
 
 1. check_new_futureeval_questions(): alerts the moment a FutureEval question
    you haven't seen before appears as open. Built specifically to make the
@@ -19,6 +19,15 @@ meta_watch.py — two alerting checks, run alongside tournament_forecast.py
    codebase (meta_batch_forecast.py, tournament_forecast.py itself) submits
    via the bot token and is included.
 
+3. check_refresh_candidates() [added Phase 1, 2026-07-01]: alerts on
+   still-open, bot-forecasted questions that look worth a manual refresh —
+   either closing within CLOSING_SOON_HOURS, or where the live community
+   prediction has moved by more than CP_SHIFT_THRESHOLD since your last
+   submitted probability. ALERT-ONLY: this never triggers a refresh itself,
+   you run meta_refresh_forecast.py by hand off the alert, same as the
+   existing --check workflow. Deliberately does not touch FutureEval
+   forecasting logic or auto-execute anything — this is purely a signal.
+
 Resolution field names below (status/resolution/actual_resolve_time) were
 checked against Metaculus's own public API examples before writing this —
 not guessed — but this is still the first time this codebase has read
@@ -26,8 +35,8 @@ these specific fields, so the first real resolution alert is worth
 eyeballing against the actual question page once, the same way the CP-fetch
 fix needs a live check.
 
-Both checks persist their own small state files under watch_state/ so they
-only ever alert once per event, not every run.
+All three checks persist their own small state files under watch_state/ so
+they only ever alert once per event, not every run.
 """
 
 import os
@@ -47,6 +56,7 @@ os.makedirs(WATCH_DIR, exist_ok=True)
 
 FUTUREEVAL_SEEN_FILE   = os.path.join(WATCH_DIR, "futureeval_seen_posts.json")
 RESOLUTION_STATE_FILE  = os.path.join(WATCH_DIR, "resolution_state.json")
+REFRESH_STATE_FILE     = os.path.join(WATCH_DIR, "refresh_candidate_state.json")
 
 FUTUREEVAL_TOURNAMENT_ID = 33022
 
@@ -57,6 +67,15 @@ FUTUREEVAL_TOURNAMENT_ID = 33022
 # as questions actually resolve — so this cap matters most on the very
 # first run and barely matters afterward.
 MAX_RESOLUTION_CHECKS_PER_RUN = 150
+
+# Same cap pattern applied to refresh-candidate checking.
+MAX_REFRESH_CHECKS_PER_RUN = 150
+
+# Refresh-candidate thresholds — starting values, tune once you see real
+# alert volume. Don't change these based on the first few alerts alone.
+CLOSING_SOON_HOURS = 48
+CP_SHIFT_THRESHOLD = 0.15
+MIN_HOURS_BETWEEN_REFRESH_ALERTS = 24
 
 # Same token-selection logic used everywhere else in this codebase.
 WATCH_TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN") or os.getenv("METACULUS_TOKEN")
@@ -268,3 +287,108 @@ def check_resolutions() -> None:
     print(f"  Resolution check complete: {newly_resolved} newly resolved (alerted), "
           f"{len(capped) - newly_resolved} still open/pending"
           f"{f', {len(to_check) - len(capped)} deferred to next run (cap reached)' if len(to_check) > len(capped) else ''}.")
+
+
+# ─── 3. Refresh candidate alert (Phase 1, added 2026-07-01) ────────────────
+def check_refresh_candidates() -> None:
+    """Flags bot-forecasted, still-open questions that look worth a manual
+    refresh: either closing soon, or where the live community prediction
+    has moved meaningfully since your last submitted probability.
+
+    ALERT-ONLY — this never triggers meta_refresh_forecast.py itself. You
+    run --check manually off the alert, same as the existing workflow.
+
+    Skips anything RESOLUTION_STATE_FILE already knows is resolved, to
+    avoid a redundant API call for questions check_resolutions() has
+    already confirmed are done — cuts this function's call volume roughly
+    in half once your resolved history builds up.
+
+    CP-shift check is binary-only for now: multiple_choice/numeric CP
+    comparison isn't apples-to-apples against a single stored probability
+    and would need separate logic — deferred until binary refresh triggers
+    are proven useful. CP availability is also not guaranteed (see
+    meta_dashboard.py's CP NOTE — bots are excluded from community
+    aggregates on most tournaments), so this check is best-effort and will
+    silently do nothing on questions where CP is null.
+    """
+    bot_forecasts = _load_bot_forecasts()
+    resolution_state = _load_json(RESOLUTION_STATE_FILE, {})
+    state = _load_json(REFRESH_STATE_FILE, {})
+    now = datetime.now(timezone.utc)
+
+    candidates_pool = [
+        (q_id, info) for q_id, info in bot_forecasts.items()
+        if not resolution_state.get(str(q_id), {}).get("alerted")
+    ]
+    capped = candidates_pool[:MAX_REFRESH_CHECKS_PER_RUN]
+    print(f"  Checking {len(capped)}/{len(candidates_pool)} not-yet-resolved bot "
+          f"forecast(s) for refresh signals...")
+
+    candidates = []
+    for i, (q_id, info) in enumerate(capped, 1):
+        post_id = info["post_id"]
+        url = f"https://www.metaculus.com/api2/questions/{post_id}/"
+        r = _get_with_retry(url)
+        if r is None or r.status_code != 200:
+            continue
+        try:
+            data = r.json()
+        except Exception:
+            continue
+
+        q = data.get("question", data)
+        if q.get("resolution") is not None or data.get("status") == "resolved":
+            continue  # resolved since last check_resolutions run — not our concern here
+
+        reasons = []
+
+        close_time_str = data.get("scheduled_close_time") or q.get("scheduled_close_time")
+        if close_time_str:
+            try:
+                close_time = datetime.fromisoformat(close_time_str.replace("Z", "+00:00"))
+                hours_left = (close_time - now).total_seconds() / 3600
+                if 0 < hours_left <= CLOSING_SOON_HOURS:
+                    reasons.append(f"closing in {hours_left:.0f}h")
+            except Exception:
+                pass
+
+        agg = q.get("aggregations", {}) or {}
+        node = agg.get("recency_weighted") or agg.get("metaculus_prediction") or {}
+        cp_latest = node.get("latest")
+        submitted = info.get("probability")
+        if (isinstance(cp_latest, (int, float)) and isinstance(submitted, (int, float))
+                and abs(cp_latest - submitted) >= CP_SHIFT_THRESHOLD):
+            reasons.append(f"CP moved to {cp_latest:.0%} vs your {submitted:.0%}")
+
+        if reasons:
+            last_alerted = state.get(str(q_id), {}).get("alerted_at")
+            skip = False
+            if last_alerted:
+                try:
+                    last_dt = datetime.fromisoformat(last_alerted)
+                    if (now - last_dt).total_seconds() / 3600 < MIN_HOURS_BETWEEN_REFRESH_ALERTS:
+                        skip = True
+                except Exception:
+                    pass
+            if not skip:
+                candidates.append((q_id, info, reasons))
+                state[str(q_id)] = {"alerted_at": now.isoformat(), "reasons": reasons}
+
+        if i % 10 == 0:
+            print(f"    ...{i}/{len(capped)} checked")
+        time.sleep(1.2)
+
+    if candidates:
+        MAX_LISTED = 15
+        lines = []
+        for q_id, info, reasons in candidates[:MAX_LISTED]:
+            lines.append(f"- Q{q_id}: {info['question_text'][:80]} — {', '.join(reasons)}")
+        body = "\n".join(lines)
+        if len(candidates) > MAX_LISTED:
+            body += f"\n...and {len(candidates) - MAX_LISTED} more."
+        send_alert(body, title=f"🔄 {len(candidates)} refresh candidate(s)")
+        print(f"  📬 {len(candidates)} refresh candidate(s) — alerted.")
+    else:
+        print("  No refresh candidates this run.")
+
+    _save_json(REFRESH_STATE_FILE, state)

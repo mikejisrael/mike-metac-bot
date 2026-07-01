@@ -40,7 +40,10 @@ from meta_cp_extract import extract_live_cp
 from meta_alerts import send_alert
 from meta_research import research_question
 from live_data import detect_data_needs, format_live_data_for_prompt
-from meta_watch import check_new_futureeval_questions, check_resolutions, FUTUREEVAL_TOURNAMENT_ID
+from meta_watch import (
+    check_new_futureeval_questions, check_resolutions, check_refresh_candidates,
+    FUTUREEVAL_TOURNAMENT_ID,
+)
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 # Cost optimization split (2026-06-30): this script previously fetched and
@@ -447,8 +450,14 @@ async def fetch_tournament_questions() -> list:
     #
     # NOTE: binary CP extraction via this endpoint is proven (see
     # meta_debug_ids_probe.py --single output, 2026-06-29). numeric/
-    # multiple_choice extraction is NOT yet separately verified — check the
-    # cp_found breakdown by type below on first real run.
+    # multiple_choice extraction pipeline is confirmed to run end-to-end
+    # without error (see live FutureEval Q44219, 2026-07-01), but has only
+    # been tested against a question with NO community prediction present
+    # (structurally null on FutureEval — see meta_dashboard.py's CP NOTE).
+    # Whether extract_live_cp() correctly PARSES a populated multiple_choice
+    # CP payload remains untested in practice, and given bots are excluded
+    # from community aggregates on most tournaments, may rarely be
+    # testable at all. Not treating this as a blocking open item.
     MAX_CONCURRENT_CP_FETCHES = 8
     if supported:
         import aiohttp
@@ -1111,6 +1120,13 @@ async def run():
     print(f"\n{'=' * 50}")
     print("Checking for resolved questions (bot-submitted forecasts only)...")
     check_resolutions()
+
+    # Phase 1 (added 2026-07-01): refresh-candidate check, same "after
+    # everything urgent is done" placement as check_resolutions() above.
+    # Alert-only — never triggers meta_refresh_forecast.py itself, you
+    # run that manually off the alert.
+    print("Checking for refresh candidates (closing soon / CP moved)...")
+    check_refresh_candidates()
 
 
 if __name__ == "__main__":
