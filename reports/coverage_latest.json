@@ -1,10 +1,10 @@
 {
-  "checked_at": "2026-07-01T04:55:37.662144+00:00",
+  "checked_at": "2026-07-02T01:06:58.507883+00:00",
   "tournaments": {
     "FutureEval": {
       "tournament_id": 33022,
-      "open_count": 0,
-      "forecasted_count": 0,
+      "open_count": 1,
+      "forecasted_count": 1,
       "missing_question_ids": []
     },
     "ACX2026": {
@@ -21,8 +21,8 @@
     },
     "Metaculus Cup": {
       "tournament_id": 33021,
-      "open_count": 26,
-      "forecasted_count": 26,
+      "open_count": 25,
+      "forecasted_count": 25,
       "missing_question_ids": []
     }
   },
