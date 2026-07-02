@@ -43,6 +43,14 @@ TOURNAMENTS = {
     32880: "ACX2026",
      1756: "Climate Tipping Points",
     33021: "Metaculus Cup",
+    # EXPANDED 2026-07-02: matches meta_batch_forecast.py's ALLOWED_TOURNAMENTS
+    # expansion — same 5 series, same IDs (resolved via resolve_series_ids.py,
+    # not guessed).
+     1173: "Nuclear Risk Horizons",
+    32774: "Current Events",
+     3048: "Taiwan Tinderbox",
+     2018: "Economic Indicators",
+     2995: "Animal Welfare",
 }
 
 BOT_TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN")
@@ -97,7 +105,9 @@ def run_coverage_check():
         "total_gaps": 0,
     }
 
-    gap_lines = []
+    total_open = 0
+    total_forecasted = 0
+    tournaments_with_gaps = []
     for tid, label in TOURNAMENTS.items():
         open_qs = fetch_open_questions(client, tid)
         missing = sorted(open_qs - forecasted)
@@ -108,10 +118,17 @@ def run_coverage_check():
             "missing_question_ids": missing,
         }
         report["total_gaps"] += len(missing)
+        total_open += len(open_qs)
+        total_forecasted += len(open_qs) - len(missing)
         if missing:
-            gap_lines.append(f"{label}: {len(missing)} open question(s) not forecasted "
-                              f"(e.g. {missing[:5]})")
-        print(f"  {label}: {len(open_qs)} open, {len(missing)} missing")
+            tournaments_with_gaps.append(f"{label} ({len(missing)})")
+
+    print(f"  {total_forecasted}/{total_open} open questions forecasted across "
+          f"{len(TOURNAMENTS)} tournaments — {report['total_gaps']} total gap(s)"
+          f"{' in: ' + ', '.join(tournaments_with_gaps) if tournaments_with_gaps else ''}")
+    # Per-tournament breakdown is available in the JSON report (and on
+    # metaculus.com directly) for whenever that level of detail is wanted —
+    # console/alert output stays at the summary level deliberately.
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     with open(os.path.join(REPORTS_DIR, f"coverage_{ts}.json"), "w") as f:
@@ -119,9 +136,12 @@ def run_coverage_check():
     with open(os.path.join(REPORTS_DIR, "coverage_latest.json"), "w") as f:
         json.dump(report, f, indent=2)
 
-    if gap_lines:
+    if report["total_gaps"] > 0:
         send_alert(
-            "\n".join(gap_lines),
+            f"{total_forecasted}/{total_open} open questions forecasted across "
+            f"{len(TOURNAMENTS)} tournaments.\n"
+            f"{report['total_gaps']} gap(s) in: {', '.join(tournaments_with_gaps)}\n"
+            f"Check metaculus.com or the dashboard for per-question detail.",
             title=f"⚠️ Coverage gap: {report['total_gaps']} question(s) not forecasted"
         )
         print(f"  📬 Alert sent — {report['total_gaps']} total gap(s).")

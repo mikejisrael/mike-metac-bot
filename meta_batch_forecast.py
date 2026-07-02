@@ -74,7 +74,13 @@ client_metaculus._post_question_prediction = _types.MethodType(
 # ─── Config ───────────────────────────────────────────────────────────────────
 MODEL = "claude-haiku-4-5"
 MAX_TOKENS = 2000
-NUM_QUESTIONS = 50
+# FIXED 2026-07-02: dropped from 50 to 20 as a deliberate cost control —
+# ALLOWED_TOURNAMENTS is expanding from 3 to 8 tournaments below, so
+# holding new-questions-per-run steady rather than letting it scale with
+# tournament count keeps the Batch API bill from growing 8/3 = ~2.7x
+# alongside it. Revisit once the cost optimization review (deferred
+# 2026-06-28) actually happens.
+NUM_QUESTIONS = 20
 DAYS_AHEAD = 365
 MIN_FORECASTERS = 5
 # FIXED 2026-06-30: was "Meta batches" (capital M) — harmless on Windows
@@ -106,7 +112,26 @@ RESULTS_FILE = os.path.join(BATCH_DIR, "batch_results.json")
 #   "metaculus-cup-summer-2026"  = Metaculus Cup Summer 2026 (bots can forecast
 #                                  here for calibration data, but are NOT prize-
 #                                  eligible in this one — humans-only for prizes)
-ALLOWED_TOURNAMENTS = ["ACX2026", "climate", "metaculus-cup-summer-2026"]
+#
+# EXPANDED 2026-07-02: added 5 more series for broader category coverage —
+# the whole point of the track record is figuring out which question
+# categories Claude forecasts well, which needs more categories to compare.
+# Each was shortlisted specifically for confirmed peer scoring (checked via
+# resolve_series_ids.py against a known question from each) — series
+# without peer scoring wouldn't feed meta_calibration_report.py at all, so
+# weren't worth adding. IDs resolved via a real question's own `projects`
+# field, not guessed — see resolve_series_ids.py in this same session for
+# the lookup method (list/search endpoints proved unreliable, silently
+# ignoring filters — see check_tournament_ids.py's results).
+#   1173   = Nuclear Risk Horizons Project
+#   32774  = Current Events⚡
+#   3048   = The Taiwan Tinderbox
+#   2018   = Economic Indicators
+#   2995   = Animal Welfare Series
+ALLOWED_TOURNAMENTS = [
+    "ACX2026", "climate", "metaculus-cup-summer-2026",
+    1173, 32774, 3048, 2018, 2995,
+]
 
 
 def ensure_batch_dir():
