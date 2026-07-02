@@ -77,6 +77,32 @@ CLOSING_SOON_HOURS = 48
 CP_SHIFT_THRESHOLD = 0.15
 MIN_HOURS_BETWEEN_REFRESH_ALERTS = 24
 
+# FIXED 2026-07-02: "closing soon" alone isn't a useful refresh signal for
+# FutureEval — those questions open and close within ~3 hours by design
+# (the "reveal and close in period" structure), so EVERY FutureEval
+# question is always "closing soon" the moment it exists, immediately
+# after being forecasted. What actually matters is whether the EXISTING
+# forecast is stale relative to now — a forecast submitted minutes before
+# close was never stale to begin with, no matter how tight the window.
+# Requiring the forecast to be at least this many days old before
+# "closing soon" counts as a real signal naturally excludes FutureEval
+# (forecasts there are always minutes old) without hardcoding a tournament
+# exclusion, and still catches genuinely stale forecasts on long-horizon
+# tournaments (ACX2026, Climate, Metaculus Cup) that happen to be closing
+# soon. Starting value — tune once you see real alert volume, same as the
+# other thresholds above.
+MIN_FORECAST_AGE_DAYS = 1.0
+
+# Maps a tournament's numeric ID to the short label used in refresh-
+# candidate notifications, so an alert can say which tournament a question
+# belongs to. Kept in sync with meta_coverage_check.py's TOURNAMENTS dict.
+TOURNAMENT_LABELS = {
+    33022: "FutureEval",
+    32880: "ACX2026",
+     1756: "Climate Tipping Points",
+    33021: "Metaculus Cup",
+}
+
 # Same token-selection logic used everywhere else in this codebase.
 WATCH_TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN") or os.getenv("METACULUS_TOKEN")
 _HEADERS = {
@@ -126,6 +152,37 @@ def _load_json(path: str, default):
 def _save_json(path: str, data):
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
+
+
+def _forecast_age_days(source_file: str, now: datetime):
+    """Parses the YYYYMMDD_HHMM timestamp embedded in
+    batch_results_YYYYMMDD_HHMM.json filenames (UTC — same convention
+    show_reasoning.py relies on for 'later filename == newer' sorting) to
+    estimate how long ago this forecast was submitted. Returns None if the
+    filename doesn't match the expected pattern, rather than guessing."""
+    import re
+    m = re.search(r"batch_results_(\d{8})_(\d{4})", os.path.basename(source_file or ""))
+    if not m:
+        return None
+    try:
+        dt = datetime.strptime(m.group(1) + m.group(2), "%Y%m%d%H%M").replace(tzinfo=timezone.utc)
+        return (now - dt).total_seconds() / 86400
+    except Exception:
+        return None
+
+
+def _extract_tournament_label(data: dict) -> str:
+    """Reads the tournament off the live per-question API response (same
+    'projects.tournament' field seen in Metaculus's own post detail JSON),
+    falling back to the API's own tournament name if it's not one of the
+    four this codebase tracks by ID."""
+    tournaments = (data.get("projects") or {}).get("tournament") or []
+    if not tournaments:
+        return "Other"
+    tid = tournaments[0].get("id")
+    if tid in TOURNAMENT_LABELS:
+        return TOURNAMENT_LABELS[tid]
+    return (tournaments[0].get("name") or "Other")[:20]
 
 
 # ─── 1. New FutureEval question alert ──────────────────────────────────────
@@ -342,6 +399,7 @@ def check_refresh_candidates() -> None:
         if q.get("resolution") is not None or data.get("status") == "resolved":
             continue  # resolved since last check_resolutions run — not our concern here
 
+        tournament_label = _extract_tournament_label(data)
         reasons = []
 
         close_time_str = data.get("scheduled_close_time") or q.get("scheduled_close_time")
@@ -350,7 +408,13 @@ def check_refresh_candidates() -> None:
                 close_time = datetime.fromisoformat(close_time_str.replace("Z", "+00:00"))
                 hours_left = (close_time - now).total_seconds() / 3600
                 if 0 < hours_left <= CLOSING_SOON_HOURS:
-                    reasons.append(f"closing in {hours_left:.0f}h")
+                    age_days = _forecast_age_days(info.get("source_file"), now)
+                    # Only a real signal if the EXISTING forecast is itself
+                    # old — see MIN_FORECAST_AGE_DAYS above for why this
+                    # naturally excludes FutureEval without hardcoding it.
+                    if age_days is None or age_days >= MIN_FORECAST_AGE_DAYS:
+                        age_str = f"forecast {age_days:.1f}d old" if age_days is not None else "forecast age unknown"
+                        reasons.append(f"closing in {hours_left:.0f}h, {age_str}")
             except Exception:
                 pass
 
@@ -373,7 +437,7 @@ def check_refresh_candidates() -> None:
                 except Exception:
                     pass
             if not skip:
-                candidates.append((q_id, info, reasons))
+                candidates.append((q_id, info, reasons, tournament_label))
                 state[str(q_id)] = {"alerted_at": now.isoformat(), "reasons": reasons}
 
         if i % 10 == 0:
@@ -383,8 +447,8 @@ def check_refresh_candidates() -> None:
     if candidates:
         MAX_LISTED = 15
         lines = []
-        for q_id, info, reasons in candidates[:MAX_LISTED]:
-            lines.append(f"- Q{q_id}: {info['question_text'][:80]} — {', '.join(reasons)}")
+        for q_id, info, reasons, tournament_label in candidates[:MAX_LISTED]:
+            lines.append(f"- Q{q_id} [{tournament_label}]: {info['question_text'][:70]} — {', '.join(reasons)}")
         body = "\n".join(lines)
         if len(candidates) > MAX_LISTED:
             body += f"\n...and {len(candidates) - MAX_LISTED} more."

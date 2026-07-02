@@ -1,18 +1,10 @@
-import math
-from unittest.mock import MagicMock
-import tournament_forecast as tf
+git show :2:watch_state/futureeval_seen_posts.json > seen_ours.json
+git show :3:watch_state/futureeval_seen_posts.json > seen_theirs.json
+git show :2:watch_state/resolution_state.json > res_ours.json
+git show :3:watch_state/resolution_state.json > res_theirs.json
 
-q = MagicMock()
-q.lower_bound = 300000.0
-q.upper_bound = 450000.0
-q.open_lower_bound = True
-q.open_upper_bound = False
-q.cdf_size = 201
+python -c "import json; a=json.load(open('seen_ours.json')); b=json.load(open('seen_theirs.json')); json.dump(sorted(set(a)|set(b)), open('watch_state/futureeval_seen_posts.json','w'), indent=2)"
 
-raw = '''
-10th percentile (low): 280,000
-50th percentile (median): 298,000
-90th percentile (high): 320,000
-'''
-result = tf.parse_numeric_response(raw, q)
-print('Result:', result[:5] if result else None)
+python -c "import json; a=json.load(open('res_ours.json')); b=json.load(open('res_theirs.json')); c={**a, **b}; json.dump(c, open('watch_state/resolution_state.json','w'), indent=2)"
+
+del seen_ours.json seen_theirs.json res_ours.json res_theirs.json

@@ -18,8 +18,25 @@ jobs:
 
     steps:
       - name: Check out repository
+        # FIXED 2026-07-02: previously had no explicit `ref`, so this
+        # defaulted to github.sha — the exact commit that was on `main` at
+        # the MOMENT THIS RUN WAS DISPATCHED, not when it actually starts
+        # executing. Because concurrency.cancel-in-progress is false, a
+        # dispatch can sit queued behind other runs for a while; when it
+        # finally executes, the default behavior still checks out that old,
+        # now-stale commit. Confirmed live: run #212 executed at 10:17 AM
+        # but was still pinned to commit 9b22a5b, several commits behind
+        # main by then — causing it to re-process resolution_state.json as
+        # if the .gitignore/merge fixes had never happened, re-alerting on
+        # 5 already-resolved questions. Run #211 hit the other half of the
+        # same problem: it tried to push its (stale-derived) changes and
+        # got rejected as non-fast-forward, since main had moved on.
+        # Setting ref: main explicitly (a literal branch name, not
+        # github.sha) makes checkout do a live fetch of whatever's actually
+        # on main right now, no matter how long the dispatch sat queued.
         uses: actions/checkout@v4
         with:
+          ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v5
