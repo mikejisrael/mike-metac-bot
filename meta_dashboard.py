@@ -253,6 +253,41 @@ def extract_score_info(raw: dict) -> dict:
     return info
 
 
+def extract_submitted_forecast(raw: dict, q_type: str):
+    """Fallback source for 'Submitted' when no local batch-result record has
+    it (e.g. FutureEval questions run through tournament_forecast.py's
+    synchronous path, which may not always write a matching local file).
+    Reads straight from the live API's question.my_forecasts.latest.
+
+    Binary: forecast_values is [P(No), P(Yes)] -> return P(Yes) as a scalar,
+    matching what summarize_forecast() expects for q_type == "binary".
+    Multiple choice: zip forecast_values against options into a dict.
+    Numeric: pass the raw forecast_values list through (summarize_forecast
+    already knows how to handle a numeric CDF-style list).
+    """
+    if not raw:
+        return None
+    q = raw.get("question", raw)
+    latest = ((q.get("my_forecasts") or {}).get("latest")) or {}
+    values = latest.get("forecast_values")
+    if values is None:
+        return None
+    try:
+        if q_type == "binary":
+            if isinstance(values, list) and len(values) >= 2:
+                return values[1]
+            return values
+        if q_type == "multiple_choice":
+            options = q.get("options") or []
+            if isinstance(values, list) and options and len(values) == len(options):
+                return dict(zip(options, values))
+            return values
+        # numeric (and anything else): hand the raw list/value through
+        return values
+    except Exception:
+        return None
+
+
 def summarize_forecast(q_type: str, forecast) -> str:
     if forecast is None:
         return "—"
@@ -323,7 +358,12 @@ def _make_row(qid, local_r, post, is_personal_only=False) -> dict:
         "post_id":           post_id,
         "question_text":     (local_r or {}).get("question_text") or score["title"] or "(unknown)",
         "question_type":     q_type,
-        "submitted_summary": summarize_forecast(q_type, (local_r or {}).get("submitted_forecast") or (local_r or {}).get("probability")),
+        "submitted_summary": summarize_forecast(
+            q_type,
+            (local_r or {}).get("submitted_forecast")
+            or (local_r or {}).get("probability")
+            or (extract_submitted_forecast(post, q_type) if post else None)
+        ),
         "cp_summary":        summarize_forecast(q_type, cp_val) if cp_val is not None else "—",
         "cp_available":      score["cp_available"],
         "resolved":          score["resolved"],

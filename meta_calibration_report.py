@@ -68,11 +68,27 @@ def _extract_resolution(q_json: dict):
     return q.get("resolution")
 
 
+def _is_resolved(q_json: dict) -> bool:
+    """Same multi-signal check meta_dashboard.py's extract_score_info() uses
+    — don't trust a single field alone. Used in place of ApiFilter's
+    allowed_statuses=['resolved'] kwarg, which returned an essentially-empty
+    result set (see run_calibration_report()'s fetch below for why)."""
+    q = q_json.get("question", q_json)
+    return (
+        q_json.get("status") == "resolved"
+        or q.get("resolution") is not None
+        or q_json.get("actual_resolve_time") is not None
+        or q.get("actual_resolve_time") is not None
+    )
+
+
 def _extract_peer_score(q_json: dict):
     for path in [
         ("my_forecasts", "score_data", "peer_score"),
         ("my_forecasts", "latest", "score_data", "peer_score"),
+        ("my_forecasts", "latest", "peer_score"),
         ("scoring", "peer_score"),
+        ("score_data", "peer_score"),
     ]:
         val = q_json
         try:
@@ -92,16 +108,25 @@ def run_calibration_report():
 
     client = MetaculusClient(token=BOT_TOKEN)
 
+    # FIXED 2026-07-02: previously filtered server-side with
+    # ApiFilter(..., allowed_statuses=["resolved"]) and got back an
+    # essentially-empty result (0 scored questions) — even though the
+    # dashboard's own fetch, using no status filter at all and determining
+    # "resolved" from the actual per-question data instead, found 13
+    # resolved & scored questions with a real average peer score.
+    # meta_coverage_check.py's docstring already flags this exact family of
+    # ApiFilter status kwargs as unverified; switching to the dashboard's
+    # proven approach here too rather than trusting it a second time.
     try:
         questions = asyncio.run(
             client.get_questions_matching_filter(
-                ApiFilter(is_previously_forecasted_by_user=True, allowed_statuses=["resolved"]),
+                ApiFilter(is_previously_forecasted_by_user=True),
                 num_questions=1000,
                 error_if_question_target_missed=False,
             )
         )
     except Exception as e:
-        print(f"  ⚠️  could not fetch resolved questions: {e}")
+        print(f"  ⚠️  could not fetch forecasted questions: {e}")
         return
 
     buckets = defaultdict(lambda: {"predicted_sum": 0.0, "count": 0, "resolved_yes": 0})
@@ -110,6 +135,9 @@ def run_calibration_report():
 
     for q in questions:
         q_json = q.api_json
+        if not _is_resolved(q_json):
+            continue
+
         peer_score = _extract_peer_score(q_json)
         close_time = (q_json.get("scheduled_close_time")
                       or (q_json.get("question") or {}).get("scheduled_close_time"))
@@ -147,7 +175,11 @@ def run_calibration_report():
     report = {
         "checked_at": datetime.now(timezone.utc).isoformat(),
         "questions_scored": len(scores),
+        # NOTE: now counts ALL forecasted questions ever fetched (open +
+        # resolved), not just resolved ones — the fetch no longer filters
+        # server-side. questions_resolved_checked is the resolved-only count.
         "questions_predicted_total": len(questions),
+        "questions_resolved_checked": sum(1 for q in questions if _is_resolved(q.api_json)),
         "average_peer_score": (sum(scores) / len(scores)) if scores else None,
         "calibration": calibration,
         "score_scatter": scatter,

@@ -1,0 +1,73 @@
+name: Phase 0 Reports (coverage + calibration)
+
+on:
+  workflow_dispatch:  # manual trigger from GitHub UI, and the target for a
+                       # cron-job.org scheduled job — GitHub's native
+                       # `schedule:` trigger is unreliable (same reason
+                       # tournament_forecast.yaml doesn't use it either),
+                       # so external cron drives this too.
+  #schedule:
+    #- cron: "0 20 * * *"  # left here as documentation only, not active
+
+# Prevent overlapping runs (queue rather than cancel — these scripts are
+# read-only against Metaculus, but the git commit step is still stateful).
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  reports:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed to push reports/ back for the local dashboard
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Run meta_coverage_check.py
+        run: poetry run python meta_coverage_check.py
+        env:
+          METAC_TOURNAMENT_TOKEN: ${{ secrets.METAC_TOURNAMENT_TOKEN }}
+          ALERT_NTFY_TOPIC: ${{ secrets.ALERT_NTFY_TOPIC }}
+
+      - name: Run meta_calibration_report.py
+        # Runs even if the coverage check step above failed, so one script
+        # erroring doesn't prevent the other's report from being generated
+        # and committed. Same reasoning as tournament_forecast.yaml's
+        # commit step: don't let a partial failure silently lose progress.
+        if: always()
+        run: poetry run python meta_calibration_report.py
+        env:
+          METAC_TOURNAMENT_TOKEN: ${{ secrets.METAC_TOURNAMENT_TOKEN }}
+
+      - name: Commit reports for dashboard
+        # if: always() — same lesson as tournament_forecast.yaml's commit
+        # step (2026-07-02): don't let this step get silently skipped just
+        # because a prior step failed. Whatever report(s) did get written
+        # should still be committed.
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/ 2>/dev/null || true
+          git diff --cached --quiet && echo "No new reports to commit." || (
+            git commit -m "chore: phase 0 reports (coverage + calibration) [skip ci]" &&
+            git push
+          )
