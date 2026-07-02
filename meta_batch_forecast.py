@@ -112,26 +112,32 @@ RESULTS_FILE = os.path.join(BATCH_DIR, "batch_results.json")
 #   "metaculus-cup-summer-2026"  = Metaculus Cup Summer 2026 (bots can forecast
 #                                  here for calibration data, but are NOT prize-
 #                                  eligible in this one — humans-only for prizes)
-#
-# EXPANDED 2026-07-02: added 5 more series for broader category coverage —
-# the whole point of the track record is figuring out which question
-# categories Claude forecasts well, which needs more categories to compare.
-# Each was shortlisted specifically for confirmed peer scoring (checked via
-# resolve_series_ids.py against a known question from each) — series
-# without peer scoring wouldn't feed meta_calibration_report.py at all, so
-# weren't worth adding. IDs resolved via a real question's own `projects`
-# field, not guessed — see resolve_series_ids.py in this same session for
-# the lookup method (list/search endpoints proved unreliable, silently
-# ignoring filters — see check_tournament_ids.py's results).
+ALLOWED_TOURNAMENTS = ["ACX2026", "climate", "metaculus-cup-summer-2026"]
+
+# FIXED 2026-07-02: the 5 series added alongside ALLOWED_TOURNAMENTS above
+# turned out to be type='question_series' on Metaculus's side, not
+# type='tournament' like the original 3. Confirmed live via
+# check_project_type.py: ApiFilter's allowed_tournaments sends these IDs as
+# a `tournaments=` query param, which returned count=7427 (i.e.
+# essentially unfiltered, matching almost the whole site) for Nuclear Risk
+# Horizons — silently NOT scoping to the series at all. The raw `project=`
+# parameter, by contrast, correctly returned count=37, the real Nuclear
+# question set. So these 5 need a separate fetch path (see
+# fetch_question_series_questions() below) that uses `project=` directly
+# and converts matches via client_metaculus.get_question_by_post_id(),
+# rather than going through ApiFilter/allowed_tournaments at all.
 #   1173   = Nuclear Risk Horizons Project
 #   32774  = Current Events⚡
 #   3048   = The Taiwan Tinderbox
 #   2018   = Economic Indicators
 #   2995   = Animal Welfare Series
-ALLOWED_TOURNAMENTS = [
-    "ACX2026", "climate", "metaculus-cup-summer-2026",
-    1173, 32774, 3048, 2018, 2995,
-]
+QUESTION_SERIES_IDS = [1173, 32774, 3048, 2018, 2995]
+
+# How many open questions to pull per series before client-side filtering —
+# generous since these series are individually small (Nuclear Risk Horizons
+# was 37 total via check_project_type.py), not a per-run forecast cap
+# (NUM_QUESTIONS above still governs that, globally, after merging).
+QUESTION_SERIES_FETCH_LIMIT = 100
 
 
 def ensure_batch_dir():
@@ -162,6 +168,83 @@ def _set_research_text(obj, text) -> None:
 
 # ─── Question identity guard ────────────────────────────────────────────────
 from meta_question_matching import titles_match
+
+
+# ─── question_series fetch path (2026-07-02) ───────────────────────────────
+import requests as _requests
+
+async def fetch_question_series_questions(now: datetime) -> list[BinaryQuestion]:
+    """Fetches open questions from QUESTION_SERIES_IDS via the raw
+    `project=` parameter (proven correct — see check_project_type.py),
+    since ApiFilter's allowed_tournaments/`tournaments=` parameter silently
+    doesn't scope question_series-type projects. Applies the same
+    binary/open/close-time/forecaster-count constraints ApiFilter would
+    normally enforce, by hand, client-side. Converts each surviving match
+    via client_metaculus.get_question_by_post_id() to get a real
+    BinaryQuestion object compatible with the rest of this pipeline
+    (research, CP extraction, submission all expect that type)."""
+    headers = {"Authorization": f"Token {ACTIVE_TOKEN}"}
+    close_before = now + timedelta(days=DAYS_AHEAD)
+    results: list[BinaryQuestion] = []
+
+    for series_id in QUESTION_SERIES_IDS:
+        try:
+            r = _requests.get(
+                "https://www.metaculus.com/api2/questions/",
+                headers=headers,
+                params={"project": series_id, "status": "open", "limit": QUESTION_SERIES_FETCH_LIMIT},
+                timeout=30,
+            )
+        except Exception as e:
+            print(f"  ⚠️  question_series {series_id}: fetch failed ({e}) — skipping this series this run.")
+            continue
+        if r.status_code != 200:
+            print(f"  ⚠️  question_series {series_id}: HTTP {r.status_code} — skipping this series this run.")
+            continue
+
+        raw_matches = (r.json() or {}).get("results") or []
+        candidates = []
+        for item in raw_matches:
+            q_info = item.get("question", item) or {}
+            if q_info.get("type") != "binary":
+                continue
+            close_str = item.get("scheduled_close_time") or q_info.get("scheduled_close_time")
+            if not close_str:
+                continue
+            try:
+                close_dt = datetime.fromisoformat(close_str.replace("Z", "+00:00"))
+            except Exception:
+                continue
+            if not (now < close_dt < close_before):
+                continue  # respects DAYS_AHEAD, same as the ApiFilter path
+            if (item.get("nr_forecasters") or 0) < MIN_FORECASTERS:
+                continue
+            candidates.append(item.get("id"))  # post_id
+
+        print(f"  question_series {series_id}: {len(raw_matches)} open, "
+              f"{len(candidates)} pass binary/close-time/forecaster filters")
+
+        for post_id in candidates:
+            if post_id is None:
+                continue
+            try:
+                # FIXED 2026-07-02: confirmed live — this is synchronous,
+                # not async. The docs snippet that led me to assume await
+                # was needed didn't actually show it being awaited; the
+                # runtime error ("BinaryQuestion can't be used in 'await'
+                # expression") only happens when the call already returned
+                # the real object, not a coroutine.
+                q = client_metaculus.get_question_by_post_id(post_id=post_id)
+            except Exception as e:
+                print(f"    ⚠️  post {post_id}: could not fetch question object ({e}) — skipping.")
+                continue
+            if isinstance(q, list):  # group_question_mode default may unpack; guard either way
+                results.extend(x for x in q if isinstance(x, BinaryQuestion))
+            elif isinstance(q, BinaryQuestion):
+                results.append(q)
+            await asyncio.sleep(1.2)  # same politeness delay used elsewhere in this codebase
+
+    return results
 
 
 # ─── Step 1: Fetch questions ───────────────────────────────────────────────────
@@ -224,6 +307,15 @@ async def fetch_questions() -> list[BinaryQuestion]:
                     num_questions=actual_count,
                 )
     binary = [q for q in questions if isinstance(q, BinaryQuestion)]
+
+    # 2026-07-02: separate fetch path for question_series-type projects
+    # (see fetch_question_series_questions() docstring for why) — merged in
+    # here, BEFORE dedup/NUM_QUESTIONS-cap, so those apply globally across
+    # both true tournaments and question_series alike.
+    series_questions = await fetch_question_series_questions(now)
+    print(f"  question_series fetch: {len(series_questions)} candidate(s) across "
+          f"{len(QUESTION_SERIES_IDS)} series")
+    binary.extend(series_questions)
 
     # Filter out already-done questions (title-checked — see titles_match)
     fresh = []
