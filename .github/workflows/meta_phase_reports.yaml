@@ -23,8 +23,16 @@ jobs:
 
     steps:
       - name: Check out repository
+        # FIXED 2026-07-02: same stale-checkout issue found in
+        # tournament_forecast.yaml — without an explicit ref, checkout
+        # pins to whatever commit was on main at DISPATCH time, not
+        # execution time. A dispatch queued behind another run (concurrency
+        # cancel-in-progress: false) can execute much later still checked
+        # out at that old commit. ref: main forces a live fetch of main's
+        # actual current tip whenever this step runs.
         uses: actions/checkout@v4
         with:
+          ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v5

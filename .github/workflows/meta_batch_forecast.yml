@@ -30,8 +30,18 @@ jobs:
 
     steps:
       - name: Check out repository
+        # FIXED 2026-07-02: same stale-checkout issue found in
+        # tournament_forecast.yaml — without an explicit ref, checkout
+        # pins to whatever commit was on main at DISPATCH time, not
+        # execution time. A dispatch queued behind another run (concurrency
+        # cancel-in-progress: false) can execute much later still checked
+        # out at that old commit — which for this workflow would mean
+        # dedup checks running against stale meta batches/ history. ref:
+        # main forces a live fetch of main's actual current tip whenever
+        # this step runs.
         uses: actions/checkout@v4
         with:
+          ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v5
@@ -65,10 +75,15 @@ jobs:
           ALERT_NTFY_TOPIC: ${{ secrets.ALERT_NTFY_TOPIC }}
 
       - name: Commit batch job file for later --check / dedup
+        # if: always() — same lesson as tournament_forecast.yaml (2026-07-02):
+        # don't let this step get silently skipped just because a prior
+        # step failed or hit its 15-minute timeout. Whatever batch file did
+        # get written should still be committed, not thrown away.
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "meta batches/"
+          git add "meta batches/" 2>/dev/null || true
           git diff --cached --quiet && echo "No new batch files to commit." || (
             git commit -m "chore: meta batch forecast submission [skip ci]" &&
             git push
