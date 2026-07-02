@@ -157,15 +157,17 @@ def check_new_futureeval_questions(raw_posts_by_id: dict) -> None:
 
     if new_ids:
         if is_first_run:
-            print(f"  📬 First-ever run: seeding watch list with {len(new_ids)} "
-                  f"currently-open FutureEval question(s) — sending ONE summary "
-                  f"alert, not {len(new_ids)} individual ones.")
-            send_alert(
-                f"Watch list initialized with {len(new_ids)} currently-open "
-                f"FutureEval question(s). From now on you'll get an alert "
-                f"only for genuinely NEW questions between runs.",
-                title="FutureEval watch list initialized"
-            )
+            print(f"  📋 First-ever run: seeding watch list with {len(new_ids)} "
+                  f"currently-open FutureEval question(s). No push notification "
+                  f"sent for this — it's not actionable, just a baseline. "
+                  f"From now on you'll only get a push alert for genuinely "
+                  f"NEW questions between runs.")
+            # Deliberately no send_alert() call here. This event isn't
+            # something to act on, and firing a push for it was confusing
+            # next to the "new question" alert below, which IS actionable.
+            # If this line is repeating on every run rather than printing
+            # once ever, that's a sign watch_state/ isn't being committed
+            # back to the repo — see tournament_forecast.yaml's commit step.
         else:
             print(f"  📬 {len(new_ids)} new FutureEval question(s) detected — "
                   f"alerting (single batched notification)...")
@@ -179,7 +181,7 @@ def check_new_futureeval_questions(raw_posts_by_id: dict) -> None:
             body = "\n".join(lines)
             if len(new_ids) > MAX_LISTED:
                 body += f"\n...and {len(new_ids) - MAX_LISTED} more."
-            send_alert(body, title=f"{len(new_ids)} new FutureEval question(s)")
+            send_alert(body, title=f"🆕 {len(new_ids)} new FutureEval question(s)")
     else:
         print(f"  No new FutureEval questions since last check ({len(seen)} known).")
 

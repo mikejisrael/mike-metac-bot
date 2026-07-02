@@ -184,4 +184,9 @@ poll_tournament.log
 
 reports/coverage_2*.json
 reports/calibration_2*.json
-watch_state/*.json
+# NOTE: watch_state/*.json used to be ignored here. Removed 2026-07-02 —
+# this was the root cause of meta_watch.py's repeat-alert bug: the
+# workflow's `git add watch_state/` step was silently staging nothing,
+# every run, forever, so state (which questions were already seen /
+# already alerted on) never persisted between runs. These files are
+# meant to be committed — see meta_watch.py's module docstring.
