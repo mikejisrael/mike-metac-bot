@@ -1,0 +1,33 @@
+{
+  "single_43331_20260703_104635": {
+    "question_id": 43331,
+    "post_id": 43326,
+    "account": "bot",
+    "question_text": "Which party will hold the most seats in the US House of Representatives after the 2026 elections?",
+    "question_type": "multiple_choice",
+    "refresh_reason": "manual single refresh (community prediction shift alert)",
+    "reasoning": "(a) **Time left until resolution:** The election is November 3, 2026, with resolution after final results (including recounts/runoffs). As of July 3, 2026, approximately 4 months remain until Election Day, with final resolution potentially extending into early 2027.\n\n(b) **Status quo outcome if nothing changes:** Republicans currently hold a narrow 218-215 majority. In midterms, the president's party typically loses seats. With Trump/Republicans in power, historical patterns suggest Democrats would likely gain seats. The current status quo projection thus leans Democratic.\n\n(c) **Scenario for each option resolving YES:**\n- **Democrats:** Democrats net gain seats in November 2026, flipping enough Republican-held seats to reach 218+ seats (needing a net gain of ~4+ seats given current vacancies/margins).\n- **Republicans:** Republicans maintain or expand their current majority, holding 218+ seats after all races resolve.\n- **Other:** A third party wins more seats than either major party, or there's a tie, or mass vacancies \u2014 all extremely unlikely.\n\n(d) **Base rate:** The president's party historically loses House seats in midterm elections. This is one of the strongest patterns in American electoral history. In the modern era, the incumbent president's party rarely gains House seats in midterms; the average loss is substantial (often 20-30+ seats). Given Republicans hold only a 3-seat margin, even a modest swing would flip the House. This pattern strongly favors Democrats retaking the House.\n\n(e) **How the research moves me from base rate:**\nThe research mentions:\n- Democrats' odds around 73.4% (from Race to the WH or similar aggregator, April timeframe)\n- Republicans' chances rose from ~18.9% to ~27.2% by mid-May (likely due to redistricting news)\n- The community is at 69% Democrats / 29% Republicans\n\nThe redistricting shift (Republicans rising from ~19% to ~27%) suggests some favorable redistricting developments for Republicans between May 7-13. This is consistent with the community moving from what may have been higher Democratic odds earlier to the current 69%.\n\nThe current 69% Democrats / 29% Republicans split from the community suggests:\n- The midterm headwind for the president's party remains the dominant factor\n- But redistricting and other factors have partially offset this\n- The generic ballot environment, fundraising advantages for Democrats, and historical patterns all still favor Democrats\n\n(f) **Change from original forecast (78% D / 19% R / 3% Other):**\nThe original forecast had Democrats at 78% and Republicans at 19%. The community has shifted to 69%/29%, a meaningful 9-10 point swing toward Republicans. The redistricting news (Republicans gaining from 19% to 27%) and possibly other developments (Trump approval, economy, specific race ratings) explain this shift. I should update toward the current community prediction. The community has access to real current events I don't have full details on, and the redistricting change is specifically mentioned as a driver.\n\n(g) **Community divergence analysis:**\nMy original forecast was 78% Democrats vs. the current community 69%. That's a >10% gap relative to my prior. Given:\n1. The community incorporates more recent information (redistricting, May developments)\n2. The research explicitly notes Republicans' chances rose significantly in May\n3. The community of forecasters on Metaculus tends to be well-calibrated\n\nI should substantially defer to the community's updated 69%/29% split. The midterm headwind pattern still supports Democrats, but I'll anchor near the community consensus given their access to more recent information. I'll place Democrats slightly above 69% given the strong historical base rate of midterm losses for the president's party, but not far from the community.\n\n**Final assessment:** ~70% Democrats, ~28% Republicans, ~2% Other.\n\nProbabilities: {\"Democrats\": 70, \"Republicans\": 28, \"Other\": 2}",
+    "community_prediction": {
+      "Democrats": 0.6877872273126429,
+      "Republicans": 0.28894190419181914,
+      "Other": 0.023270868495537913
+    },
+    "research_text": "I found one internal contradiction in the summary:\n\n**Contradiction identified:** The summary states \"After an April fundraising update, Democrats' odds of winning the House increased to roughly 73.4%,\" but earlier it mentions \"Republicans' chances of winning the House rose from 18.9% on May 7th to 27.2% on May 13th.\" These statements refer to different probability estimates at different times, but the April date for the 73.4% figure appears inconsistent with the May 7-13 timeframe for the redistricting impact statement. However, since these measure different things (Democrats' odds vs. Republicans' odds) and the April date may simply be earlier in the timeline, this is not a direct numerical contradiction of the same metric.\n\nUpon closer inspection, there is **no clear internal contradiction** \u2014 the summary references different forecasting sources (The Economist, Inside Elections, Race to the WH) at different times, and while the dates are somewhat scattered, they don't directly contradict each other (April fundraising update could precede May redistricting changes).\n\n**Return: UNCHANGED**\n\nThe summary contains no internal contradictions that meet the criteria specified (same metric attributed to two different incompatible values).",
+    "status": "success",
+    "probabilities": {
+      "Democrats": 0.7,
+      "Republicans": 0.28,
+      "Other": 0.02
+    },
+    "submitted_forecast": {
+      "Democrats": 0.7,
+      "Republicans": 0.28,
+      "Other": 0.02
+    },
+    "original_probabilities": {
+      "Democrats": 0.78,
+      "Republicans": 0.19,
+      "Other": 0.03
+    }
+  }
+}

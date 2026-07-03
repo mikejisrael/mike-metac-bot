@@ -50,6 +50,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from meta_alerts import send_alert
+from meta_refresh_gate import is_refresh_due, MIN_REFRESH_GAP_HOURS
 
 WATCH_DIR = "watch_state"
 os.makedirs(WATCH_DIR, exist_ok=True)
@@ -75,7 +76,14 @@ MAX_REFRESH_CHECKS_PER_RUN = 150
 # alert volume. Don't change these based on the first few alerts alone.
 CLOSING_SOON_HOURS = 48
 CP_SHIFT_THRESHOLD = 0.15
-MIN_HOURS_BETWEEN_REFRESH_ALERTS = 24
+# CHANGED (2026-07-03): was a local MIN_HOURS_BETWEEN_REFRESH_ALERTS = 24,
+# now the shared meta_refresh_gate.MIN_REFRESH_GAP_HOURS (192h / 8 days) —
+# same constant meta_refresh_forecast.py's CLOSING_SOON eligibility gate
+# uses, so alert cadence and actual refresh eligibility can't drift apart
+# (previously this script could keep alerting about a question more often
+# than meta_refresh_forecast.py would even consider it due for a refresh).
+# Chosen so a question closing in 14 days gets at most 2 alerts/refreshes
+# — see meta_refresh_gate.py's docstring for the full reasoning.
 
 # FIXED 2026-07-02: "closing soon" alone isn't a useful refresh signal for
 # FutureEval — those questions open and close within ~3 hours by design
@@ -254,8 +262,18 @@ def _load_bot_forecasts() -> dict:
     deduped to the most recently loaded entry per question_id (files are
     sorted, so later == newer, matching show_reasoning.py's convention)."""
     forecasts: dict = {}
+    # FIXED 2026-07-03: was "Meta batches" (capital M) — same latent
+    # Linux/GitHub-Actions case-sensitivity bug already fixed in
+    # meta_refresh_forecast.py's BATCH_DIR and meta_backfill_page_urls.py's
+    # BATCH_DIR (2026-06-30 and 2026-07-03 respectively). Only ever
+    # "worked" here because this has so far only run on Windows (NTFS,
+    # case-insensitive) — this script hasn't been bitten by it yet only
+    # because it's never run on a case-sensitive runner either, not because
+    # the folder name was actually correct. "tournament_batches" was
+    # already lowercase and consistent with tournament_forecast.py's own
+    # convention — left as-is.
     result_files = sorted(
-        f for d in ("Meta batches", "tournament_batches")
+        f for d in ("meta batches", "tournament_batches")
         for f in glob.glob(os.path.join(d, "batch_results*.json"))
     )
     for rf in result_files:
@@ -432,7 +450,14 @@ def check_refresh_candidates() -> None:
             if last_alerted:
                 try:
                     last_dt = datetime.fromisoformat(last_alerted)
-                    if (now - last_dt).total_seconds() / 3600 < MIN_HOURS_BETWEEN_REFRESH_ALERTS:
+                    # CHANGED (2026-07-03): now the shared is_refresh_due()
+                    # function (meta_refresh_gate.py) at MIN_REFRESH_GAP_HOURS
+                    # — was a local manual timedelta comparison against
+                    # MIN_HOURS_BETWEEN_REFRESH_ALERTS=24. Same "has enough
+                    # time passed" check, now shared with
+                    # meta_refresh_forecast.py's CLOSING_SOON eligibility gate
+                    # so the two can't silently drift apart.
+                    if not is_refresh_due(last_dt, MIN_REFRESH_GAP_HOURS, now=now):
                         skip = True
                 except Exception:
                     pass

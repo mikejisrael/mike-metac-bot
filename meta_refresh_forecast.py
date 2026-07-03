@@ -41,24 +41,62 @@ skipped by fetch_question_by_id with a warning rather than guessed at —
 those questions will just get freshly forecast next time they come up
 through the normal tournament/batch path.
 
-IMPORTANT — --single always authenticates as your PERSONAL account
-(mike_iz_, via METACULUS_TOKEN), never the bot's METAC_TOURNAMENT_TOKEN.
-This is deliberate and different from the rest of this file: the
-"significant change in Community Prediction" emails this flag is built for
-are about YOUR predictions specifically, not the bot's separate, unrelated
-forecasting history on the same questions. Using the wrong token here would
-silently show/refresh the wrong account's forecast.
+CHANGED (2026-07-03): --single now authenticates as the BOT account
+(mike_iz_-bot, via METAC_TOURNAMENT_TOKEN / ACTIVE_TOKEN), same as every
+other path in this file. Originally --single deliberately used the PERSONAL
+account (METACULUS_TOKEN) because it was built for "significant change in
+Community Prediction" emails about Mike's own manual predictions. That
+premise no longer holds — Mike confirmed (2026-07-03) he no longer forecasts
+manually; everything runs through the bot now — so keeping --single on the
+personal token would just mean comparing against a forecast history that
+isn't being added to anymore. "Your last forecast" below now means the
+bot's last forecast on this question, not mike_iz_'s.
 
-IMPORTANT — community prediction & your last forecast, fetched live:
+CHANGED (2026-07-03): --single now supports MultipleChoiceQuestion in
+addition to BinaryQuestion. NumericQuestion is still unsupported — same
+"only binary" warning now says "binary or multiple-choice" instead.
+MC forecasts are collected as a dict of option label -> probability (the
+shape post_multiple_choice_question_prediction requires) and stored in
+local history as "probabilities" rather than the single-float "probability"
+field binary uses, with a "question_type" field on every result so readers
+know which shape to expect. This is a newer, less battle-tested path than
+the binary one — verify against a real MC question before trusting it
+blindly (per usual practice in this file).
+
+CHANGED (2026-07-03): the batch path (dry run / --submit / --check) now
+ALSO supports multiple-choice questions, not just --single. This closed a
+real gap found while testing: --single's MC support alone meant any MC
+question forecast that way became permanently invisible to the CLOSING_SOON/
+STALE eligibility scan (find_questions_to_refresh only checked the binary
+"probability" field, so MC entries were silently `continue`'d before ever
+reaching closing_soon/stale — no crash, no warning, just gone). Fixed by:
+fetch_question_by_id now accepts MultipleChoiceQuestion; submit_refresh_batch
+picks build_refresh_prompt vs build_refresh_prompt_mc per question and
+persists question_type + options_by_question into the batch_info jobs file
+(needed because check_refresh_batch reads from disk up to 24h later, not
+from memory); check_refresh_batch parses each result with the right logic
+via the shared parse_mc_probabilities_text (also used by --single, so both
+paths validate identically); submit_to_metaculus calls
+post_multiple_choice_question_prediction for MC results instead of
+post_binary_question_prediction. Batch files from before this change have
+no question_types/options_by_question keys and are treated as all-binary
+(the only thing they could have been).
+
+IMPORTANT — community prediction & last forecast, fetched live:
 get_question_by_post_id() doesn't request question aggregations, and (a real
 quirk in the forecasting_tools library itself) that also blanks out your own
 forecast history even when the API actually returned it, because both are
 parsed in one shared try/except block. --single works around this with its
 own direct call to the same legacy api2 detail endpoint already proven
 reliable elsewhere in this codebase (update_community_predictions, the old
-fetch_question_by_id) — matched by POST id, authenticated as mike_iz_,
-parsing community prediction and your own forecast history independently so
-one being missing doesn't blank the other.
+fetch_question_by_id) — matched by POST id, authenticated as the ACTIVE
+account (the bot, per the change above), parsing community prediction and
+last-forecast history independently so one being missing doesn't blank the
+other. For MultipleChoiceQuestion, the api2 aggregation "centers" list is
+matched positionally against question.options — this assumes the API
+returns centers in the same order as options, which is a real assumption,
+not a confirmed guarantee; the raw response is printed as a debug aid the
+first time so this can be checked against a live question.
 """
 
 import asyncio
@@ -75,11 +113,12 @@ import requests
 
 load_dotenv()
 
-from forecasting_tools import MetaculusClient, BinaryQuestion
+from forecasting_tools import MetaculusClient, BinaryQuestion, MultipleChoiceQuestion, QuestionState
 from live_data import detect_data_needs, format_live_data_for_prompt
 from cached_llm import build_forecaster_system_prompt
 from meta_prompt_cache import cacheable_system_block
 from meta_research import research_question
+from meta_refresh_gate import is_refresh_due, MIN_REFRESH_GAP_HOURS
 
 client_anthropic = anthropic.Anthropic()
 
@@ -87,9 +126,9 @@ client_anthropic = anthropic.Anthropic()
 # Metaculus support for general use, not just tournaments). Falls back to
 # METACULUS_TOKEN if METAC_TOURNAMENT_TOKEN isn't set, so this doesn't break
 # if .env hasn't been updated yet.
-# NOTE: this is used by the BATCH/REFRESH paths (--submit/--check/main), which
-# legitimately run as the bot. --single deliberately does NOT use this — see
-# personal_client below and the module docstring.
+# NOTE: as of 2026-07-03 this is used by every path in this file, including
+# --single — see single_client below and the module docstring for why
+# --single no longer runs as a separate personal account.
 ACTIVE_TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN") or os.getenv("METACULUS_TOKEN")
 if os.getenv("METAC_TOURNAMENT_TOKEN"):
     print("Auth: using METAC_TOURNAMENT_TOKEN (mike_iz_-bot)")
@@ -97,10 +136,13 @@ else:
     print("Auth: METAC_TOURNAMENT_TOKEN not set — falling back to METACULUS_TOKEN (mike_iz_)")
 client_metaculus = MetaculusClient(token=ACTIVE_TOKEN)
 
-# --single always acts as the PERSONAL account specifically — see module
-# docstring for why this is intentionally separate from ACTIVE_TOKEN above.
-PERSONAL_TOKEN = os.getenv("METACULUS_TOKEN")
-personal_client = MetaculusClient(token=PERSONAL_TOKEN) if PERSONAL_TOKEN else None
+# CHANGED (2026-07-03): --single used to run as a separate personal_client
+# (METACULUS_TOKEN) — see module docstring for why that's no longer the
+# case. --single now shares client_metaculus / ACTIVE_TOKEN with every
+# other path in this file. Kept as a plain alias (rather than deleting the
+# name outright) so the diff below stays small and the intent at each
+# call site — "this call is part of the --single flow" — stays legible.
+single_client = client_metaculus
 
 # ─── Fail fast on permanently-closed questions ───────────────────────────────
 # FIXED 2026-06-30: copied from tournament_forecast.py's identical fix —
@@ -112,10 +154,9 @@ personal_client = MetaculusClient(token=PERSONAL_TOKEN) if PERSONAL_TOKEN else N
 # of pure dead time PER closed question, retrying a 405 "already closed"
 # response that can never succeed no matter how many times it's retried.
 # This file never had the fix tournament_forecast.py already has — applied
-# here to BOTH clients (client_metaculus for --submit/--check, AND
-# personal_client for --single, since --single can hit the exact same
-# closed-question scenario when refreshing a single question that closed
-# since it was last checked).
+# here to client_metaculus, which single_client aliases, so --single is
+# covered too (it can hit the exact same closed-question scenario when
+# refreshing a single question that closed since it was last checked).
 import types as _types
 
 _original_post_question_prediction = type(client_metaculus)._post_question_prediction.__wrapped__
@@ -141,10 +182,8 @@ def _post_question_prediction_fail_fast_on_closed(self, question_id, forecast_pa
 client_metaculus._post_question_prediction = _types.MethodType(
     _post_question_prediction_fail_fast_on_closed, client_metaculus
 )
-if personal_client is not None:
-    personal_client._post_question_prediction = _types.MethodType(
-        _post_question_prediction_fail_fast_on_closed, personal_client
-    )
+# single_client is just an alias for client_metaculus (see above), so it
+# already has this patch — no separate application needed.
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 MODEL = "claude-haiku-4-5"
@@ -160,6 +199,12 @@ SINGLE_MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 2000
 CLOSING_SOON_DAYS = 14
 STALE_DAYS = 30
+# Added 2026-07-03 for cost control: caps how many STALE questions get
+# refreshed per run. CLOSING_SOON questions are NEVER capped — they have a
+# real deadline (miss the window and you lose the chance to refresh before
+# the question locks), whereas a skipped stale question just waits for next
+# run at no real cost. Mike's choice, 2026-07-03: 10 stale refreshes/run.
+STALE_REFRESH_CAP = 10
 # FIXED 2026-06-30: was "Meta batches" (capital M) — see meta_batch_forecast.py's
 # identical fix for the full explanation. This file hadn't been bitten by
 # it yet only because it has never run on a case-sensitive (Linux) runner
@@ -174,6 +219,23 @@ def ensure_batch_dir():
 
 
 # ─── Pydantic-safe attribute setter ────────────────────────────────────────
+def _set_cp(obj, cp) -> None:
+    """Added 2026-07-03. MultipleChoiceQuestion (and NumericQuestion,
+    documented elsewhere in this codebase) reject plain assignment of
+    community_prediction_at_access_time — it's not a declared pydantic
+    field on those classes — raising ValueError instead of just setting it.
+    BinaryQuestion happens to allow it (confirmed: this file's binary path
+    used plain assignment for a while without issue), but MC does not, as
+    caught via a live test while building the MC path below. Use this for
+    ALL question types now rather than relying on BinaryQuestion's more
+    permissive behavior, so this doesn't silently break again if that
+    changes upstream."""
+    try:
+        obj.community_prediction_at_access_time = cp
+    except Exception:
+        object.__setattr__(obj, "community_prediction_at_access_time", cp)
+
+
 def _set_research_text(obj, text) -> None:
     """See meta_batch_forecast.py's identical helper for the full
     explanation — plain attribute assignment crashed BinaryQuestion in a
@@ -270,16 +332,22 @@ def build_community_context(
 
 
 # ─── Load full forecast history ───────────────────────────────────────────────
-def _build_probability_index() -> dict[str, float]:
-    """Scan every results file in BATCH_DIR once and build a single
-    custom_id -> probability lookup. This replaces the old per-job-file
-    filename guess (job_file.replace('batch_jobs', 'batch_results')),
-    which silently failed whenever a results file was saved under a
-    different timestamp than its matching jobs file (e.g. --check run
-    well after --submit). That failure caused every forecast in the
-    affected batch to read probability=None, making them invisible to
-    find_questions_to_refresh even when their resolve_time was fine."""
-    index: dict[str, float] = {}
+def _build_forecast_index() -> dict[str, dict]:
+    """RENAMED (2026-07-03) from _build_probability_index, generalized for
+    full MC batch support alongside the existing binary path. Scan every
+    results file in BATCH_DIR once and build a single custom_id -> {probability,
+    probabilities, question_type} lookup. This replaces the old per-job-file
+    filename guess (job_file.replace('batch_jobs', 'batch_results')), which
+    silently failed whenever a results file was saved under a different
+    timestamp than its matching jobs file (e.g. --check run well after
+    --submit). That failure caused every forecast in the affected batch to
+    read probability=None, making them invisible to find_questions_to_refresh
+    even when their resolve_time was fine.
+
+    question_type defaults to "binary" for any result missing the field —
+    every result written before 2026-07-03 predates MC support and is
+    binary-only, so this keeps old history readable without a migration."""
+    index: dict[str, dict] = {}
     results_files = (
         glob.glob(os.path.join(BATCH_DIR, "batch_results_2*.json")) +
         glob.glob(os.path.join(BATCH_DIR, "batch_results_refresh_*.json"))
@@ -289,8 +357,20 @@ def _build_probability_index() -> dict[str, float]:
             with open(rf) as f:
                 results = json.load(f)
             for custom_id, r in results.items():
-                if r.get("status") == "success" and r.get("probability") is not None:
-                    index.setdefault(custom_id, r["probability"])
+                if r.get("status") != "success":
+                    continue
+                if custom_id in index:
+                    continue  # setdefault-once semantics, same as the old index
+                if r.get("probability") is not None:
+                    index[custom_id] = {
+                        "probability": r["probability"], "probabilities": None,
+                        "question_type": r.get("question_type", "binary"),
+                    }
+                elif r.get("probabilities") is not None:
+                    index[custom_id] = {
+                        "probability": None, "probabilities": r["probabilities"],
+                        "question_type": r.get("question_type", "multiple_choice"),
+                    }
         except Exception as e:
             print(f"  Warning: could not load {rf}: {e}")
     return index
@@ -309,10 +389,10 @@ def load_all_batches() -> list[dict]:
         print(f"No batch job files found in {BATCH_DIR}/")
         return []
 
-    # Build the probability lookup ONCE across all results files, rather
-    # than guessing one filename per job file (see _build_probability_index
+    # Build the forecast lookup ONCE across all results files, rather than
+    # guessing one filename per job file (see _build_forecast_index
     # docstring for why the old approach silently dropped questions).
-    probability_index = _build_probability_index()
+    forecast_index = _build_forecast_index()
 
     for job_file in sorted(job_files):
         try:
@@ -329,6 +409,7 @@ def load_all_batches() -> list[dict]:
             post_ids = batch_info.get("post_ids", {})
 
             for custom_id, q_id in question_ids.items():
+                entry = forecast_index.get(custom_id, {})
                 all_forecasts.append({
                     "custom_id":      custom_id,
                     "question_id":    q_id,
@@ -338,7 +419,11 @@ def load_all_batches() -> list[dict]:
                     "resolve_time":   resolve_times.get(custom_id),
                     "category":       (categories.get(custom_id) or [""])[0],
                     "community_pred": community_preds.get(custom_id),
-                    "probability":    probability_index.get(custom_id),
+                    "probability":    entry.get("probability"),
+                    # Added 2026-07-03 for MC support — None for every binary
+                    # entry, a dict for MC entries with a successful result.
+                    "probabilities":  entry.get("probabilities"),
+                    "question_type":  entry.get("question_type", "binary"),
                     "source_file":    job_file,
                 })
         except Exception as e:
@@ -349,10 +434,21 @@ def load_all_batches() -> list[dict]:
 
 
 # ─── Identify questions needing refresh ───────────────────────────────────────
-def find_questions_to_refresh(all_forecasts: list[dict]) -> tuple[list[dict], list[dict]]:
+def find_questions_to_refresh(
+    all_forecasts: list[dict]
+) -> tuple[list[dict], list[dict], list[dict]]:
     now = datetime.now(timezone.utc)
     closing_soon = []
     stale = []
+    # CHANGED (2026-07-03): new third bucket — closing-soon questions that
+    # were refreshed too recently to be eligible again yet (see
+    # meta_refresh_gate.is_refresh_due). Previously closing_soon had NO
+    # recency check at all, so the same questions got re-flagged (and
+    # actually re-forecast) on every single run no matter how recently
+    # they'd last been refreshed. Tracked separately rather than silently
+    # dropped, matching this file's established pattern (stale-cap
+    # deferrals, MC eligibility) of never hiding a skip without a reason.
+    gated = []
     seen_question_ids = set()
 
     sorted_forecasts = sorted(
@@ -366,13 +462,24 @@ def find_questions_to_refresh(all_forecasts: list[dict]) -> tuple[list[dict], li
         if q_id in seen_question_ids:
             continue
 
-        if f["probability"] is None:
+        # CHANGED (2026-07-03): previously only checked f["probability"],
+        # which meant every MC entry (which carries "probabilities" instead
+        # — see load_all_batches/_build_forecast_index) silently and
+        # permanently vanished from refresh eligibility with no warning
+        # anywhere. Now a forecast counts as "has a usable forecast on
+        # file" if EITHER field is populated, matching its question_type.
+        has_forecast = (
+            f["probability"] is not None
+            if f.get("question_type", "binary") == "binary"
+            else f.get("probabilities") is not None
+        )
+        if not has_forecast:
             # Don't mark as seen yet — this is just the newest entry for
-            # this question_id, and it happens to lack a usable probability
+            # this question_id, and it happens to lack a usable forecast
             # (e.g. a results file that didn't line up with its jobs file).
             # An older entry for the same question_id, later in this sorted
-            # list, may still have a valid probability — let it through
-            # instead of permanently dropping the question here.
+            # list, may still have a valid one — let it through instead of
+            # permanently dropping the question here.
             continue
         seen_question_ids.add(q_id)
 
@@ -398,6 +505,16 @@ def find_questions_to_refresh(all_forecasts: list[dict]) -> tuple[list[dict], li
         if resolve_time:
             days_to_close = (resolve_time - now).days
             if 0 <= days_to_close <= CLOSING_SOON_DAYS:
+                # CHANGED (2026-07-03): gate on how recently this was last
+                # refreshed. A question that isn't due yet is genuinely NOT
+                # stale either (if it were old enough to be stale, it would
+                # already have passed this gate — MIN_REFRESH_GAP_HOURS is
+                # far shorter than STALE_DAYS), so `continue` straight past
+                # both buckets is correct, not a fallthrough risk.
+                if not is_refresh_due(submitted_at, now=now):
+                    f["days_to_close"] = days_to_close
+                    gated.append(f)
+                    continue
                 f["days_to_close"] = days_to_close
                 f["refresh_reason"] = f"closing in {days_to_close} days"
                 closing_soon.append(f)
@@ -412,16 +529,31 @@ def find_questions_to_refresh(all_forecasts: list[dict]) -> tuple[list[dict], li
                 f["refresh_reason"] = f"forecast is {age_days} days old"
                 stale.append(f)
 
-    return closing_soon, stale
+    return closing_soon, stale, gated
 
 
 # ─── Fetch fresh question data from Metaculus ─────────────────────────────────
 from meta_question_matching import titles_match
 
 
+def _is_open_for_forecasting(question) -> bool:
+    """Added 2026-07-03. Checks question.state (a real field forecasting_tools
+    already populates on fetch — QuestionState.OPEN / CLOSED / RESOLVED /
+    UPCOMING) so a closed question can be skipped BEFORE spending an Anthropic
+    API call on it, not after. Caught live: a --submit run generated real
+    (paid) forecasts for 9 stale questions that had already closed to
+    forecasting since they were first submitted weeks earlier — the
+    eligibility check only ever looked at the OLD local resolve_time, and
+    fetch_question_by_id had no state check at all, so the closure was only
+    ever discovered at the final Metaculus submission call (post-generation,
+    money already spent). UPCOMING is treated as not-forecastable too, out
+    of caution — untested whether Metaculus accepts forecasts pre-open."""
+    return getattr(question, "state", None) == QuestionState.OPEN
+
+
 async def fetch_question_by_id(
     post_id: int | None, question_id: int, expected_text: str | None = None
-) -> BinaryQuestion | None:
+) -> BinaryQuestion | MultipleChoiceQuestion | None:
     """Fetch a question by its POST id, using MetaculusClient.get_question_by_post_id
     — the same method --single already uses successfully (see module docstring).
 
@@ -439,7 +571,18 @@ async def fetch_question_by_id(
     If expected_text is provided (the title we have on file from when we
     originally forecast it), this also verifies the fetched question's
     title actually matches before returning it — a safety net in case the
-    post id on file doesn't correspond to the question we think it does."""
+    post id on file doesn't correspond to the question we think it does.
+
+    CHANGED (2026-07-03): now accepts MultipleChoiceQuestion too, not just
+    BinaryQuestion — full batch MC support added alongside --single's MC
+    support. Still rejects anything else (e.g. NumericQuestion — not
+    requested, not built).
+
+    CHANGED (2026-07-03): also rejects a question that isn't currently OPEN
+    for forecasting — see _is_open_for_forecasting docstring. This is a
+    cost fix, not just a correctness one: skipping here means
+    submit_refresh_batch never builds a prompt or spends an Anthropic API
+    call on a question that can't accept a forecast anyway."""
     if post_id is None:
         print(f"    ⚠️  Q{question_id}: no post_id on file (forecast predates the "
               f"post_id fix) — skipping rather than guessing. Will be re-forecast "
@@ -448,9 +591,13 @@ async def fetch_question_by_id(
     try:
         result = client_metaculus.get_question_by_post_id(post_id)
         question = result[0] if isinstance(result, list) else result
-        if not isinstance(question, BinaryQuestion):
-            print(f"    ⚠️  Post {post_id} is not a binary question "
+        if not isinstance(question, (BinaryQuestion, MultipleChoiceQuestion)):
+            print(f"    ⚠️  Post {post_id} is not a binary or multiple-choice question "
                   f"({type(question).__name__}). Skipping.")
+            return None
+        if not _is_open_for_forecasting(question):
+            print(f"    ⏭️  Q{question_id} (post {post_id}): state={getattr(question, 'state', None)}, "
+                  f"not open for forecasting — skipping before spending an API call.")
             return None
         fetched_title = question.question_text or ""
         if expected_text and not titles_match(expected_text, fetched_title):
@@ -466,27 +613,27 @@ async def fetch_question_by_id(
 
 
 # ─── Build prompt ─────────────────────────────────────────────────────────────
-def build_refresh_prompt(
-    question: BinaryQuestion,
-    original_prob: float | None,
-    refresh_reason: str,
-    days_to_close: float = 30,
-    total_days: float = 365,
-) -> str:
+def _fetch_grounding_blocks(question) -> tuple[str, str, bool]:
+    """Shared by build_refresh_prompt (binary) and build_refresh_prompt_mc
+    (multiple-choice, added 2026-07-03) — extracted 2026-07-03 out of what
+    used to be inline-only in build_refresh_prompt, so both share identical
+    live-data + research fetching logic instead of risking drift between
+    two copies. Returns (live_data_text, research_block, has_real_grounding).
+
+    Added 2026-06-30: was previously missing entirely from this file —
+    tournament_forecast.py and meta_batch_forecast.py both got real-time
+    web search research wired in, but refresh (this file, both --submit
+    batch and --single) had no research call at all, meaning refreshed
+    forecasts on non-live_data questions (most politics/sports/legal/
+    geopolitics questions) were still reasoning from static,
+    frozen-at-creation-time background text only, exactly the failure
+    mode this fix addresses everywhere else."""
     live_data = detect_data_needs(question.question_text)
     live_data_text = format_live_data_for_prompt(live_data)
     has_live_data = bool(live_data)  # live_data.py only covers crypto/stock/
     # index/FRED keywords — empty dict means no real current information at
     # all for this question from that source alone.
 
-    # Added 2026-06-30: was previously missing entirely from this file —
-    # tournament_forecast.py and meta_batch_forecast.py both got real-time
-    # web search research wired in, but refresh (this file, both --submit
-    # batch and --single) had no research call at all, meaning refreshed
-    # forecasts on non-live_data questions (most politics/sports/legal/
-    # geopolitics questions) were still reasoning from static,
-    # frozen-at-creation-time background text only, exactly the failure
-    # mode this fix addresses everywhere else.
     research_text = research_question(question.question_text, question.background_info or "")
     has_research = research_text is not None
     research_block = (
@@ -501,6 +648,17 @@ def build_refresh_prompt(
     # build_community_context's docstring for why has_live_data alone is no
     # longer the right signal now that research_question exists.
     has_real_grounding = has_live_data or has_research
+    return live_data_text, research_block, has_real_grounding
+
+
+def build_refresh_prompt(
+    question: BinaryQuestion,
+    original_prob: float | None,
+    refresh_reason: str,
+    days_to_close: float = 30,
+    total_days: float = 365,
+) -> str:
+    live_data_text, research_block, has_real_grounding = _fetch_grounding_blocks(question)
 
     cp = getattr(question, 'community_prediction_at_access_time', None)
     community = build_community_context(days_to_close, total_days, cp, has_real_grounding)
@@ -560,10 +718,171 @@ The last thing you write is: "Probability: ZZ%"
 """
 
 
+def build_refresh_prompt_mc(
+    question: MultipleChoiceQuestion,
+    original_probs: dict[str, float] | None,
+    refresh_reason: str,
+    days_to_close: float = 30,
+    total_days: float = 365,
+) -> str:
+    """Added 2026-07-03 alongside --single's MC support. Structurally mirrors
+    build_refresh_prompt (same grounding/community/base-rate scaffolding —
+    see that function and _fetch_grounding_blocks) but asks for a full
+    probability distribution over question.options instead of a single
+    Yes/No probability, since post_multiple_choice_question_prediction needs
+    a dict of every option -> probability, not one float.
+
+    original_probs / cp are dicts here (option label -> probability) rather
+    than the single floats build_refresh_prompt uses — see
+    fetch_live_forecast_context's options parameter for how those dicts get
+    built. community weighting itself (build_community_context) is still
+    fundamentally a single-number function, so it's applied per-option and
+    the resulting lines joined, rather than rewriting that function to be
+    MC-aware — this keeps the sliding-weight logic identical to the binary
+    path with no risk of diverging behavior between the two."""
+    live_data_text, research_block, has_real_grounding = _fetch_grounding_blocks(question)
+
+    options = question.options
+    options_list = "\n".join(f"  - {opt}" for opt in options)
+
+    cp = getattr(question, 'community_prediction_at_access_time', None)
+    if isinstance(cp, dict):
+        cp_lines = "\n".join(
+            f"  - {opt}: {cp[opt]:.0%}" for opt in options if opt in cp
+        )
+        # Weight tier text mirrors build_community_context's tiers exactly
+        # (same community_weight() call, same thresholds/wording) but
+        # written directly against "the community prediction above" rather
+        # than a single percentage, since MC has one per option. Written
+        # out directly instead of string-splicing into build_community_context's
+        # output (tried initially, produced garbled text like "...(below)
+        # (moderate weight)." for non-lowest tiers).
+        if not has_real_grounding:
+            community_guidance = (
+                "\nIMPORTANT: you have NO live data, news, or search results for "
+                "this question — only the static background/resolution text "
+                "above, which was frozen at question-creation time. Stay within "
+                "10 percentage points of the community prediction for each "
+                "option unless the background/resolution text above gives a "
+                "specific, concrete reason to diverge.\n"
+            )
+        else:
+            w = community_weight(days_to_close, total_days)
+            if w < 0.10:
+                community_guidance = (
+                    "\nForm your own independent view — you are early enough "
+                    "that your forecast contributes meaningfully to the "
+                    "aggregation. Note if you diverge from any option by more "
+                    "than 10% and explain why.\n"
+                )
+            elif w < 0.40:
+                community_guidance = (
+                    "\nGive the community prediction meaningful weight "
+                    "alongside your own analysis. Explain any per-option "
+                    "divergence greater than 10%.\n"
+                )
+            elif w < 0.75:
+                community_guidance = (
+                    "\nAnchor close to the community prediction above — it has "
+                    "aggregated substantial information at this stage. Only "
+                    "deviate on an option if the background or resolution text "
+                    "above gives a clear, specific reason not yet priced in.\n"
+                )
+            else:
+                community_guidance = (
+                    f"\nVery high weight ({w:.0%}) — stay within 5-10 "
+                    "percentage points of the community prediction for each "
+                    "option unless the background or resolution text above "
+                    "gives something genuinely explosive and specific.\n"
+                )
+        community = f"\nCurrent community prediction by option:\n{cp_lines}\n{community_guidance}"
+    else:
+        community = ""
+
+    if original_probs:
+        orig_lines = "\n".join(f"  - {opt}: {original_probs[opt]:.0%}" for opt in options if opt in original_probs)
+        original_note = (
+            f"\nNote: This question was previously forecast as:\n{orig_lines}\n"
+            "Review whether this distribution remains appropriate given current information.\n"
+        )
+    else:
+        original_note = "\nNote: No prior forecast on file for this question — treat this as a fresh, independent forecast.\n"
+
+    no_data_note = ""
+    if not has_real_grounding:
+        no_data_note = (
+            "\nNOTE: No live market data and no research results were found "
+            "for this question. You have no current information beyond the "
+            "static background/resolution text above.\n"
+        )
+
+    return f"""Question: {question.question_text}
+
+This is a MULTIPLE-CHOICE question with these options:
+{options_list}
+
+Background:
+{question.background_info or 'No background provided'}
+
+Resolution criteria:
+{question.resolution_criteria or 'No resolution criteria provided'}
+
+{question.fine_print or ''}
+
+{live_data_text}
+{research_block}
+{no_data_note}
+{community}
+{original_note}
+
+Refresh reason: {refresh_reason}
+Today is {datetime.now().strftime("%Y-%m-%d")}.
+
+Before answering write:
+(a) Time left until resolution
+(b) Status quo outcome if nothing changes
+(c) For each option, the scenario in which it resolves YES
+(d) Base rate. HARD RULE: do not reference any specific past tournament
+    edition, named forecaster, or quoted/paraphrased tournament outcome
+    UNLESS it appears verbatim in the Background, Resolution criteria, or
+    Research sections above. Do not invent or recall a "Spring" edition, a
+    prior head-to-head result, or any other specific precedent from memory —
+    you do not have reliable knowledge of this tournament's history beyond
+    what is given above. If no real base-rate data is given above, write
+    exactly: "No reliable base rate available — proceeding on priors." and
+    move on.
+(e) How the live data/research/background above (NOT general news — you
+    have none unless explicitly given above) moves you from base rate
+(f) How your view has changed (or not) since the original forecast
+(g) If community prediction exists and any option differs >10%, explain why you diverge
+
+Your probabilities MUST sum to 100% across all options.
+
+The last thing you write is a single line in exactly this format, using the
+option text VERBATIM as written above, valid JSON, one entry per option:
+Probabilities: {{"<option 1 text>": XX, "<option 2 text>": YY, ...}}
+"""
+
+
 # ─── Submit refresh batch (BATCH mode — 24h turnaround) ──────────────────────
-async def submit_refresh_batch(to_refresh: list[dict]):
+async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[dict], stale_cap: int):
+    """CHANGED (2026-07-03): was a single flat to_refresh list, pre-sliced to
+    the cap in main() BEFORE any fetching happened. That meant a stale
+    question that turned out closed (only discoverable at fetch time — see
+    _is_open_for_forecasting) silently consumed one of the STALE_REFRESH_CAP
+    slots for the run without ever producing a forecast, even when a
+    genuinely refreshable question further down the sorted list was
+    available and never got attempted. Caught live: Mike's --submit run
+    only queued 2/10 stale slots as usable forecasts once already-closed
+    questions were correctly skipped by the earlier fix.
+
+    Now stale_candidates is the FULL urgency-sorted pool (not pre-sliced) —
+    this function keeps pulling from it until it has successfully QUEUED
+    stale_cap open questions, or the pool runs out, so the cap represents
+    actual work done, not slots offered. closing_soon is still fully
+    unbounded/uncapped, exactly as before — it never had this problem since
+    it was never capped, just flagged here for clarity."""
     ensure_batch_dir()
-    print(f"\nFetching fresh data for {len(to_refresh)} questions...")
 
     system_prompt = build_forecaster_system_prompt()
     # See meta_prompt_cache.py — same caching treatment as
@@ -574,9 +893,13 @@ async def submit_refresh_batch(to_refresh: list[dict]):
     requests = []
     question_map = {}
 
-    for i, forecast in enumerate(to_refresh):
+    async def _try_include(forecast: dict, label: str) -> bool:
+        """Fetch one candidate and, if open/fetchable, add it to requests +
+        question_map. Returns whether it was actually included — this is
+        what the stale-pool loop below counts against stale_cap, not
+        whether it was merely attempted."""
         q_id = forecast["question_id"]
-        print(f"  [{i+1}/{len(to_refresh)}] Fetching Q{q_id}...")
+        print(f"  {label} Fetching Q{q_id}...")
 
         question = await fetch_question_by_id(
             forecast.get("post_id"), q_id, expected_text=forecast.get("question_text")
@@ -588,8 +911,13 @@ async def submit_refresh_batch(to_refresh: list[dict]):
         # 0.5s still wasn't enough headroom across a run of ~15+ requests.
         await asyncio.sleep(1.5)
         if question is None:
-            print(f"    ⚠️  Could not fetch Q{q_id} (or title mismatch — see above), skipping")
-            continue
+            print(f"    ⚠️  Could not fetch Q{q_id} (closed, mismatch, or missing "
+                  f"post_id — see above), skipping")
+            return False
+
+        is_mc = isinstance(question, MultipleChoiceQuestion)
+        question_type = "multiple_choice" if is_mc else "binary"
+        original_value = forecast.get("probabilities") if is_mc else forecast.get("probability")
 
         custom_id = f"refresh_{q_id}_{datetime.now().strftime('%Y%m%d')}"
 
@@ -610,7 +938,9 @@ async def submit_refresh_batch(to_refresh: list[dict]):
 
         question_map[custom_id] = {
             "question":               question,
-            "original_prob":          forecast["probability"],
+            "original_value":         original_value,
+            "question_type":          question_type,
+            "options":                question.options if is_mc else None,
             "refresh_reason":         forecast.get("refresh_reason", ""),
             "question_id":            q_id,
             "original_question_text": forecast.get("question_text", ""),
@@ -624,13 +954,22 @@ async def submit_refresh_batch(to_refresh: list[dict]):
             "known_resolve_time":     resolve_time_str,
         }
 
-        prompt = build_refresh_prompt(
-            question=question,
-            original_prob=forecast["probability"],
-            refresh_reason=forecast.get("refresh_reason", ""),
-            days_to_close=days_to_close,
-            total_days=total_days,
-        )
+        if is_mc:
+            prompt = build_refresh_prompt_mc(
+                question=question,
+                original_probs=original_value,
+                refresh_reason=forecast.get("refresh_reason", ""),
+                days_to_close=days_to_close,
+                total_days=total_days,
+            )
+        else:
+            prompt = build_refresh_prompt(
+                question=question,
+                original_prob=original_value,
+                refresh_reason=forecast.get("refresh_reason", ""),
+                days_to_close=days_to_close,
+                total_days=total_days,
+            )
 
         requests.append({
             "custom_id": custom_id,
@@ -641,6 +980,32 @@ async def submit_refresh_batch(to_refresh: list[dict]):
                 "messages": [{"role": "user", "content": prompt}]
             }
         })
+        return True
+
+    print(f"\nFetching {len(closing_soon)} closing-soon question(s) (never capped)...")
+    for i, forecast in enumerate(closing_soon):
+        await _try_include(forecast, f"[closing-soon {i + 1}/{len(closing_soon)}]")
+
+    print(f"\nFetching stale candidates — aiming for {stale_cap} successfully queued "
+          f"(pool of {len(stale_candidates)} available, sorted by soonest resolve date)...")
+    stale_included = 0
+    stale_attempted = 0
+    for forecast in stale_candidates:
+        if stale_included >= stale_cap:
+            break
+        stale_attempted += 1
+        included = await _try_include(
+            forecast, f"[stale candidate {stale_attempted}, {stale_included}/{stale_cap} queued so far]"
+        )
+        if included:
+            stale_included += 1
+
+    if stale_included < stale_cap:
+        print(f"  ⚠️  Only found {stale_included}/{stale_cap} open stale questions "
+              f"after checking all {stale_attempted} available candidate(s) in the pool.")
+    elif stale_attempted > stale_included:
+        print(f"  Filled all {stale_cap} stale slots after skipping "
+              f"{stale_attempted - stale_included} closed/unfetchable candidate(s) along the way.")
 
     if not requests:
         print("No questions to submit after fetching.")
@@ -666,9 +1031,24 @@ async def submit_refresh_batch(to_refresh: list[dict]):
             custom_id: info.get("original_question_text") or info["question"].question_text
             for custom_id, info in question_map.items()
         },
+        # CHANGED (2026-07-03): key renamed conceptually but kept as
+        # "original_probabilities" for backward compatibility with existing
+        # local history readers — value is a float for binary, a dict for
+        # MC. "question_types" and "options_by_question" are new keys that
+        # check_refresh_batch needs (it runs from disk, possibly 24h later,
+        # not from question_map in memory) to know how to parse each result.
         "original_probabilities": {
-            custom_id: info["original_prob"]
+            custom_id: info["original_value"]
             for custom_id, info in question_map.items()
+        },
+        "question_types": {
+            custom_id: info["question_type"]
+            for custom_id, info in question_map.items()
+        },
+        "options_by_question": {
+            custom_id: info["options"]
+            for custom_id, info in question_map.items()
+            if info["options"] is not None
         },
         "refresh_reasons": {
             custom_id: info["refresh_reason"]
@@ -732,8 +1112,15 @@ async def check_refresh_batch():
     results = {}
     total_cache_read = 0
     total_cache_write = 0
+    question_types = batch_info.get("question_types", {})
+    options_by_question = batch_info.get("options_by_question", {})
+
     for result in client_anthropic.messages.batches.results(batch_id):
         custom_id = result.custom_id
+        # Default "binary" — batches submitted before 2026-07-03 (MC support)
+        # have no question_types key at all, and were all binary anyway.
+        q_type = question_types.get(custom_id, "binary")
+        is_mc = q_type == "multiple_choice"
 
         if result.result.type == "succeeded":
             text = result.result.message.content[0].text
@@ -741,46 +1128,75 @@ async def check_refresh_batch():
             if usage is not None:
                 total_cache_read += getattr(usage, "cache_read_input_tokens", 0) or 0
                 total_cache_write += getattr(usage, "cache_creation_input_tokens", 0) or 0
-            prob = None
-            for line in reversed(text.split('\n')):
-                if 'probability:' in line.lower():
-                    numbers = re.findall(r'\d+\.?\d*', line)
-                    if numbers:
-                        prob = float(numbers[-1]) / 100
-                        prob = max(0.01, min(0.99, prob))
-                        break
-
-            original = batch_info.get("original_probabilities", {}).get(custom_id)
-            change = round((prob - original) * 100, 1) if prob and original else None
-            change_str = f"{'+' if change >= 0 else ''}{change}pt" if change is not None else "n/a"
 
             q_id = batch_info["question_ids"][custom_id]
             q_text = batch_info.get("question_texts", {}).get(custom_id) or \
                      next((v for k, v in batch_info.get("question_texts", {}).items()
                            if batch_info.get("question_ids", {}).get(k) == q_id), "Unknown question")
+            original = batch_info.get("original_probabilities", {}).get(custom_id)
 
-            results[custom_id] = {
-                "question_id":    q_id,
-                "question_text":  q_text,
-                "probability":    prob,
-                "original_prob":  original,
-                "change_pts":     change,
-                "refresh_reason": batch_info.get("refresh_reasons", {}).get(custom_id, ""),
-                "reasoning":      text,
-                "research_text":  batch_info.get("research_texts", {}).get(custom_id),
-                "status":         "success"
-            }
-            print(f"  Q{q_id}: {original:.0%} → {prob:.0%} ({change_str}) — {q_text[:50]}")
+            if is_mc:
+                options = options_by_question.get(custom_id, [])
+                probs = parse_mc_probabilities_text(text, options) if options else None
+                results[custom_id] = {
+                    "question_id":    q_id,
+                    "question_text":  q_text,
+                    "question_type":  "multiple_choice",
+                    "probabilities":  probs,
+                    "original_probabilities": original,
+                    "refresh_reason": batch_info.get("refresh_reasons", {}).get(custom_id, ""),
+                    "reasoning":      text,
+                    "research_text":  batch_info.get("research_texts", {}).get(custom_id),
+                    "status":         "success" if probs is not None else "failed",
+                }
+                if probs is not None:
+                    summary = ", ".join(f"{opt}: {probs[opt]:.0%}" for opt in options)
+                    print(f"  Q{q_id} (MC): {summary} — {q_text[:50]}")
+                else:
+                    print(f"  Q{q_id} (MC): ⚠️  could not parse a valid distribution — {q_text[:50]}")
+            else:
+                prob = None
+                for line in reversed(text.split('\n')):
+                    if 'probability:' in line.lower():
+                        numbers = re.findall(r'\d+\.?\d*', line)
+                        if numbers:
+                            prob = float(numbers[-1]) / 100
+                            prob = max(0.01, min(0.99, prob))
+                            break
+
+                change = round((prob - original) * 100, 1) if prob and original else None
+                change_str = f"{'+' if change >= 0 else ''}{change}pt" if change is not None else "n/a"
+
+                results[custom_id] = {
+                    "question_id":    q_id,
+                    "question_text":  q_text,
+                    "question_type":  "binary",
+                    "probability":    prob,
+                    "original_prob":  original,
+                    "change_pts":     change,
+                    "refresh_reason": batch_info.get("refresh_reasons", {}).get(custom_id, ""),
+                    "reasoning":      text,
+                    "research_text":  batch_info.get("research_texts", {}).get(custom_id),
+                    "status":         "success" if prob is not None else "failed",
+                }
+                if prob is not None and original is not None:
+                    print(f"  Q{q_id}: {original:.0%} → {prob:.0%} ({change_str}) — {q_text[:50]}")
+                elif prob is not None:
+                    print(f"  Q{q_id}: → {prob:.0%} (no prior on file) — {q_text[:50]}")
+                else:
+                    print(f"  Q{q_id}: ⚠️  could not parse a probability — {q_text[:50]}")
         else:
             q_id = batch_info["question_ids"][custom_id]
             q_text = batch_info.get("question_texts", {}).get(custom_id, "Unknown question")
-            results[custom_id] = {
+            entry = {
                 "question_id":   q_id,
                 "question_text": q_text,
-                "probability":   None,
+                "question_type": q_type,
                 "status":        "failed",
                 "research_text": batch_info.get("research_texts", {}).get(custom_id),
             }
+            entry["probabilities" if is_mc else "probability"] = None
+            results[custom_id] = entry
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
     results_file = f"{REFRESH_RESULTS_PREFIX}_{timestamp}.json"
@@ -804,14 +1220,26 @@ async def submit_to_metaculus(results: dict):
     failed = 0
 
     for custom_id, result in results.items():
-        if result["status"] != "success" or result["probability"] is None:
+        is_mc = result.get("question_type") == "multiple_choice"
+        # CHANGED (2026-07-03): was result["probability"] is None — that
+        # would KeyError on MC entries, which carry "probabilities" instead.
+        # .get() + type-aware field name avoids both the KeyError and
+        # silently treating a valid MC result as failed.
+        value = result.get("probabilities") if is_mc else result.get("probability")
+        if result["status"] != "success" or value is None:
             failed += 1
             continue
         try:
-            client_metaculus.post_binary_question_prediction(
-                question_id=result["question_id"],
-                prediction_in_decimal=result["probability"]
-            )
+            if is_mc:
+                client_metaculus.post_multiple_choice_question_prediction(
+                    question_id=result["question_id"],
+                    options_with_probabilities=value,
+                )
+            else:
+                client_metaculus.post_binary_question_prediction(
+                    question_id=result["question_id"],
+                    prediction_in_decimal=value,
+                )
             submitted += 1
             await asyncio.sleep(0.5)
         except Exception as e:
@@ -867,30 +1295,110 @@ def call_claude_single(prompt: str) -> tuple[float | None, str]:
     return prob, text
 
 
+def parse_mc_probabilities_text(text: str, options: list[str]) -> dict[str, float] | None:
+    """Extracted 2026-07-03 out of call_claude_single_mc so the batch path
+    (check_refresh_batch, added below for full MC batch support) parses
+    Claude's "Probabilities: {...}" line with the exact same validated
+    logic as --single, instead of a second copy that could silently drift
+    out of sync with it over time.
+
+    Looks for the last "Probabilities: {...}" line, requires valid JSON,
+    requires the key set to exactly match `options` (no fuzzy matching —
+    a near-miss option string silently mapped to the wrong option would
+    mean submitting against the wrong outcome with no error raised), and
+    renormalizes to sum to 1.0 to absorb small rounding drift (e.g.
+    33+33+33=99) — but only if the raw sum is within 5 points of 100;
+    anything further off is treated as a parse failure rather than
+    silently corrected, since that's more likely a real mistake than
+    rounding."""
+    json_str = None
+    for line in reversed(text.split("\n")):
+        if "probabilities:" in line.lower():
+            idx = line.lower().index("probabilities:")
+            json_str = line[idx + len("probabilities:"):].strip()
+            break
+    if json_str is None:
+        return None
+
+    try:
+        parsed = json.loads(json_str)
+    except Exception as e:
+        print(f"    ⚠️  Could not parse Probabilities line as JSON: {e}")
+        return None
+
+    if not isinstance(parsed, dict):
+        return None
+
+    if set(parsed.keys()) != set(options):
+        print(f"    ⚠️  Returned option labels don't exactly match question.options.")
+        print(f"       Expected: {options}")
+        print(f"       Got:      {list(parsed.keys())}")
+        return None
+
+    try:
+        values = {k: float(v) for k, v in parsed.items()}
+    except (TypeError, ValueError):
+        return None
+
+    total = sum(values.values())
+    if total <= 0 or abs(total - 100) > 5:
+        print(f"    ⚠️  Probabilities sum to {total}, expected ~100 — treating as a parse failure "
+              f"rather than silently correcting a likely mistake.")
+        return None
+
+    return {k: max(0.001, min(0.999, v / total)) for k, v in values.items()}
+
+
+def call_claude_single_mc(prompt: str, options: list[str]) -> tuple[dict[str, float] | None, str]:
+    """Added 2026-07-03. MC counterpart to call_claude_single — same model/
+    caching tradeoffs (see that function's docstring). Parsing itself lives
+    in parse_mc_probabilities_text (shared with the batch path)."""
+    system_prompt = build_forecaster_system_prompt()
+    response = client_anthropic.messages.create(
+        model=SINGLE_MODEL,
+        max_tokens=MAX_TOKENS,
+        system=system_prompt,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    text = response.content[0].text
+    return parse_mc_probabilities_text(text, options), text
+
+
 def _save_single_result(
     post_id: int,
     q_id: int,
-    question: BinaryQuestion,
-    prob: float,
-    original_prob: float | None,
+    question,
+    prob,
+    original_prob,
     refresh_reason: str,
     reasoning: str,
+    question_type: str = "binary",
 ):
     """Write a one-entry batch_jobs/batch_results pair in the same schema the
     rest of the codebase uses, so the dashboard and future refresh-eligibility
     scans pick this up automatically. Records post_id AND account alongside
     question_id — existing history has neither, but every new entry from
     here on will, so future --single lookups can tell at a glance whether a
-    locally-found forecast was actually yours or the bot's."""
+    locally-found forecast was actually yours or the bot's.
+
+    CHANGED (2026-07-03): account is now "bot", not "personal" — see module
+    docstring for why --single switched accounts. Also now accepts either
+    question_type="binary" (prob/original_prob are floats — unchanged
+    behavior) or question_type="multiple_choice" (prob/original_prob are
+    dicts of option -> probability), storing under "probability"/
+    "original_prob" for binary and "probabilities"/"original_probabilities"
+    for MC so a reader can tell which shape to expect from question_type
+    alone rather than needing to inspect the value."""
     ensure_batch_dir()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     custom_id = f"single_{q_id}_{timestamp}"
+    is_mc = question_type == "multiple_choice"
 
     batch_info = {
         "batch_id": custom_id,
         "submitted_at": datetime.now().isoformat(),
         "batch_type": "single",
-        "account": "personal",  # --single always submits as mike_iz_ — see module docstring
+        "account": "bot",  # CHANGED 2026-07-03: --single now submits as mike_iz_-bot — see module docstring
         "num_requests": 1,
         "question_ids": {custom_id: q_id},
         "post_ids": {custom_id: post_id},
@@ -909,29 +1417,34 @@ def _save_single_result(
     with open(jobs_file, "w") as f:
         json.dump(batch_info, f, indent=2)
 
-    results = {
-        custom_id: {
-            "question_id": q_id,
-            "post_id": post_id,
-            "account": "personal",
-            "question_text": question.question_text,
-            "question_type": "binary",
-            "probability": prob,
-            "submitted_forecast": prob,
-            "original_prob": original_prob,
-            "refresh_reason": refresh_reason,
-            "reasoning": reasoning,
-            # Was previously only saved in the jobs file (batch_info above),
-            # making the results file look like CP data was lost/missing
-            # whenever someone audited it on its own. Saved here too now so
-            # the results file is self-contained.
-            "community_prediction": getattr(
-                question, "community_prediction_at_access_time", None
-            ),
-            "research_text": getattr(question, "research_text_at_access_time", None),
-            "status": "success",
-        }
+    result_entry = {
+        "question_id": q_id,
+        "post_id": post_id,
+        "account": "bot",
+        "question_text": question.question_text,
+        "question_type": question_type,
+        "refresh_reason": refresh_reason,
+        "reasoning": reasoning,
+        # Was previously only saved in the jobs file (batch_info above),
+        # making the results file look like CP data was lost/missing
+        # whenever someone audited it on its own. Saved here too now so
+        # the results file is self-contained.
+        "community_prediction": getattr(
+            question, "community_prediction_at_access_time", None
+        ),
+        "research_text": getattr(question, "research_text_at_access_time", None),
+        "status": "success",
     }
+    if is_mc:
+        result_entry["probabilities"] = prob
+        result_entry["submitted_forecast"] = prob
+        result_entry["original_probabilities"] = original_prob
+    else:
+        result_entry["probability"] = prob
+        result_entry["submitted_forecast"] = prob
+        result_entry["original_prob"] = original_prob
+
+    results = {custom_id: result_entry}
     results_file = os.path.join(BATCH_DIR, f"batch_results_{timestamp}.json")
     with open(results_file, "w") as f:
         json.dump(results, f, indent=2)
@@ -976,36 +1489,47 @@ def _safe_dig(d, *keys):
     return d
 
 
-def fetch_live_personal_context(
-    post_id: int, expected_title: str
-) -> tuple[float | None, str | None, float | None]:
+def fetch_live_forecast_context(
+    post_id: int, expected_title: str, options: list[str] | None = None
+) -> tuple[float | dict[str, float] | None, str | None, float | dict[str, float] | None]:
     """Direct GET against the legacy api2 detail endpoint (matched by POST id
-    — see module docstring), authenticated as the PERSONAL account, to pull
-    two things get_question_by_post_id doesn't reliably surface: your own
-    last forecast on this question, and the current community prediction.
-    Parsed independently via _safe_dig (not chained .get()/bracket access)
-    so a present-but-null value anywhere in either chain can't throw and
-    take the other one down with it."""
-    if not PERSONAL_TOKEN:
+    — see module docstring), authenticated as ACTIVE_TOKEN (the bot, as of
+    2026-07-03 — see module docstring for why this changed from the
+    personal account), to pull two things get_question_by_post_id doesn't
+    reliably surface: the account's own last forecast on this question, and
+    the current community prediction. Parsed independently via _safe_dig
+    (not chained .get()/bracket access) so a present-but-null value anywhere
+    in either chain can't throw and take the other one down with it.
+
+    RENAMED (2026-07-03) from fetch_live_personal_context — same function,
+    now generic to whichever account ACTIVE_TOKEN points at.
+
+    options: pass question.options for a MultipleChoiceQuestion to get back
+    dicts (option label -> probability) instead of single floats. Centers
+    are matched to options POSITIONALLY (assumes the API returns them in
+    question.options order) — this is an assumption, not a confirmed
+    guarantee; call sites should sanity-check the printed debug output
+    against the real question before trusting an MC result here."""
+    if not ACTIVE_TOKEN:
         return None, None, None
     try:
         url = f"https://www.metaculus.com/api2/questions/{post_id}/"
         resp = requests.get(
-            url, headers={"Authorization": f"Token {PERSONAL_TOKEN}"}, timeout=20
+            url, headers={"Authorization": f"Token {ACTIVE_TOKEN}"}, timeout=20
         )
         if resp.status_code != 200:
-            print(f"    (live personal-context fetch: HTTP {resp.status_code})")
+            print(f"    (live forecast-context fetch: HTTP {resp.status_code})")
             return None, None, None
         data = resp.json()
         if not isinstance(data, dict):
-            print(f"    (live personal-context fetch: unexpected response shape "
+            print(f"    (live forecast-context fetch: unexpected response shape "
                   f"{type(data).__name__}, raw: {resp.text[:200]!r})")
             return None, None, None
 
         fetched_title = data.get("title") or _safe_dig(data, "question", "title") or ""
         if expected_title and not titles_match(expected_title, fetched_title):
             print(f"    ⚠️  api2 lookup for post {post_id} returned a different title — "
-                  f"skipping live personal-context (proceeding without it).")
+                  f"skipping live forecast-context (proceeding without it).")
             print(f"       Expected: {expected_title[:90]}")
             print(f"       Got:      {fetched_title[:90]}")
             return None, None, None
@@ -1016,8 +1540,11 @@ def fetch_live_personal_context(
             latest = history[-1] if isinstance(history, list) else None
             if isinstance(latest, dict):
                 values = latest.get("forecast_values")
-                if isinstance(values, list) and len(values) > 1:
-                    my_prob = values[1]
+                if isinstance(values, list):
+                    if options and len(values) == len(options):
+                        my_prob = dict(zip(options, values))
+                    elif not options and len(values) > 1:
+                        my_prob = values[1]
                 start_time = latest.get("start_time")
                 if start_time is not None:
                     try:
@@ -1032,7 +1559,12 @@ def fetch_live_personal_context(
             uw_bucket = _safe_dig(data, "question", "aggregations", "unweighted")
             centers = _latest_centers(uw_bucket)
         if centers:
-            cp = centers[1] if len(centers) > 1 else centers[0]
+            if options and len(centers) == len(options):
+                cp = dict(zip(options, centers))
+            elif not options:
+                cp = centers[1] if len(centers) > 1 else centers[0]
+            # else: options given but length mismatch — cp stays None rather
+            # than guessing a positional mapping we can't trust.
 
         # Note: recency_weighted (and unweighted) sometimes comes back fully
         # null across history/latest/score_data/movement for a given
@@ -1042,26 +1574,26 @@ def fetch_live_personal_context(
 
         return my_prob, my_ts, cp
     except Exception as e:
-        print(f"    (live personal-context fetch failed: {e})")
+        print(f"    (live forecast-context fetch failed: {e})")
         return None, None, None
 
 
 def run_single():
     """python meta_refresh_forecast.py --single
     Prompts for a Metaculus URL or post ID, fetches it via the post-id-based
-    get_question_by_post_id AS YOUR PERSONAL ACCOUNT (mike_iz_ — see module
-    docstring for why this is deliberately not the bot token), shows your
-    real last forecast on this question next to the current community
-    prediction, gets a fresh forecast from Claude synchronously, confirms,
-    then submits."""
-    if personal_client is None:
-        print("  ❌ METACULUS_TOKEN not set in .env — --single needs your PERSONAL "
-              "account's token specifically (these refresh emails are about mike_iz_'s "
-              "own predictions, not the bot's).")
+    get_question_by_post_id AS THE BOT ACCOUNT (mike_iz_-bot — CHANGED
+    2026-07-03, see module docstring), shows the bot's last forecast on
+    this question next to the current community prediction, gets a fresh
+    forecast from Claude synchronously, confirms, then submits. Supports
+    both BinaryQuestion and MultipleChoiceQuestion (MC added 2026-07-03)."""
+    if single_client is None:
+        print("  ❌ No Metaculus token available (METAC_TOURNAMENT_TOKEN / "
+              "METACULUS_TOKEN both unset in .env).")
         return
 
-    print("Auth: --single acts as mike_iz_ (personal) via METACULUS_TOKEN — "
-          "not mike_iz_-bot, even if METAC_TOURNAMENT_TOKEN is also set.")
+    print("Auth: --single acts as mike_iz_-bot via ACTIVE_TOKEN "
+          "(METAC_TOURNAMENT_TOKEN, falling back to METACULUS_TOKEN) — "
+          "same account as every other path in this file.")
 
     raw = input("Paste the Metaculus question URL or post ID: ").strip()
     post_id = parse_post_id(raw)
@@ -1069,24 +1601,31 @@ def run_single():
         print(f"Could not find a post ID in '{raw}'. Paste the full URL or just the numeric ID.")
         return
 
-    print(f"Fetching post {post_id} from Metaculus (as mike_iz_)...")
+    print(f"Fetching post {post_id} from Metaculus (as mike_iz_-bot)...")
     try:
-        result = personal_client.get_question_by_post_id(post_id)
+        result = single_client.get_question_by_post_id(post_id)
     except Exception as e:
         print(f"  ❌ Could not fetch post {post_id}: {e}")
         return
 
     question = result[0] if isinstance(result, list) else result
-    if not isinstance(question, BinaryQuestion):
-        print(f"  ⚠️  Post {post_id} is not a single binary question "
-              f"({type(question).__name__}). --single currently only supports binary questions.")
+    if not isinstance(question, (BinaryQuestion, MultipleChoiceQuestion)):
+        print(f"  ⚠️  Post {post_id} is not a binary or multiple-choice question "
+              f"({type(question).__name__}). --single currently only supports "
+              f"binary and multiple-choice questions.")
         return
+    if not _is_open_for_forecasting(question):
+        print(f"  ⚠️  Q{getattr(question, 'id_of_question', '?')}: state="
+              f"{getattr(question, 'state', None)}, not open for forecasting — "
+              f"stopping before asking Claude for a forecast.")
+        return
+    if isinstance(question, BinaryQuestion):
+        _run_single_binary(question, post_id)
+    else:
+        _run_single_mc(question, post_id)
 
-    q_id = question.id_of_question  # the id actually used for submission — not the post id
-    confirmed_post_id = question.id_of_post or post_id
-    print(f"  Found: {question.question_text}")
-    print(f"  (post id {confirmed_post_id} -> question id {q_id})")
 
+def _print_background_debug(question):
     # DEBUG: print the raw background_info exactly as fetched, so we can
     # verify ground truth ourselves instead of trusting the model's claims
     # about what is/isn't "in the background." Remove once resolved.
@@ -1096,31 +1635,8 @@ def run_single():
     print(f"  {question.background_info!r}")
     print(f"  {'─'*60}\n")
 
-    my_prob, my_ts, cp = fetch_live_personal_context(confirmed_post_id, question.question_text)
-    question.community_prediction_at_access_time = cp  # used by build_refresh_prompt below
 
-    original_prob = my_prob
-    source = "live (mike_iz_'s own forecast history)"
-    if original_prob is None:
-        # Fall back to local batch history — but that only ever contains
-        # BOT-submitted forecasts (your own manual predictions made via the
-        # website are never logged locally), and now title-checked, which
-        # the original version of this fallback was missing.
-        all_forecasts = load_all_batches()
-        prior = [
-            f for f in all_forecasts
-            if f["question_id"] == q_id and f.get("probability") is not None
-            and titles_match(f.get("question_text", ""), question.question_text)
-        ]
-        prior.sort(key=lambda f: f.get("submitted_at") or "", reverse=True)
-        original_prob = prior[0]["probability"] if prior else None
-        source = "local file — likely the BOT's forecast, not yours" if original_prob is not None else None
-
-    print(f"  Your last forecast on file: "
-          f"{f'{original_prob:.0%} ({source})' if original_prob is not None else 'none found'}")
-    print(f"  Current community prediction: "
-          f"{f'{cp:.0%}' if cp is not None else 'hidden/unavailable'}")
-
+def _days_and_total(question) -> tuple[float, float]:
     resolve_time = question.scheduled_resolution_time
     open_time = getattr(question, "open_time", None) or getattr(question, "created_time", None)
     now = datetime.now(timezone.utc)
@@ -1129,6 +1645,40 @@ def run_single():
         max(float((resolve_time - open_time).days), 1.0)
         if (resolve_time and open_time) else 365.0
     )
+    return days_to_close, total_days
+
+
+def _run_single_binary(question: BinaryQuestion, post_id: int):
+    q_id = question.id_of_question  # the id actually used for submission — not the post id
+    confirmed_post_id = question.id_of_post or post_id
+    print(f"  Found: {question.question_text}")
+    print(f"  (post id {confirmed_post_id} -> question id {q_id})")
+
+    _print_background_debug(question)
+
+    my_prob, my_ts, cp = fetch_live_forecast_context(confirmed_post_id, question.question_text)
+    _set_cp(question, cp)  # used by build_refresh_prompt below
+
+    original_prob = my_prob
+    source = "live (bot's own forecast history)"
+    if original_prob is None:
+        # Fall back to local batch history.
+        all_forecasts = load_all_batches()
+        prior = [
+            f for f in all_forecasts
+            if f["question_id"] == q_id and f.get("probability") is not None
+            and titles_match(f.get("question_text", ""), question.question_text)
+        ]
+        prior.sort(key=lambda f: f.get("submitted_at") or "", reverse=True)
+        original_prob = prior[0]["probability"] if prior else None
+        source = "local file" if original_prob is not None else None
+
+    print(f"  Last forecast on file: "
+          f"{f'{original_prob:.0%} ({source})' if original_prob is not None else 'none found'}")
+    print(f"  Current community prediction: "
+          f"{f'{cp:.0%}' if cp is not None else 'hidden/unavailable'}")
+
+    days_to_close, total_days = _days_and_total(question)
 
     refresh_reason = (
         "manual single refresh (community prediction shift alert)"
@@ -1154,7 +1704,7 @@ def run_single():
     change_str = ""
     if original_prob is not None:
         change = round((prob - original_prob) * 100, 1)
-        change_str = f" ({'+' if change >= 0 else ''}{change}pt vs your last forecast of {original_prob:.0%})"
+        change_str = f" ({'+' if change >= 0 else ''}{change}pt vs last forecast of {original_prob:.0%})"
 
     print(f"\n{'─'*60}")
     print("  Full reasoning:")
@@ -1163,56 +1713,250 @@ def run_single():
     print(f"{'─'*60}")
 
     print(f"\n  New forecast: {prob:.0%}{change_str}")
-    confirm = input("  Submit this to Metaculus (as mike_iz_)? [Y/n]: ").strip().lower()
+    confirm = input("  Submit this to Metaculus (as mike_iz_-bot)? [Y/n]: ").strip().lower()
     if confirm == "n":
         print("  Cancelled — nothing submitted.")
         return
 
     try:
-        personal_client.post_binary_question_prediction(
+        single_client.post_binary_question_prediction(
             question_id=q_id, prediction_in_decimal=prob
         )
-        print(f"  ✅ Submitted {prob:.0%} on question {q_id} (post {confirmed_post_id}) as mike_iz_")
+        print(f"  ✅ Submitted {prob:.0%} on question {q_id} (post {confirmed_post_id}) as mike_iz_-bot")
     except Exception as e:
         print(f"  ❌ Submission failed: {e}")
         return
 
-    _save_single_result(confirmed_post_id, q_id, question, prob, original_prob, refresh_reason, reasoning)
+    _save_single_result(
+        confirmed_post_id, q_id, question, prob, original_prob, refresh_reason, reasoning,
+        question_type="binary",
+    )
+
+
+def _run_single_mc(question: MultipleChoiceQuestion, post_id: int):
+    q_id = question.id_of_question
+    confirmed_post_id = question.id_of_post or post_id
+    options = question.options
+    print(f"  Found (multiple-choice): {question.question_text}")
+    print(f"  (post id {confirmed_post_id} -> question id {q_id})")
+    print(f"  Options: {options}")
+
+    _print_background_debug(question)
+
+    my_probs, my_ts, cp = fetch_live_forecast_context(
+        confirmed_post_id, question.question_text, options=options
+    )
+    # DEBUG: this is a newer path than the binary one — options are matched
+    # to the API's "centers" list POSITIONALLY (see fetch_live_forecast_context
+    # docstring), which is an assumption, not a confirmed guarantee. Printed
+    # here so it can be sanity-checked against the real question on Metaculus
+    # before trusting it. Remove once confirmed reliable across a few runs.
+    print(f"  DEBUG — community prediction by option (positional match, unverified): {cp}")
+    _set_cp(question, cp)
+
+    original_probs = my_probs
+    source = "live (bot's own forecast history)"
+    if original_probs is None:
+        all_forecasts = load_all_batches()
+        prior = [
+            f for f in all_forecasts
+            if f["question_id"] == q_id and f.get("probabilities") is not None
+            and titles_match(f.get("question_text", ""), question.question_text)
+        ]
+        prior.sort(key=lambda f: f.get("submitted_at") or "", reverse=True)
+        original_probs = prior[0]["probabilities"] if prior else None
+        source = "local file" if original_probs is not None else None
+
+    if original_probs is not None:
+        print(f"  Last forecast on file ({source}):")
+        for opt in options:
+            if opt in original_probs:
+                print(f"    - {opt}: {original_probs[opt]:.0%}")
+    else:
+        print("  Last forecast on file: none found")
+
+    if cp is not None:
+        print("  Current community prediction:")
+        for opt in options:
+            if opt in cp:
+                print(f"    - {opt}: {cp[opt]:.0%}")
+    else:
+        print("  Current community prediction: hidden/unavailable")
+
+    days_to_close, total_days = _days_and_total(question)
+
+    refresh_reason = (
+        "manual single refresh (community prediction shift alert)"
+        if original_probs is not None else
+        "manual single refresh (no prior forecast on file)"
+    )
+
+    prompt = build_refresh_prompt_mc(
+        question=question,
+        original_probs=original_probs,
+        refresh_reason=refresh_reason,
+        days_to_close=days_to_close,
+        total_days=total_days,
+    )
+
+    print("  Asking Claude for an updated forecast...")
+    probs, reasoning = call_claude_single_mc(prompt, options)
+
+    if probs is None:
+        print("  ❌ Could not parse a valid probability distribution from the response. Nothing submitted.")
+        return
+
+    print(f"\n{'─'*60}")
+    print("  Full reasoning:")
+    print(f"{'─'*60}")
+    print(f"  {reasoning}")
+    print(f"{'─'*60}")
+
+    print("\n  New forecast:")
+    for opt in options:
+        change_str = ""
+        if original_probs and opt in original_probs:
+            change = round((probs[opt] - original_probs[opt]) * 100, 1)
+            change_str = f" ({'+' if change >= 0 else ''}{change}pt vs {original_probs[opt]:.0%})"
+        print(f"    - {opt}: {probs[opt]:.0%}{change_str}")
+
+    confirm = input("  Submit this to Metaculus (as mike_iz_-bot)? [Y/n]: ").strip().lower()
+    if confirm == "n":
+        print("  Cancelled — nothing submitted.")
+        return
+
+    try:
+        single_client.post_multiple_choice_question_prediction(
+            question_id=q_id, options_with_probabilities=probs
+        )
+        print(f"  ✅ Submitted distribution on question {q_id} (post {confirmed_post_id}) as mike_iz_-bot")
+    except Exception as e:
+        print(f"  ❌ Submission failed: {e}")
+        return
+
+    _save_single_result(
+        confirmed_post_id, q_id, question, probs, original_probs, refresh_reason, reasoning,
+        question_type="multiple_choice",
+    )
 
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
+def _resolve_time_sort_key(f: dict):
+    """Added 2026-07-03 for the stale-refresh cap. Earlier resolve_time
+    sorts first (more urgent). Missing/unparseable resolve_time sorts last
+    (treated as far future) — a forecast with no urgency signal shouldn't
+    crowd out ones where we actually know the resolve date is coming up."""
+    resolve_time_str = f.get("resolve_time")
+    if resolve_time_str:
+        try:
+            return datetime.fromisoformat(resolve_time_str.replace("Z", "+00:00"))
+        except Exception:
+            pass
+    return datetime.max.replace(tzinfo=timezone.utc)
+
+
+def _days_until_resolve(f: dict) -> int | None:
+    """Added 2026-07-03, for display alongside the stale-refresh cap —
+    shows WHY a stale question was prioritized (or deferred), since age
+    alone doesn't tell you that."""
+    resolve_time_str = f.get("resolve_time")
+    if not resolve_time_str:
+        return None
+    try:
+        resolve_time = datetime.fromisoformat(resolve_time_str.replace("Z", "+00:00"))
+    except Exception:
+        return None
+    return (resolve_time - datetime.now(timezone.utc)).days
+
+
+def _format_forecast_summary(f: dict) -> str:
+    """Added 2026-07-03 for MC support. main()'s dry-run printout used to
+    assume every forecast had a single f['probability'] float — crashes on
+    MC entries, which carry f['probabilities'] (a dict) instead now that
+    find_questions_to_refresh treats them as eligible too."""
+    if f.get("question_type") == "multiple_choice":
+        probs = f.get("probabilities") or {}
+        top = max(probs.items(), key=lambda kv: kv[1]) if probs else None
+        return f"[MC] {top[0]}: {top[1]:.0%}" if top else "[MC] (no distribution on file)"
+    prob = f.get("probability")
+    return f"{prob:.0%}" if prob is not None else "(no probability on file)"
+
+
 async def main(submit: bool = False):
     all_forecasts = load_all_batches()
     if not all_forecasts:
         return
 
-    closing_soon, stale = find_questions_to_refresh(all_forecasts)
+    closing_soon, stale, gated = find_questions_to_refresh(all_forecasts)
+
+    # Added 2026-07-03: sort closing_soon by urgency for display (all of
+    # them still go through — this is purely cosmetic ordering, unlike the
+    # stale cap below).
+    closing_soon = sorted(closing_soon, key=lambda f: f.get("days_to_close", 9999))
 
     print(f"\n{'='*55}")
-    print(f"CLOSING SOON (within {CLOSING_SOON_DAYS} days): {len(closing_soon)} questions")
+    print(f"CLOSING SOON (within {CLOSING_SOON_DAYS} days): {len(closing_soon)} questions — never capped")
     for f in closing_soon:
-        print(f"  [{f['days_to_close']}d] {f['probability']:.0%} — {f['question_text'][:60]}")
+        print(f"  [{f['days_to_close']}d] {_format_forecast_summary(f)} — {f['question_text'][:60]}")
+    # CHANGED (2026-07-03): surfaces questions that WOULD be closing-soon
+    # eligible but were refreshed too recently (see meta_refresh_gate,
+    # MIN_REFRESH_GAP_HOURS). Previously these were silently re-included
+    # every single run with no visibility that anything was being gated.
+    if gated:
+        gated_sorted = sorted(gated, key=lambda f: f.get("days_to_close", 9999))
+        print(f"  ({len(gated)} more closing-soon but refreshed <{MIN_REFRESH_GAP_HOURS}h ago, skipped this run:)")
+        for f in gated_sorted:
+            print(f"    [{f['days_to_close']}d] {_format_forecast_summary(f)} — {f['question_text'][:60]}")
 
-    print(f"\nSTALE (older than {STALE_DAYS} days): {len(stale)} questions")
-    for f in stale[:10]:
-        print(f"  [{f['age_days']}d old] {f['probability']:.0%} — {f['question_text'][:60]}")
-    if len(stale) > 10:
-        print(f"  ... and {len(stale) - 10} more")
+    # CHANGED (2026-07-03): stale questions are sorted by soonest
+    # resolve/close date; only STALE_REFRESH_CAP are actually queued per
+    # run, for cost control (Mike's request — see STALE_REFRESH_CAP
+    # comment). A skipped stale question just waits for next run, unlike
+    # closing_soon above, which has a real deadline — hence the asymmetric
+    # treatment.
+    #
+    # CHANGED again (2026-07-03): the top STALE_REFRESH_CAP shown below is
+    # a PREVIEW based on local data only — it can't account for a question
+    # having closed to forecasting since it was last checked (only
+    # discoverable at live fetch time — see _is_open_for_forecasting). The
+    # actual --submit run passes the FULL sorted pool to submit_refresh_batch,
+    # which keeps pulling candidates until it's genuinely queued
+    # STALE_REFRESH_CAP open questions, so a closed preview pick gets
+    # transparently replaced rather than silently eating a slot. This dry-run
+    # preview may not exactly match what actually gets submitted.
+    stale_sorted = sorted(stale, key=_resolve_time_sort_key)
+    stale_preview = stale_sorted[:STALE_REFRESH_CAP]
+    stale_deferred = stale_sorted[STALE_REFRESH_CAP:]
 
-    total = len(closing_soon) + len(stale)
-    print(f"\nTotal to refresh: {total}")
+    print(f"\nSTALE (older than {STALE_DAYS} days): {len(stale)} eligible"
+          + (f", targeting {STALE_REFRESH_CAP}/run (cost control)" if len(stale) > STALE_REFRESH_CAP else ""))
+    if len(stale) > STALE_REFRESH_CAP:
+        print(f"  (preview only — actual picks may differ if any of these have since closed; "
+              f"--submit will substitute from the pool below as needed)")
+    for f in stale_preview:
+        dtr = _days_until_resolve(f)
+        dtr_str = f"{dtr}d to resolve" if dtr is not None else "resolve date unknown"
+        print(f"  [{f['age_days']}d old, {dtr_str}] {_format_forecast_summary(f)} — {f['question_text'][:60]}")
+    if stale_deferred:
+        print(f"  ... {len(stale_deferred)} more in reserve, used only if a preview pick above turns out closed")
 
-    if total == 0:
+    total_eligible = len(closing_soon) + len(stale)
+    total_to_submit_estimate = len(closing_soon) + min(len(stale), STALE_REFRESH_CAP)
+
+    print(f"\nEligible: {total_eligible} | Will attempt to submit ~{total_to_submit_estimate} this run "
+          f"({len(closing_soon)} closing-soon + up to {STALE_REFRESH_CAP} stale)")
+
+    if total_to_submit_estimate == 0:
         print("Nothing needs refreshing yet.")
         return
 
     if not submit:
         print(f"\nDry run — run with --submit to submit a refresh batch")
-        print(f"Estimated cost: ~${total * 0.05:.2f} (50% batch discount)")
+        print(f"Estimated cost: ~${total_to_submit_estimate * 0.05:.2f} (50% batch discount, "
+              f"assumes the preview picks are still open)")
         return
 
-    to_refresh = closing_soon + stale
-    await submit_refresh_batch(to_refresh)
+    await submit_refresh_batch(closing_soon, stale_sorted, STALE_REFRESH_CAP)
 
 
 if __name__ == "__main__":

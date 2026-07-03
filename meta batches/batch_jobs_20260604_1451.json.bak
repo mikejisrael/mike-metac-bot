@@ -1,0 +1,391 @@
+{
+  "batch_id": "msgbatch_01GpGSD32gwEzXFXMtYb8BWA",
+  "submitted_at": "2026-06-04T14:51:50.413984",
+  "num_requests": 50,
+  "question_ids": {
+    "q_43825": 43825,
+    "q_43738": 43738,
+    "q_43735": 43735,
+    "q_43733": 43733,
+    "q_43732": 43732,
+    "q_22523": 22523,
+    "q_22310": 22310,
+    "q_21761": 21761,
+    "q_21548": 21548,
+    "q_20709": 20709,
+    "q_20556": 20556,
+    "q_20466": 20466,
+    "q_20460": 20460,
+    "q_20169": 20169,
+    "q_18258": 18258,
+    "q_18230": 18230,
+    "q_17112": 17112,
+    "q_16469": 16469,
+    "q_16179": 16179,
+    "q_15621": 15621,
+    "q_15493": 15493,
+    "q_15492": 15492,
+    "q_15490": 15490,
+    "q_15489": 15489,
+    "q_15134": 15134,
+    "q_12298": 12298,
+    "q_11045": 11045,
+    "q_10429": 10429,
+    "q_9488": 9488,
+    "q_9042": 9042,
+    "q_8725": 8725,
+    "q_8664": 8664,
+    "q_8602": 8602,
+    "q_8600": 8600,
+    "q_8599": 8599,
+    "q_8408": 8408,
+    "q_8164": 8164,
+    "q_8050": 8050,
+    "q_7872": 7872,
+    "q_7861": 7861,
+    "q_7819": 7819,
+    "q_7544": 7544,
+    "q_7316": 7316,
+    "q_7056": 7056,
+    "q_6721": 6721,
+    "q_6602": 6602,
+    "q_6462": 6462,
+    "q_5919": 5919,
+    "q_5423": 5423,
+    "q_4922": 4922
+  },
+  "question_texts": {
+    "q_43825": "Will Swiss voters approve the \"No to a Switzerland with 10 million\" population cap referendum?",
+    "q_43738": "Will Starlink's website show India as a country with Starlink availability before September 1, 2026?",
+    "q_43735": "Will Donald Trump and Vladimir Putin speak on the phone with each other before August 1, 2026?",
+    "q_43733": "Will the June 2026 University of Michigan Consumer Sentiment number be greater than it was for May 2026?",
+    "q_43732": "Will a hurricane make landfall in the continental United States before September 1, 2026?",
+    "q_22523": "Will the U.S. employment to population ratio fall below 50% before 2027?",
+    "q_22310": "Will President Luiz Inacio Lula da Silva be reelected as Brazil's president in October of 2026?",
+    "q_21761": "Will combat troops from NATO countries be openly present in Ukraine before 2027 in significant numbers?",
+    "q_21548": "Will there be a direct conflict between Russia and any NATO member state before 2027?",
+    "q_20709": "Will there be an FDA-approved cure for Type 1 diabetes before January 1, 2032?",
+    "q_20556": "Will Berkshire Hathaway pay a dividend before 2027?",
+    "q_20466": "If at least one frontier AI model has been trained by a Chinese firm before 2027, will a Chinese frontier AI model have been trained using primarily Chinese AI chips?",
+    "q_20460": "Will a Chinese firm make a large order of domestic AI chips before 2027?",
+    "q_20169": "Will a Chinese fab achieve a process with a density of greater than 150M transistors per square millimeter by 2027?",
+    "q_18258": "Will space-based technology enable effective enforcement of the UN High Seas Treaty to reduce marine pollution and protect marine ecosystems before 2027?",
+    "q_18230": "Will the cancer pill AOH1996 enter Phase III clinical trials before January 1, 2027?",
+    "q_17112": "Will the U.S. have passed legislation that requires cybersecurity around AI models before 2030?",
+    "q_16469": "Will Meghan Markle's book be reported to have outsold Prince Harry's \"Spare\" within a year after its publication?",
+    "q_16179": "Will transformer models be the state-of-the-art on most natural language processing benchmarks on January 1, 2027?",
+    "q_15621": "Will Emmanuel Macron cease being President of France before 2027?",
+    "q_15493": "Will a law that allows states other than California to set their own stringent vehicle emissions standards be enacted in the United States before January 1, 2027?",
+    "q_15492": "Will California's waiver exception under the Clean Air Act be repealed before January 1, 2027?",
+    "q_15490": "Will a new federal \"Cash for Clunkers\" program be passed into law before 2027?",
+    "q_15489": "Will the United States pass a law setting deadlines on NEPA review before January 1, 2027?",
+    "q_15134": "Will Dubai's planned aerial taxis be operational before 2027?",
+    "q_12298": "Will 'No Religion' responses represent at least 50% of the Australian population in the 2026 census?",
+    "q_11045": "Will a Democrat win the 2028 US presidential election?",
+    "q_10429": "Will Brazil reach net zero deforestation before 2031?",
+    "q_9488": "Will the Humani Bedford Old Baobab die by 2027?",
+    "q_9042": "Will <40% of US tax filings be filed using paid tax preparers in 2027?",
+    "q_8725": "Will the peak 7-day average of COVID-19 cases OR CLI in Virginia during a summer exceed the same peak during the preceding winter for any year before 1 November 2026?",
+    "q_8664": "Will a federal law imposing disbursement requirements on donor-advised fund accounts pass in the United States before 2031?",
+    "q_8602": "Will the combination of semaglutide and cagrilintide be approved for the treatment of obesity by the FDA or EMA by 2027?",
+    "q_8600": "Will oral semaglutide be approved for the treatment of obesity by the FDA or EMA by 2027?",
+    "q_8599": "Will the FDA or EMA withdraw approval of Semaglutide for the treatment of obesity by 2027?",
+    "q_8408": "Will GiveWell recommend 1 or more grants to support breastfeeding promotion or denote it a \"top charity\" before 2027?",
+    "q_8164": "Will a member of the Forward Party hold any seat in the US congress or the presidency by February 1st 2029?",
+    "q_8050": "Will Israel recognize the Islamic Emirate of Afghanistan before 2030?",
+    "q_7872": "Will the United States recognize the Islamic Emirate of Afghanistan before 2030?",
+    "q_7861": "Will China recognize the Islamic Emirate of Afghanistan before 2030?",
+    "q_7819": "Will Taliban-controlled Afghanistan be used as a base for anti-NATO terrorism before 2027?",
+    "q_7544": "Will Pr\u00f3spera at any point before 2035 have at least 10,000 residents?",
+    "q_7316": "Will a exascale volume of connectome be mapped and revealed to the public by June 2031?",
+    "q_7056": "Will McDonald's be the first top global QSR to feature a cultivated meat product on their menu before 2027?",
+    "q_6721": "Will there be a successful seasteading venture with at least 100 participants before 2035?",
+    "q_6602": "Will TBC complete two transit systems bigger than LVCC loop < 2030?",
+    "q_6462": "Will the use of whips be banned on or before the 2026 Melbourne Cup thoroughbred horse race?",
+    "q_5919": "Will India have a successful crewed moon landing before 2027?",
+    "q_5423": "Will Stripe reach a valuation of $1 trillion (2020 USD) before 2027?",
+    "q_4922": "Will there be active warfare between the United States and China before 2027?"
+  },
+  "community_predictions": {
+    "q_43825": null,
+    "q_43738": null,
+    "q_43735": null,
+    "q_43733": null,
+    "q_43732": null,
+    "q_22523": null,
+    "q_22310": null,
+    "q_21761": null,
+    "q_21548": null,
+    "q_20709": null,
+    "q_20556": null,
+    "q_20466": null,
+    "q_20460": null,
+    "q_20169": null,
+    "q_18258": null,
+    "q_18230": null,
+    "q_17112": null,
+    "q_16469": null,
+    "q_16179": null,
+    "q_15621": null,
+    "q_15493": null,
+    "q_15492": null,
+    "q_15490": null,
+    "q_15489": null,
+    "q_15134": null,
+    "q_12298": null,
+    "q_11045": null,
+    "q_10429": null,
+    "q_9488": null,
+    "q_9042": null,
+    "q_8725": null,
+    "q_8664": null,
+    "q_8602": null,
+    "q_8600": null,
+    "q_8599": null,
+    "q_8408": null,
+    "q_8164": null,
+    "q_8050": null,
+    "q_7872": null,
+    "q_7861": null,
+    "q_7819": null,
+    "q_7544": null,
+    "q_7316": null,
+    "q_7056": null,
+    "q_6721": null,
+    "q_6602": null,
+    "q_6462": null,
+    "q_5919": null,
+    "q_5423": null,
+    "q_4922": null
+  },
+  "resolve_times": {
+    "q_43825": "2026-06-15T12:00:00+00:00",
+    "q_43738": "2026-09-01T07:00:00+00:00",
+    "q_43735": "2026-08-01T05:00:00+00:00",
+    "q_43733": "2026-06-12T18:00:00+00:00",
+    "q_43732": "2026-09-01T09:00:00+00:00",
+    "q_22523": "2027-01-01T12:00:00+00:00",
+    "q_22310": "2026-10-29T15:00:00+00:00",
+    "q_21761": "2027-01-01T08:00:00+00:00",
+    "q_21548": "2027-01-01T08:00:00+00:00",
+    "q_20709": "2032-01-01T11:00:00+00:00",
+    "q_20556": "2027-01-08T00:00:00+00:00",
+    "q_20466": "2027-01-01T12:00:00+00:00",
+    "q_20460": "2027-01-01T12:00:00+00:00",
+    "q_20169": "2027-01-01T11:00:00+00:00",
+    "q_18258": "2027-01-01T14:00:00+00:00",
+    "q_18230": "2027-01-01T14:00:00+00:00",
+    "q_17112": "2030-02-01T12:00:00+00:00",
+    "q_16469": "2027-02-01T01:00:00+00:00",
+    "q_16179": "2027-01-02T12:00:00+00:00",
+    "q_15621": "2027-01-01T12:00:00+00:00",
+    "q_15493": "2027-01-01T14:00:00+00:00",
+    "q_15492": "2027-01-01T14:00:00+00:00",
+    "q_15490": "2027-01-01T14:00:00+00:00",
+    "q_15489": "2027-01-01T14:00:00+00:00",
+    "q_15134": "2027-01-01T05:01:00+00:00",
+    "q_12298": "2027-12-31T12:59:00+00:00",
+    "q_11045": "2029-01-20T17:50:00+00:00",
+    "q_10429": "2033-03-01T17:00:00+00:00",
+    "q_9488": "2027-06-01T21:59:00+00:00",
+    "q_9042": "2028-05-31T23:00:00+00:00",
+    "q_8725": "2026-11-01T17:00:00+00:00",
+    "q_8664": "2030-12-31T12:59:00+00:00",
+    "q_8602": "2027-01-01T17:00:00+00:00",
+    "q_8600": "2027-01-01T17:00:00+00:00",
+    "q_8599": "2027-01-01T17:00:00+00:00",
+    "q_8408": "2027-03-01T00:00:00+00:00",
+    "q_8164": "2029-02-01T05:00:00+00:00",
+    "q_8050": "2030-01-01T05:00:00+00:00",
+    "q_7872": "2030-01-01T05:00:00+00:00",
+    "q_7861": "2030-01-01T05:00:00+00:00",
+    "q_7819": "2027-01-01T05:02:00+00:00",
+    "q_7544": "2034-12-31T23:01:00+00:00",
+    "q_7316": "2031-06-01T07:00:00+00:00",
+    "q_7056": "2027-01-01T00:03:00+00:00",
+    "q_6721": "2035-01-01T08:00:00+00:00",
+    "q_6602": "2030-03-15T22:52:00+00:00",
+    "q_6462": "2026-11-08T13:00:00+00:00",
+    "q_5919": "2027-01-01T05:00:00+00:00",
+    "q_5423": "2027-01-01T23:00:00+00:00",
+    "q_4922": "2027-01-30T13:00:00+00:00"
+  },
+  "categories": {
+    "q_43825": [
+      "Elections"
+    ],
+    "q_43738": [
+      "Technology"
+    ],
+    "q_43735": [
+      "Geopolitics"
+    ],
+    "q_43733": [
+      "Economy & Business",
+      "Social Sciences"
+    ],
+    "q_43732": [
+      "Natural Sciences"
+    ],
+    "q_22523": [
+      "Economy & Business",
+      "Artificial Intelligence"
+    ],
+    "q_22310": [
+      "Elections",
+      "Politics"
+    ],
+    "q_21761": [
+      "Geopolitics"
+    ],
+    "q_21548": [
+      "Geopolitics"
+    ],
+    "q_20709": [
+      "Health & Pandemics"
+    ],
+    "q_20556": [
+      "Economy & Business"
+    ],
+    "q_20466": [
+      "Technology",
+      "Geopolitics",
+      "Computing and Math"
+    ],
+    "q_20460": [
+      "Technology",
+      "Geopolitics",
+      "Computing and Math"
+    ],
+    "q_20169": [
+      "Technology",
+      "Computing and Math"
+    ],
+    "q_18258": [
+      "Environment & Climate",
+      "Economy & Business",
+      "Technology"
+    ],
+    "q_18230": [
+      "Economy & Business",
+      "Health & Pandemics"
+    ],
+    "q_17112": [
+      "Politics",
+      "Computing and Math",
+      "Artificial Intelligence"
+    ],
+    "q_16469": [
+      "Sports & Entertainment",
+      "Politics"
+    ],
+    "q_16179": [
+      "Computing and Math",
+      "Artificial Intelligence"
+    ],
+    "q_15621": [
+      "Politics"
+    ],
+    "q_15493": [
+      "Environment & Climate",
+      "Economy & Business"
+    ],
+    "q_15492": [
+      "Environment & Climate",
+      "Economy & Business"
+    ],
+    "q_15490": [
+      "Environment & Climate",
+      "Economy & Business"
+    ],
+    "q_15489": [
+      "Environment & Climate",
+      "Economy & Business"
+    ],
+    "q_15134": [
+      "Economy & Business",
+      "Technology"
+    ],
+    "q_12298": [
+      "Social Sciences"
+    ],
+    "q_11045": [
+      "Politics",
+      "Elections"
+    ],
+    "q_10429": [
+      "Environment & Climate"
+    ],
+    "q_9488": [
+      "Environment & Climate",
+      "Natural Sciences"
+    ],
+    "q_9042": [],
+    "q_8725": [
+      "Health & Pandemics"
+    ],
+    "q_8664": [
+      "Law",
+      "Politics"
+    ],
+    "q_8602": [
+      "Health & Pandemics"
+    ],
+    "q_8600": [
+      "Health & Pandemics"
+    ],
+    "q_8599": [
+      "Health & Pandemics"
+    ],
+    "q_8408": [],
+    "q_8164": [
+      "Elections"
+    ],
+    "q_8050": [
+      "Geopolitics"
+    ],
+    "q_7872": [
+      "Politics",
+      "Geopolitics"
+    ],
+    "q_7861": [
+      "Geopolitics"
+    ],
+    "q_7819": [
+      "Geopolitics"
+    ],
+    "q_7544": [
+      "Geopolitics",
+      "Law",
+      "Politics"
+    ],
+    "q_7316": [
+      "Natural Sciences"
+    ],
+    "q_7056": [
+      "Economy & Business",
+      "Technology"
+    ],
+    "q_6721": [
+      "Technology"
+    ],
+    "q_6602": [
+      "Economy & Business",
+      "Technology"
+    ],
+    "q_6462": [
+      "Sports & Entertainment"
+    ],
+    "q_5919": [
+      "Economy & Business",
+      "Technology"
+    ],
+    "q_5423": [
+      "Economy & Business",
+      "Computing and Math"
+    ],
+    "q_4922": [
+      "Geopolitics"
+    ]
+  }
+}

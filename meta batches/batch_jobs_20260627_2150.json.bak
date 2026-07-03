@@ -1,0 +1,43 @@
+{
+  "batch_id": "msgbatch_017bgAG9ZVo4rx8XBye5XB8H",
+  "submitted_at": "2026-06-27T21:50:55.533903",
+  "num_requests": 4,
+  "question_ids": {
+    "q_44248": 44248,
+    "q_44205": 44205,
+    "q_44007": 44007,
+    "q_43938": 43938
+  },
+  "question_texts": {
+    "q_44248": "Will Elon Musk be a trillionaire on August 31, 2026?",
+    "q_44205": "Will North Korea conduct a nuclear test before September 1, 2026?",
+    "q_44007": "Will U.S. District Judge Eleanor L. Ross leave office before 2027?",
+    "q_43938": "Will there be a Cockroach Janta Party protest with at least 20,000 participants before 2027?"
+  },
+  "community_predictions": {
+    "q_44248": null,
+    "q_44205": null,
+    "q_44007": null,
+    "q_43938": null
+  },
+  "resolve_times": {
+    "q_44248": "2026-08-31T08:00:00+00:00",
+    "q_44205": "2026-09-01T12:00:00+00:00",
+    "q_44007": "2027-01-01T12:30:00+00:00",
+    "q_43938": "2027-01-05T13:00:00+00:00"
+  },
+  "categories": {
+    "q_44248": [
+      "Economy & Business"
+    ],
+    "q_44205": [
+      "Geopolitics"
+    ],
+    "q_44007": [
+      "Politics"
+    ],
+    "q_43938": [
+      "Politics"
+    ]
+  }
+}

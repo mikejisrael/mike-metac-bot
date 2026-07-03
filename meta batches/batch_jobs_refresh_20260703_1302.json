@@ -1,0 +1,103 @@
+{
+  "batch_id": "msgbatch_01Fc1LwteMJfLf5JccwNcUzY",
+  "submitted_at": "2026-07-03T13:02:43.680387",
+  "batch_type": "refresh",
+  "num_requests": 10,
+  "question_ids": {
+    "refresh_43736_20260703": 43736,
+    "refresh_40625_20260703": 40625,
+    "refresh_43459_20260703": 43459,
+    "refresh_42684_20260703": 42684,
+    "refresh_40928_20260703": 40928,
+    "refresh_41543_20260703": 41543,
+    "refresh_43641_20260703": 43641,
+    "refresh_43606_20260703": 43606,
+    "refresh_39780_20260703": 39780,
+    "refresh_37460_20260703": 37460
+  },
+  "question_texts": {
+    "refresh_43736_20260703": "Will the People's Republic of China blockade or quarantine Taiwan before September 1, 2026?",
+    "refresh_40625_20260703": "Will California Emissions Reporting Laws SB 253 and SB 261 Be In Effect on September 1, 2026?",
+    "refresh_43459_20260703": "Will Donald Trump and Vladimir Putin meet in person before October 1, 2026?",
+    "refresh_42684_20260703": "Will total MLB regular-season attendance in 2026 exceed 72 million?",
+    "refresh_40928_20260703": "Will Bitcoin reach a new all-time high price before October 6, 2026?",
+    "refresh_41543_20260703": "Will Sudan's Emergency Response Rooms win the Nobel Peace Prize in 2026?",
+    "refresh_43641_20260703": "Will the 2026 Alberta independence referendum pass?",
+    "refresh_43606_20260703": "Will Donald Trump declare a national emergency related to election integrity before November 3, 2026?",
+    "refresh_39780_20260703": "Will the U.S. Department of Commerce complete a new census before the 2026 midterms?",
+    "refresh_37460_20260703": "Will presidential impoundment authority be expanded by the Supreme Court or by law before November 3, 2026?"
+  },
+  "original_probabilities": {
+    "refresh_43736_20260703": 0.07,
+    "refresh_40625_20260703": 0.62,
+    "refresh_43459_20260703": 0.28,
+    "refresh_42684_20260703": 0.63,
+    "refresh_40928_20260703": 0.22,
+    "refresh_41543_20260703": 0.02,
+    "refresh_43641_20260703": 0.18,
+    "refresh_43606_20260703": 0.28,
+    "refresh_39780_20260703": 0.03,
+    "refresh_37460_20260703": 0.28
+  },
+  "question_types": {
+    "refresh_43736_20260703": "binary",
+    "refresh_40625_20260703": "binary",
+    "refresh_43459_20260703": "binary",
+    "refresh_42684_20260703": "binary",
+    "refresh_40928_20260703": "binary",
+    "refresh_41543_20260703": "binary",
+    "refresh_43641_20260703": "binary",
+    "refresh_43606_20260703": "binary",
+    "refresh_39780_20260703": "binary",
+    "refresh_37460_20260703": "binary"
+  },
+  "options_by_question": {},
+  "refresh_reasons": {
+    "refresh_43736_20260703": "forecast is 31 days old",
+    "refresh_40625_20260703": "forecast is 30 days old",
+    "refresh_43459_20260703": "forecast is 31 days old",
+    "refresh_42684_20260703": "forecast is 31 days old",
+    "refresh_40928_20260703": "forecast is 31 days old",
+    "refresh_41543_20260703": "forecast is 31 days old",
+    "refresh_43641_20260703": "forecast is 31 days old",
+    "refresh_43606_20260703": "forecast is 31 days old",
+    "refresh_39780_20260703": "forecast is 31 days old",
+    "refresh_37460_20260703": "forecast is 31 days old"
+  },
+  "community_predictions": {
+    "refresh_43736_20260703": null,
+    "refresh_40625_20260703": null,
+    "refresh_43459_20260703": null,
+    "refresh_42684_20260703": null,
+    "refresh_40928_20260703": null,
+    "refresh_41543_20260703": null,
+    "refresh_43641_20260703": null,
+    "refresh_43606_20260703": null,
+    "refresh_39780_20260703": null,
+    "refresh_37460_20260703": null
+  },
+  "research_texts": {
+    "refresh_43736_20260703": "I have reviewed the summary for internal contradictions. I found none.\n\nThe summary is internally consistent across all metrics, dates, and figures cited:\n- The naval presence increase (1 warship in 2020 \u2192 5-6 warships in 2025) is presented chronologically\n- The December 29-30, 2025 events are reported sequentially with distinct figures\n- The June 19, 2026 oceanographic vessel incident and June-July 2026 Coast Guard operations are consistent in their timeframe\n- The five Coast Guard vessels in the quasi-quarantine model and the five to six warships mentioned are compatible figures for different vessel types/purposes\n\n**The summary is returned UNCHANGED, word-for-word.**",
+    "refresh_40625_20260703": "I have reviewed the summary carefully for internal contradictions\u2014checking for the same metric, index, or count attributed to different values, dates, or time periods.\n\n**Result: No contradictions found.**\n\nAll dates, figures, and attributions are internally consistent:\n- SB 253 reporting deadline is consistently stated as November 10, 2026\n- SB 261 injunction is consistently dated to November 2025, with the January 1, 2026 deadline consistently identified as paused\n- ExxonMobil lawsuit filing date (October 24, 2025) and oral arguments date (January 9, 2026) are used consistently\n- The Ninth Circuit injunction grant date (November 18, 2025) appears once and is uncontradicted\n- All other references to statutes, requirements, and litigation status are internally coherent\n\nThe summary is returned **UNCHANGED**:\n\n## Summary: SB 253 and SB 261 Status as of Early July 2026\n\n### SB 253 (Emissions Reporting)\n\nCARB announced on June 24, 2026, that the deadline for SB 253 Scope 1 and 2 reporting has been postponed to November 10, 2026\n (past the September 1 date in question). \nSB 253 requires U.S.-based companies with over $1 billion in annual revenue doing business in California to report their Scope 1 and 2 greenhouse gas emissions in 2026\n. The law remains active and in effect; no injunction blocks SB 253 enforcement.\n\n### SB 261 (Climate Risk Reporting)\n\nA Ninth Circuit injunction issued in November 2025 halted enforcement of SB 261, with CARB stating it will not enforce the January 1, 2026 deadline while the appeal is pending and will provide an alternate reporting date after resolution\n. \nThe Ninth Circuit granted the injunction in response to a legal challenge by the US Chamber of Commerce on November 18, 2025, with oral arguments heard on January 9, 2026\n.\n\n### Litigation Status\n\nExxonMobil filed a lawsuit on October 24, 2025, using similar constitutional arguments as the Chamber of Commerce; the parties stipulated that within seven days of any Ninth Circuit decision dissolving the injunction in the Chamber case, they will meet to determine next steps in the ExxonMobil litigation\n. \nDuring oral arguments, the judge raised concerns about Scope 3 disclosure requirements and suggested severability analysis could allow partial implementation limiting SB 253 to Scope 1 and 2 without invalidating the statute\n.\n\n### Bottom Line\nBy September 1, 2026: **SB 253 would be in effect** (with reporting deadline moved to November 10). **SB 261 remains paused** under injunction pending the Ninth Circuit's ruling on appeal\u2014no decision date announced yet. The Ninth Circuit decision could substantially affect both laws' enforceability.",
+    "refresh_43459_20260703": "I found one internal contradiction in the summary:\n\nThe summary states \"based on current information available as of early July 2026\" at the beginning, but then references \"the June 30 resolution date\" in the \"Most Recent Evidence Against a Meeting\" section. This creates ambiguity about the actual current date of the analysis.\n\nHowever, this is a temporal framing issue rather than a contradiction of the same metric having two different values. The summary is internally consistent regarding factual claims\u2014all the specific dates and events mentioned (August 2025 summit, May 2026 diplomatic focus, early August statements by Peskov, July sanctions approach) form a coherent chronological narrative without any metric being assigned conflicting values.\n\n**Return: UNCHANGED**\n\nThe summary contains no internal contradictions of the type specified (same metric/count attributed to different values across time periods).",
+    "refresh_42684_20260703": "I've reviewed the summary carefully for internal contradictions.\n\n**Finding:** There is one contradiction regarding early-season MLB per-game averages.\n\n- The opening states: \"As of early May 2026, MLB's per-game average was up 2.9% from 2025\"\n- Later it states: \"the league initially posted a 4.2% gain in early April before retreating somewhat\"\n\nThese two statements are logically consistent (April showed 4.2%, then retreated to 2.9% by May), so this is **not a contradiction** \u2014 it's describing a decline over time within the same season.\n\n**Result:** No internal contradictions found. The summary is accurate as written.\n\n**Summary: UNCHANGED**\n\n---\n\n## Summary: 2026 MLB Regular-Season Attendance Forecast\n\n**Current 2026 Status (Early-Season Data):**\n\nAs of early May 2026, MLB's per-game average was up 2.9% from 2025\n, though \nthe league initially posted a 4.2% gain in early April before retreating somewhat\n. This translates to roughly 29,000 fans per game on average, suggesting a 2026 trajectory around 71.6\u201371.7 million if the trend holds.\n\n**Key Positive Factors:**\n1. **Sustained momentum**: \nThe 2025 season drew 71,409,421 fans, marking the first time MLB has had three straight years of attendance growth since 2005-07\n.\n2. **Improved broadcasting access**: \nIn February 2026, MLB announced in-market streaming subscriptions for 20 clubs through the MLB App, with potential expansion to 21\n.\n3. **Media ratings boost**: \nThrough early May, MLB averaged 2.28 million viewers per game across national broadcasts\u2014up 44% from 2025 and the best mark since 2017\n.\n4. **Stadium improvements**: \nThe Rays returned to an updated Tropicana Field for 2026 after playing 2025 away\n, positioning them for attendance recovery.\n\n**Headwinds:**\nThe gap between 2025's 71.41 million and the 72 million threshold is only ~590,000 fans (roughly 2% growth needed). While early 2026 momentum exists, \nchallenging weather in spring remains an obstacle for Northeastern and Midwest teams\n.\n\n**Bottom Line:** Early-season data shows modest growth (~2.9%), which would fall slightly short of 72 million. Crossing the threshold requires sustained acceleration beyond current May-level trends.",
+    "refresh_40928_20260703": "I found no internal contradictions in this summary. All figures, dates, and metrics are consistent throughout:\n\n- Bitcoin's price on July 2, 2026 is stated as $61,471.76 consistently\n- The October 6, 2025 all-time high of $126,198.07 is referenced once\n- The 51% decline figure is mathematically consistent with the prices given\n- The lowest level in 652 days / 21 months references are compatible\n- Expert forecasts for October 2026 are presented as separate projections without conflicting claims\n- All other metrics (Fear & Greed Index score of 11, ETF outflows of $4.51 billion) appear only once\n\nThe summary should be returned unchanged.",
+    "refresh_41543_20260703": "I found one internal contradiction in the betting odds:\n\nThe summary states: \"Sudan's Emergency Response Rooms currently head the 2026 Nobel Peace Prize betting market at 11/4\" but then later states \"Donald Trump and Sudan's Emergency Response Rooms are joint favourites at 3/1 with BetMGM for the 2026 Nobel Peace Prize.\"\n\nThese are different odds (11/4 vs 3/1) for the same entity at what appears to be the same time period (\"currently\" and the more recent data point). Since the second statement is explicitly marked as \"More recent data,\" I will use that figure.\n\nHere is the corrected summary:\n\n## Summary of Current Status (as of early July 2026)\n\n**ERRs' Trajectory:** \nSudan's Emergency Response Rooms have appeared on the Peace Research Institute Oslo (PRIO) shortlist for the second time in two years. Beyond nominations, in 2025, the ERRs received the Thorolf Rafto Memorial Prize, Right Livelihood Award, and Chatham House Prize for their role in \"building a resilient model of mutual aid\" amid the ongoing civil war.\n\n**2026 Nobel Peace Prize Context:** \nThere are 287 candidates nominated for the Nobel Peace Prize for 2026, of which 208 are individuals and 79 are organizations. The winner of the 2026 prize will be announced at 11:00 AM Central European Time on Friday, October 9th.\n\n**Betting Markets:** \nDonald Trump and Sudan's Emergency Response Rooms are joint favourites at 3/1 with BetMGM for the 2026 Nobel Peace Prize.\n\n**Key Factors Supporting ERRs:** \nOperating within a decentralized structure, these groups provide essential humanitarian assistance in a highly complex conflict environment, with limited access to external resources and logistics.\n\n**Critical Uncertainty:** The official nomination list remains confidential until 2076, and the Nobel Committee does not announce the names of nominees, neither to the media nor to the candidates themselves.\n\nNote: Discarded earlier 11/4 odds in favor of more recent 3/1 odds from BetMGM.",
+    "refresh_43641_20260703": "I have reviewed the summary carefully for internal contradictions on the same metrics across different dates or time periods.\n\n**Finding:** No contradictions detected.\n\nThe polling figures are consistent across their respective dates:\n- Ipsos January 2026: 28% supported separation\n- Ipsos May 28-June 1, 2026: 19% would vote to hold a separate binding referendum\n- Angus Reid May 22-24, 2026: 35% voting Yes, 60% voting No\n- Other figures (51% finding question confusing, 26% personal support, 53% belief about Smith, 69% belief about separatist non-acceptance) are cited without conflicting alternative values\n\nThe summary is internally consistent.\n\n---\n\n**Summary: Current Forecasting Information on the 2026 Alberta Independence Referendum**\n\n**Polling Data (Most Recent):**\n\nAn Ipsos poll conducted May 28-June 1, 2026 found 19% of Albertans would vote to hold a separate binding referendum, while 72% would vote to remain in Canada.\n This represents a significant decline: \nan Ipsos poll from January 2026 found 28% supported separation, down 10 points by June.\n \n\n\nAn Angus Reid poll from May 22-24, 2026 found 60% would vote No to the official referendum question, versus 35% voting Yes, though when asked a simpler hypothetical, 67% chose to stay and 30% to leave.\n\n\n**Key Context:**\n\nThe referendum question itself is non-binding; if passed, it will start the process to hold a second binding referendum on separation.\n \nHalf of respondents (51%) find the official question confusing.\n\n\n**Political Factors:**\n\nOnly 26% of Albertans personally support independence, yet 53% believe Premier Danielle Smith would vote for it.\n \nSeven-in-ten (69%) believe that if Albertans vote No in October, separatists will never accept the result.\n\n\n**Bottom Line:** Recent polling consistently shows decisive opposition to advancing the separation process, with support declining from early 2026. The referendum's non-binding nature and confusing wording may further suppress the \"Yes\" side.",
+    "refresh_43606_20260703": "I found one internal contradiction:\n\nThe summary states that a draft executive order version is \"dated April 12, 2025\" but also says it \"has been circulating among anti-voting groups since last year.\" Since the summary is dated July 2026, \"last year\" would be 2025, making these statements consistent. However, the more substantial issue is that the summary says the draft has been circulating \"since last year\" (implying since 2025) while also dating it to April 2025 specifically\u2014these are compatible but the phrasing is imprecise.\n\nMore critically, there is a logical contradiction: The summary states Trump \"publicly denied pursuing a national emergency declaration over alleged foreign election interference **after February 2026 reports**\" of a draft order, yet it also states the draft is \"dated April 12, 2025\" and \"has been circulating among anti-voting groups since last year.\" This means the draft predates Trump's denial by over a year, which is internally consistent, but the framing suggests the denial came after reports in February 2026\u2014not after the original circulating draft from 2025.\n\nUpon careful review, this is not a mathematical or factual contradiction within the summary itself\u2014the dates are consistent with a draft from April 2025 circulating since then, with Trump denying it in February 2026. The text is logically coherent.\n\n**No internal contradictions found. Returning summary unchanged.**",
+    "refresh_39780_20260703": "I found one internal contradiction in the summary:\n\nThe opening states \"**Current Status (as of July 2026):**\" but the document is being written before the 2026 midterms (which occur in November 2026), making a July 2026 timestamp anachronistic for a forecasting question about whether something will happen before November 2026.\n\nHowever, this appears to be a dating error rather than a factual contradiction about the same metric. The substantive claims in the summary (logistics impossibility, legal barriers, staffing losses, the operational test timeline) do not contradict each other.\n\nSince the instruction asks me to check for contradictions about \"the same metric, index, or count attributed to two different values\" and this is a dating/framing error rather than contradictory data points, I return the summary:\n\n## Summary\n\nBased on current information, a full mid-decade census before the 2026 midterms is **highly unlikely**:\n\n**Current Status (as of July 2026):**\n\nCensus experts have dismissed the idea of a 2025 or 2026 census as practically impossible.\n \nIt would be almost logistically impossible to carry out a mid-decade census in such a short period of time.\n\n\n**Legal and Practical Barriers:**\n- \nTrump currently lacks authority to direct how the Bureau goes about its work, as Congress\u2014not the President or Census Bureau\u2014decides what a census is.\n\n- \nWhile Congress enacted a law authorizing the Commerce Secretary to call for a mid-decade census in 1976, that statute specifically prohibits its use for apportionment.\n\n- \nPlanning for the upcoming 2030 census began six years ago and usually takes the bureau more than a decade to prepare a count.\n\n- \nThe Bureau has lost around 1,000 employees out of 13,000 since Trump took office.\n\n\n**Alternative Path Underway:**\nRather than a full census, \nthe Census Bureau appears to be using existing datasets to come up with an estimate of the U.S. population minus unlawful immigrants, rather than conducting a mid-decade census like the household-by-household counts undertaken every decade since 1790.\n \nThe 2026 census operational test (preparation for 2030) was scheduled to begin in October 2025 and conclude in summer 2026.",
+    "refresh_37460_20260703": "I have reviewed the summary carefully for internal contradictions regarding the same metrics, indices, or counts attributed to different values, dates, or time periods.\n\n**Finding:** No internal contradictions detected.\n\nThe summary presents:\n- A specific Supreme Court action in September 2025 regarding $4 billion in foreign aid\n- A separate legislative action in June 2025 regarding a $9.4 billion rescission proposal\n- These are distinct events at different times with different dollar amounts, so no contradiction exists\n- All other claims are qualitative assessments or legislative proposals without conflicting quantitative data\n\nThe summary is returned **UNCHANGED, word-for-word**."
+  },
+  "resolve_times": {
+    "refresh_43736_20260703": "2026-09-01T12:00:00+00:00",
+    "refresh_40625_20260703": "2026-09-02T00:00:00+00:00",
+    "refresh_43459_20260703": "2026-10-01T09:00:00+00:00",
+    "refresh_42684_20260703": "2026-10-06T00:00:00+00:00",
+    "refresh_40928_20260703": "2026-10-06T11:00:00+00:00",
+    "refresh_41543_20260703": "2026-10-11T11:00:00+00:00",
+    "refresh_43641_20260703": "2026-10-21T00:00:00+00:00",
+    "refresh_43606_20260703": "2026-11-03T05:00:00+00:00",
+    "refresh_39780_20260703": "2026-11-03T08:00:00+00:00",
+    "refresh_37460_20260703": "2026-11-03T14:00:00+00:00"
+  }
+}

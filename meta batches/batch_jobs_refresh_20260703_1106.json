@@ -1,0 +1,43 @@
+{
+  "batch_id": "msgbatch_01P4tFQqYYzPH4CCkqz9GwUJ",
+  "submitted_at": "2026-07-03T11:06:03.189515",
+  "batch_type": "refresh",
+  "num_requests": 2,
+  "question_ids": {
+    "refresh_43937_20260703": 43937,
+    "refresh_43342_20260703": 43342
+  },
+  "question_texts": {
+    "refresh_43937_20260703": "Will the US and India finalise a new bilateral trade agreement before August 2026?",
+    "refresh_43342_20260703": "Will any host nation (USA, Mexico or Canada) reach the semifinals of the 2026 World Cup?"
+  },
+  "original_probabilities": {
+    "refresh_43937_20260703": 0.68,
+    "refresh_43342_20260703": 0.62
+  },
+  "question_types": {
+    "refresh_43937_20260703": "binary",
+    "refresh_43342_20260703": "binary"
+  },
+  "options_by_question": {},
+  "refresh_reasons": {
+    "refresh_43937_20260703": "closing in 9 days",
+    "refresh_43342_20260703": "closing in 9 days"
+  },
+  "community_predictions": {
+    "refresh_43937_20260703": null,
+    "refresh_43342_20260703": null
+  },
+  "research_texts": {
+    "refresh_43937_20260703": "I found one internal contradiction in the summary:\n\nThe summary states both:\n1. \"India and the United States recently concluded a Bilateral Trade Agreement (BTA) after a prolonged negotiation process marked by tariff escalations and geopolitical tensions.\"\n2. \"A final agreement is yet to be signed.\" (as of early July 2026)\n\nThese cannot both be true. Here is the corrected summary:\n\n## Summary of Current Status\n\n**Timeline and Key Developments:**\n\nThe US and India reached a framework for an Interim Agreement on reciprocal and mutually beneficial trade on February 6, 2026.\n\n**Most Recent Negotiations (Late June 2026):**\n\nThe US and India concluded trade talks in late June, with US Trade Representative Jamieson Greer traveling to India for two-day talks that wrapped up on Wednesday. However, neither side said whether they had narrowed the differences holding up an interim agreement.\n\nFollowing Prime Minister Narendra Modi's meeting with US President Donald Trump on the sidelines of the G7 Summit in June 2026, Foreign Secretary Vikram Misri stated that the proposed India-US interim trade agreement had entered its final stage.\n\n**Current Status as of Early July 2026:**\n\nThe current US tariff framework is set to expire within the next one month, on July 24.\n\nA final agreement is yet to be signed. Officials have described negotiations as constructive, but substantive gaps remain on tariff reductions and agricultural market access.\n\n**Forecast Implication:** The agreement is in its final negotiation phase with approximately one month remaining before the July 24 tariff deadline, suggesting finalization before August 2026 is within reach but not yet guaranteed.\n\n---\n\nNote: Discarded the statement \"India and the United States recently concluded a Bilateral Trade Agreement (BTA)\" as it contradicts the contemporaneous status that \"A final agreement is yet to be signed\" as of early July 2026.",
+    "refresh_43342_20260703": "I found no internal contradictions in this summary. All figures, dates, and claims are internally consistent when cross-checked:\n\n- The July 3 and July 1 dates refer to different metrics (tournament status vs. betting odds) without overlap\n- All three host nations' Round of 16 advancement is stated consistently\n- Mexico's Group A finish and USA's specific result are compatible\n- The historical context about previous World Cups (1970, 1986, 2002) and their outcomes are distinct events\n- The betting odds for Mexico (+350), USA (+360), and France (-340) are presented as a single snapshot\n\n**The summary is returned UNCHANGED, word-for-word.**"
+  },
+  "resolve_times": {
+    "refresh_43937_20260703": "2026-07-12T10:27:18+00:00",
+    "refresh_43342_20260703": "2026-07-12T04:00:00+00:00"
+  },
+  "post_ids": {
+    "refresh_43937_20260703": 43911,
+    "refresh_43342_20260703": 43343
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "batch_id": "single_43331_20260703_104635",
+  "submitted_at": "2026-07-03T10:46:35.299297",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43331_20260703_104635": 43331
+  },
+  "post_ids": {
+    "single_43331_20260703_104635": 43326
+  },
+  "question_texts": {
+    "single_43331_20260703_104635": "Which party will hold the most seats in the US House of Representatives after the 2026 elections?"
+  },
+  "original_probabilities": {
+    "single_43331_20260703_104635": {
+      "Democrats": 0.78,
+      "Republicans": 0.19,
+      "Other": 0.03
+    }
+  },
+  "refresh_reasons": {
+    "single_43331_20260703_104635": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43331_20260703_104635": {
+      "Democrats": 0.6877872273126429,
+      "Republicans": 0.28894190419181914,
+      "Other": 0.023270868495537913
+    }
+  },
+  "resolve_times": {
+    "single_43331_20260703_104635": "2026-11-05T00:00:00+00:00"
+  }
+}

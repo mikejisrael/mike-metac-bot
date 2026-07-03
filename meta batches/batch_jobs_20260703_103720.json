@@ -1,0 +1,35 @@
+{
+  "batch_id": "single_44166_20260703_103720",
+  "submitted_at": "2026-07-03T10:37:20.620649",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_44166_20260703_103720": 44166
+  },
+  "post_ids": {
+    "single_44166_20260703_103720": 44151
+  },
+  "question_texts": {
+    "single_44166_20260703_103720": "What will be the access status of Claude Fable and Mythos on September 1, 2026?"
+  },
+  "original_probabilities": {
+    "single_44166_20260703_103720": {
+      "Fable Open, Mythos Open": 0.05,
+      "Fable US-only, Mythos Open": 0.08,
+      "Fable Closed, Mythos Open": 0.05,
+      "Fable Open, Mythos Closed": 0.07,
+      "Fable US-only, Mythos Closed": 0.2,
+      "Fable Closed, Mythos Closed": 0.55
+    }
+  },
+  "refresh_reasons": {
+    "single_44166_20260703_103720": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_44166_20260703_103720": null
+  },
+  "resolve_times": {
+    "single_44166_20260703_103720": "2026-09-01T12:00:00+00:00"
+  }
+}
