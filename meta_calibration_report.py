@@ -72,10 +72,21 @@ def _is_resolved(q_json: dict) -> bool:
     """Same multi-signal check meta_dashboard.py's extract_score_info() uses
     — don't trust a single field alone. Used in place of ApiFilter's
     allowed_statuses=['resolved'] kwarg, which returned an essentially-empty
-    result set (see run_calibration_report()'s fetch below for why)."""
+    result set (see run_calibration_report()'s fetch below for why).
+
+    FIXED (2026-07-03): status was only ever checked at the top level, while
+    resolution and actual_resolve_time were checked at BOTH top level and
+    nested under "question" — an inconsistency, not a deliberate choice.
+    Confirmed via a live diagnostic run that resolved questions genuinely
+    exist in the fetched set (5 of them, that run) yet none were detected,
+    which pointed straight at this gap: their status lives nested under
+    question.status, not top-level, so q_json.get("status") alone could
+    never see it. Added the missing nested check for symmetry with the
+    other two fields."""
     q = q_json.get("question", q_json)
     return (
         q_json.get("status") == "resolved"
+        or q.get("status") == "resolved"
         or q.get("resolution") is not None
         or q_json.get("actual_resolve_time") is not None
         or q.get("actual_resolve_time") is not None
@@ -83,21 +94,33 @@ def _is_resolved(q_json: dict) -> bool:
 
 
 def _extract_peer_score(q_json: dict):
-    for path in [
+    """FIXED (2026-07-03, round 2): all five path guesses assumed
+    my_forecasts/scoring/score_data live at the top level. Live diagnostic
+    on a CONFIRMED-resolved question showed my_forecasts=None at the top
+    level — the top-level object here is the POST wrapper (has 'title',
+    'slug', 'short_title', 'curation_status', etc., confirmed via a full
+    top-level key dump), and per-question data lives nested under
+    q_json['question'], same root cause as the status bug fixed earlier
+    today. Now tries every path against BOTH q_json and its nested
+    'question' dict, top-level first."""
+    q = q_json.get("question", q_json)
+    paths = [
         ("my_forecasts", "score_data", "peer_score"),
         ("my_forecasts", "latest", "score_data", "peer_score"),
         ("my_forecasts", "latest", "peer_score"),
         ("scoring", "peer_score"),
         ("score_data", "peer_score"),
-    ]:
-        val = q_json
-        try:
-            for key in path:
-                val = val[key]
-            if val is not None:
-                return val
-        except (KeyError, TypeError):
-            continue
+    ]
+    for container in (q_json, q):
+        for path in paths:
+            val = container
+            try:
+                for key in path:
+                    val = val[key]
+                if val is not None:
+                    return val
+            except (KeyError, TypeError):
+                continue
     return None
 
 

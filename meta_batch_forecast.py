@@ -24,6 +24,7 @@ from meta_prompt_cache import cacheable_system_block
 from meta_cp_extract import extract_live_cp
 from meta_alerts import send_alert
 from meta_research import research_question
+from meta_forecast_gate import MIN_FORECASTERS, DAYS_AHEAD, QUESTION_SERIES_IDS, passes_forecast_gate
 
 client_anthropic = anthropic.Anthropic()
 
@@ -80,9 +81,18 @@ MAX_TOKENS = 2000
 # tournament count keeps the Batch API bill from growing 8/3 = ~2.7x
 # alongside it. Revisit once the cost optimization review (deferred
 # 2026-06-28) actually happens.
+# FIXED 2026-07-02: dropped from 50 to 20 as a deliberate cost control —
+# ALLOWED_TOURNAMENTS is expanding from 3 to 8 tournaments below, so
+# holding new-questions-per-run steady rather than letting it scale with
+# tournament count keeps the Batch API bill from growing 8/3 = ~2.7x
+# alongside it. Revisit once the cost optimization review (deferred
+# 2026-06-28) actually happens.
 NUM_QUESTIONS = 20
-DAYS_AHEAD = 365
-MIN_FORECASTERS = 5
+# CHANGED (2026-07-03): DAYS_AHEAD and MIN_FORECASTERS moved to
+# meta_forecast_gate.py — shared with meta_coverage_check.py's gap
+# classification, so both scripts can never disagree on what "worth
+# forecasting" means. Imported near the top of this file now, not
+# redefined here.
 # FIXED 2026-06-30: was "Meta batches" (capital M) — harmless on Windows
 # (case-insensitive filesystem, so it silently aliased to the real,
 # long-established "meta batches" folder used by 50+ historical files
@@ -126,12 +136,12 @@ ALLOWED_TOURNAMENTS = ["ACX2026", "climate", "metaculus-cup-summer-2026"]
 # fetch_question_series_questions() below) that uses `project=` directly
 # and converts matches via client_metaculus.get_question_by_post_id(),
 # rather than going through ApiFilter/allowed_tournaments at all.
-#   1173   = Nuclear Risk Horizons Project
-#   32774  = Current Events⚡
-#   3048   = The Taiwan Tinderbox
-#   2018   = Economic Indicators
-#   2995   = Animal Welfare Series
-QUESTION_SERIES_IDS = [1173, 32774, 3048, 2018, 2995]
+#
+# CHANGED (2026-07-03): the actual ID list moved to meta_forecast_gate.py
+# (imported near the top of this file) — meta_coverage_check.py needs the
+# same list to know which tournaments' open-question counts are still on
+# the unverified ApiFilter fetch path, and a second hardcoded copy here
+# risked drifting out of sync with that one.
 
 # How many open questions to pull per series before client-side filtering —
 # generous since these series are individually small (Nuclear Risk Horizons
@@ -184,7 +194,6 @@ async def fetch_question_series_questions(now: datetime) -> list[BinaryQuestion]
     BinaryQuestion object compatible with the rest of this pipeline
     (research, CP extraction, submission all expect that type)."""
     headers = {"Authorization": f"Token {ACTIVE_TOKEN}"}
-    close_before = now + timedelta(days=DAYS_AHEAD)
     results: list[BinaryQuestion] = []
 
     for series_id in QUESTION_SERIES_IDS:
@@ -206,18 +215,23 @@ async def fetch_question_series_questions(now: datetime) -> list[BinaryQuestion]
         candidates = []
         for item in raw_matches:
             q_info = item.get("question", item) or {}
-            if q_info.get("type") != "binary":
-                continue
             close_str = item.get("scheduled_close_time") or q_info.get("scheduled_close_time")
-            if not close_str:
+            close_dt = None
+            if close_str:
+                try:
+                    close_dt = datetime.fromisoformat(close_str.replace("Z", "+00:00"))
+                except Exception:
+                    pass
+            # CHANGED (2026-07-03): was three separate inline checks
+            # (type, close-time window, forecaster threshold) duplicating
+            # what ApiFilter enforces server-side for the other 3
+            # tournaments — now the same shared gate function both paths
+            # go through, so they can't quietly diverge. close_dt=None
+            # (no scheduled_close_time at all) still fails the gate, same
+            # as the old code's `if not close_str: continue`.
+            if close_dt is None:
                 continue
-            try:
-                close_dt = datetime.fromisoformat(close_str.replace("Z", "+00:00"))
-            except Exception:
-                continue
-            if not (now < close_dt < close_before):
-                continue  # respects DAYS_AHEAD, same as the ApiFilter path
-            if (item.get("nr_forecasters") or 0) < MIN_FORECASTERS:
+            if not passes_forecast_gate(q_info.get("type"), item.get("nr_forecasters"), close_dt, now=now):
                 continue
             candidates.append(item.get("id"))  # post_id
 

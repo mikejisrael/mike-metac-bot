@@ -1,0 +1,103 @@
+{
+  "batch_id": "msgbatch_01EXeZSBweCt12NqJmb4re15",
+  "submitted_at": "2026-07-03T16:39:04.058056",
+  "batch_type": "refresh",
+  "num_requests": 10,
+  "question_ids": {
+    "refresh_43736_20260703": 43736,
+    "refresh_40625_20260703": 40625,
+    "refresh_43459_20260703": 43459,
+    "refresh_42684_20260703": 42684,
+    "refresh_40928_20260703": 40928,
+    "refresh_41543_20260703": 41543,
+    "refresh_43641_20260703": 43641,
+    "refresh_43606_20260703": 43606,
+    "refresh_39780_20260703": 39780,
+    "refresh_37460_20260703": 37460
+  },
+  "question_texts": {
+    "refresh_43736_20260703": "Will the People's Republic of China blockade or quarantine Taiwan before September 1, 2026?",
+    "refresh_40625_20260703": "Will California Emissions Reporting Laws SB 253 and SB 261 Be In Effect on September 1, 2026?",
+    "refresh_43459_20260703": "Will Donald Trump and Vladimir Putin meet in person before October 1, 2026?",
+    "refresh_42684_20260703": "Will total MLB regular-season attendance in 2026 exceed 72 million?",
+    "refresh_40928_20260703": "Will Bitcoin reach a new all-time high price before October 6, 2026?",
+    "refresh_41543_20260703": "Will Sudan's Emergency Response Rooms win the Nobel Peace Prize in 2026?",
+    "refresh_43641_20260703": "Will the 2026 Alberta independence referendum pass?",
+    "refresh_43606_20260703": "Will Donald Trump declare a national emergency related to election integrity before November 3, 2026?",
+    "refresh_39780_20260703": "Will the U.S. Department of Commerce complete a new census before the 2026 midterms?",
+    "refresh_37460_20260703": "Will presidential impoundment authority be expanded by the Supreme Court or by law before November 3, 2026?"
+  },
+  "original_probabilities": {
+    "refresh_43736_20260703": 0.07,
+    "refresh_40625_20260703": 0.62,
+    "refresh_43459_20260703": 0.28,
+    "refresh_42684_20260703": 0.63,
+    "refresh_40928_20260703": 0.22,
+    "refresh_41543_20260703": 0.02,
+    "refresh_43641_20260703": 0.18,
+    "refresh_43606_20260703": 0.28,
+    "refresh_39780_20260703": 0.03,
+    "refresh_37460_20260703": 0.28
+  },
+  "question_types": {
+    "refresh_43736_20260703": "binary",
+    "refresh_40625_20260703": "binary",
+    "refresh_43459_20260703": "binary",
+    "refresh_42684_20260703": "binary",
+    "refresh_40928_20260703": "binary",
+    "refresh_41543_20260703": "binary",
+    "refresh_43641_20260703": "binary",
+    "refresh_43606_20260703": "binary",
+    "refresh_39780_20260703": "binary",
+    "refresh_37460_20260703": "binary"
+  },
+  "options_by_question": {},
+  "refresh_reasons": {
+    "refresh_43736_20260703": "forecast is 31 days old",
+    "refresh_40625_20260703": "forecast is 30 days old",
+    "refresh_43459_20260703": "forecast is 31 days old",
+    "refresh_42684_20260703": "forecast is 31 days old",
+    "refresh_40928_20260703": "forecast is 31 days old",
+    "refresh_41543_20260703": "forecast is 31 days old",
+    "refresh_43641_20260703": "forecast is 31 days old",
+    "refresh_43606_20260703": "forecast is 31 days old",
+    "refresh_39780_20260703": "forecast is 31 days old",
+    "refresh_37460_20260703": "forecast is 31 days old"
+  },
+  "community_predictions": {
+    "refresh_43736_20260703": null,
+    "refresh_40625_20260703": null,
+    "refresh_43459_20260703": null,
+    "refresh_42684_20260703": null,
+    "refresh_40928_20260703": null,
+    "refresh_41543_20260703": null,
+    "refresh_43641_20260703": null,
+    "refresh_43606_20260703": null,
+    "refresh_39780_20260703": null,
+    "refresh_37460_20260703": null
+  },
+  "research_texts": {
+    "refresh_43736_20260703": "I have reviewed the summary for internal contradictions and found none. The dates, figures, and attributions are internally consistent:\n\n- June 19, 2026: Coast Guard vessel incident (specific date)\n- June-July 2026: Quasi-quarantine testing (time period)\n- December 29, 2025: 100+ aircraft, 90 crossing median line, 13 warships, 14 coast guard vessels (all attributed to same date)\n- December 30, 2025: 27 rockets, 10 in contiguous zone (different date, no contradiction)\n- September 1, 2026: Deadline (consistently referenced)\n\nAll metrics are attributed to distinct dates with no conflicting values for the same measure on the same date.\n\n**Summary returned UNCHANGED:**\n\n## Summary of Current Relevant Information\n\n**Immediate Active Developments (June-July 2026):**\n\n\nOn June 19, 2026, Taiwan's Coast Guard Administration reported that a Chinese oceanographic research vessel had entered Taiwan's restricted waters off Yilan County on Taiwan's east coast.\n \nBeijing is testing a \"quasi-quarantine\" model in waters under Taiwan's control, using coast guard, maritime patrol, and other government vessels to create the appearance of administrative control without declaring a formal military blockade.\n \nThese coercive activities were internationally condemned by the United States, the United Kingdom, France, and Germany in rare, coordinated statements, and Taiwan adopted a \"shadowing and monitoring\" strategy to track Chinese vessels and avoid giving Beijing a pretext to escalate.\n\n\n**Recent Military Escalation:**\n\n\nOn December 29, 2025, Taiwan reported one of the most intense single-day episodes of Chinese military activity in recent years, with over 100 Chinese aircraft detected operating around the island, with 90 aircraft crossing the median line.\n \nThis was accompanied by 13 Chinese warships and 14 China Coast Guard vessels, followed on December 30 by 27 rockets fired from Fujian, 10 of which landed in the 24-nautical-mile contiguous zone.\n\n\n**Strategic Assessment:**\n\n\nThe PRC's patrols drill capabilities that would be needed to impose a blockade or quarantine around Taiwan to force political \"unification,\" including controlling the flow of traffic to and from Taiwanese ports.\n \nA quarantine is more feasible for China and more likely than an invasion or blockade in the near term, warranting increased scrutiny.\n\n\n**Bottom Line:** China has moved from theoretical planning to operational testing of gray-zone \"quasi-quarantine\" tactics as of June 2026. However, no formal blockade or quarantine has been declared before the September 1 deadline.",
+    "refresh_40625_20260703": "I've reviewed the summary carefully for internal contradictions regarding the same metrics, indices, counts, dates, or time periods.\n\nI found no internal contradictions. The summary presents:\n- Consistent information about SB 253 (in effect, August 10, 2026 deadline passed, regulations approved February 2026)\n- Consistent information about SB 261 (injunction granted November 18, 2025, oral arguments January 9, 2026, decision pending)\n- Consistent information about legal challenges (ExxonMobil lawsuit October 24, 2025)\n- No conflicting dates, figures, or attributions for the same metrics\n\n**Return: UNCHANGED**",
+    "refresh_43459_20260703": "I found no internal contradictions in this summary. All dates, figures, and claims are internally consistent:\n\n- The August 15, 2025 meeting is stated once\n- October 2025 plans for Budapest are described consistently (announced, then placed on hold)\n- Late October 2025 status (\"no plans\") aligns with the Budapest hold\n- May 2026 status (no immediate plans) is consistent with the overall trajectory\n- December 2026 G20 summit invitation is correctly noted as occurring **after** the October 1 deadline\n\nThe summary is logically coherent and contains no contradictory metrics or dates.\n\n**Return: UNCHANGED**",
+    "refresh_42684_20260703": "I found one internal contradiction in the summary:\n\nThe summary states that \"2024 to 2025 saw only 61,055 additional attendees (0.09% growth)\" but also states that \"MLB drew 71,409,421 fans in 2025\" compared to an implied 2024 figure. If we calculate: 71,409,421 minus 61,055 equals 71,348,366 for 2024. However, the summary also says there was \"three consecutive seasons above 70 million\" and \"the first time MLB has had three years of consecutive attendance growth since 2005-07,\" which would require both 2024 and 2023 to be above 70 million. A growth of only 61,055 from 2024 to 2025 is arithmetically consistent with the 71.4 million figure, but the characterization of this as \"only\" 0.09% growth appears inconsistent with the narrative of \"steady growth across three consecutive seasons\" that precedes it. The figure itself (61,055) contradicts the earlier statement about momentum from \"three years of consecutive attendance growth.\"\n\nHowever, upon closer inspection, the 61,055 figure is mathematically consistent with the 71,409,421 figure (representing ~0.085% growth), so this is internally consistent as written\u2014it's just a small absolute growth despite three consecutive seasons of gains.\n\n**Finding: No contradictions detected.**\n\nThe summary is UNCHANGED, word-for-word.",
+    "refresh_40928_20260703": "I found one internal contradiction in the summary:\n\n**Contradiction identified:** The \"2026 Year-End Outlook\" section forecasts Bitcoin will trade between $61,318.32 and $63,200.51 in 2026, with a high of $63,200.51. However, the \"October 2026 Price Forecasts\" section projects October 2026 prices reaching $72,039.48 (maximum), $76,594 (end of month), and $81,956 (high price from another source)\u2014all substantially higher than the year-end high of $63,200.51. This is logically impossible since October occurs before year-end.\n\n**Rewritten Summary:**\n\n## Summary: Bitcoin All-Time High Before October 6, 2026\n\n**Current Status (July 3, 2026):**\n\nBitcoin price today is $61,558.00, down approximately 51% from the previous all-time high. \nBitcoin reached its highest price ever on Oct. 6, 2025, pricing at a whopping $126,198.07.\n\n**October 2026 Price Forecasts:**\nAnalyst predictions for October 2026 are notably bearish. \nCryptocurrency experts expect that the BTC rate might reach a maximum of $72,039.48 in October 2026. It might, however, drop to $69,264.08. For October 2026, the forecasted average of Bitcoin is nearly $70,651.78. Another source projects high price 81956 in October, while low price 71232. Bitcoin price forecast at the end of the month $76594.\n\n**Market Sentiment:**\n\nTechnical indicators signal about the bearish Bullish 13% market sentiment on Bitcoin, while the Fear & Greed Index is displaying a score of 11 (Extreme Fear).\n\nThe confluence of historical patterns, halving cycles, and current market structure points to a late 2026 bottom (October-December) in the $50,000-$55,000 range as the most probable outcome.\n\n**Key Finding:** Most forecasts indicate Bitcoin will not reach a new all-time high before October 6, 2026, with October predictions maxing out around $72,000-$82,000\u2014far below the $126,198 ATH.\n\n---\n\nNote: Discarded the \"2026 Year-End Outlook\" section ($61,318.32\u2013$63,200.51 range) due to logical contradiction with October 2026 forecasts that exceed these figures; October forecasts are more specific and temporally proximate to the question deadline.",
+    "refresh_41543_20260703": "I've reviewed the summary carefully for internal contradictions regarding metrics, indices, counts, dates, and time periods.\n\n**Finding:** No contradictions detected.\n\nAll figures are either:\n- Attributed to specific, non-conflicting dates (March 2026 for the shortlist announcement; mid-June for betting odds; October 9th for the announcement date)\n- Stated without temporal qualifiers in ways that don't contradict other statements (287 candidates, 208 individuals, 79 organisations)\n- Consistent across mentions (ERRs' 2025 awards are listed once; their leading betting position is noted once with a specific date range)\n\nThe summary is internally consistent.\n\n---\n\n**Return: UNCHANGED**",
+    "refresh_43641_20260703": "I've reviewed the summary carefully for internal contradictions regarding metrics, indices, or counts attributed to different values, dates, or time periods.\n\nI found no contradictions. All figures are consistent:\n- Angus Reid polling: 60% No, 35% Yes\n- Ipsos polling (late May/early June): 72% favor staying in Canada, 19% support separation process\n- Confusion about the question: 51%\n- Belief separatists won't accept No vote: 69%\n- Alberta Forever Canada signatures: 404,293\n- Stay Free Alberta signatures: 301,000+\n\nAll dates and attributions are internally consistent.\n\n**Summary returned UNCHANGED:**\n\n## Summary: 2026 Alberta Independence Referendum Forecast\n\n\nRecent polling by Angus Reid Institute shows most Albertans would vote against proceeding with the separation process \u2014 60% would vote No to the official October question, compared to 35% who would vote Yes.\n \nIpsos surveys from late May and early June show roughly 72 percent of Albertans favoring remaining in Canada and only 19 percent supporting a process toward a binding independence referendum.\n\n\nThe referendum itself is \nnon-binding\n, asking whether Alberta's government should commence the legal process to hold a future binding referendum on separation. \nHalf (51%) find the official question confusing\n, and \nseven-in-ten (69%) believe that if Albertans vote No in October, separatists will never accept the result.\n\n\nKey context: \nElections Alberta validated Alberta Forever Canada after it received 404,293 signatures\n opposing separation. \nStay Free Alberta claimed that it collected more than 301,000 signatures between January 3 and May 2, 2026, though this number has been disputed.\n \nThe Treaty 8 First Nations have warned the referendum places Alberta \"on a course towards direct constitutional conflict,\" with the grand chief not ruling out civil disobedience if the province ignores court rulings on treaty rights.\n\n\n**Current forecast indicators strongly favor a \"No\" vote** to proceed with the binding referendum process, based on consistent polling margins of 25-50+ percentage points against the separation pathway.",
+    "refresh_43606_20260703": "I found one internal contradiction in the summary:\n\nThe draft executive order is attributed to two different dates:\n- \"a version dated April 12, 2025 circulating among groups since last year\"\n- \"17-page proposal\" discussed in context of \"mid-April 2026\"\n\nGiven that the current status is stated as \"as of July 3, 2026,\" the April 12, 2025 date is clearly the original draft date, and references to \"mid-April 2026\" appear to be discussing court actions in that timeframe. However, the phrasing \"since last year\" (relative to July 2026) would mean since 2025, which is consistent with the April 12, 2025 date.\n\nUpon closer reading, there is **no actual contradiction** here\u2014the April 12, 2025 date refers to when the draft was originally created, and it has been circulating \"since last year\" (meaning since 2025). The mid-April 2026 reference concerns court rulings, not the draft date.\n\n**Return the summary UNCHANGED, word-for-word.**",
+    "refresh_39780_20260703": "I found no internal contradictions in this summary. All figures, dates, and claims are internally consistent:\n\n- The staffing loss (1,000 out of 13,000) is stated once\n- The cost ($13.7 billion) and timeline (decade to plan) are stated once\n- The 2026 Census Test dates (public response May 1, 2026; in-field enumeration June-August 2026) are consistent\n- The legal deadline reference and other details appear only once or are consistent across mentions\n\nThe summary is returned UNCHANGED.",
+    "refresh_37460_20260703": "I've reviewed the summary for internal contradictions and found none. The dates are consistent (May 2025 for the rescission message, July 24, 2025 for the signing, February 2025 for H.R. 1180, and July 2026 for the status check), and no metrics or figures are attributed to conflicting values.\n\nHere is the summary UNCHANGED, word-for-word:\n\n## Summary: Presidential Impoundment Authority (as of July 2026)\n\n**No expansion has occurred by either the Supreme Court or by law before November 3, 2026.** Here's the key recent evidence:\n\n### Supreme Court Activity\n\n\nChief Justice John Roberts and Justice Brett Kavanaugh have both written to oppose impoundment authority\n, suggesting the Court is unlikely to expand presidential powers. \nThe Supreme Court upheld Congress' authority over the budget in Train, but the justices have never directly reviewed the Impoundment Act's legality\n. Recent 2025 decisions involved narrow procedural rulings on enforcement mechanisms rather than constitutional expansion of impoundment authority.\n\n### Legislative Developments\n\n\nOn July 24, 2025, President Trump signed into law the Rescissions Act of 2025, marking the first time since 1992 that a President successfully invoked the Impoundment Control Act to secure passage of a rescission bill, after Trump's May 2025 transmission to Congress of a rescission special message\n. This represents use of *existing* mechanisms, not expanded authority.\n\nCongressional Democrats opposed expansion. \nDemocratic proposals would permanently turn off the fast-track procedures under the Congressional Budget and Impoundment Control Act of 1974, ensuring bipartisan funding agreements cannot be undone on a partisan basis\n.\n\n\nIn February 2025, H.R. 1180 was introduced to repeal the Impoundment Control Act of 1974\n, but it has not advanced as of July 2026.\n\n### Outlook\n\nNo Supreme Court ruling expanding presidential impoundment authority has materialized, and no legislation expanding it has been enacted. The question depends on whether additional litigation reaches the Court before November 2026."
+  },
+  "resolve_times": {
+    "refresh_43736_20260703": "2026-09-01T12:00:00+00:00",
+    "refresh_40625_20260703": "2026-09-02T00:00:00+00:00",
+    "refresh_43459_20260703": "2026-10-01T09:00:00+00:00",
+    "refresh_42684_20260703": "2026-10-06T00:00:00+00:00",
+    "refresh_40928_20260703": "2026-10-06T11:00:00+00:00",
+    "refresh_41543_20260703": "2026-10-11T11:00:00+00:00",
+    "refresh_43641_20260703": "2026-10-21T00:00:00+00:00",
+    "refresh_43606_20260703": "2026-11-03T05:00:00+00:00",
+    "refresh_39780_20260703": "2026-11-03T08:00:00+00:00",
+    "refresh_37460_20260703": "2026-11-03T14:00:00+00:00"
+  }
+}
