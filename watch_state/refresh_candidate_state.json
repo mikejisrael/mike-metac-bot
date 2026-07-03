@@ -10,5 +10,11 @@
     "reasons": [
       "closing in 3h"
     ]
+  },
+  "43343": {
+    "alerted_at": "2026-07-03T06:04:11.062553+00:00",
+    "reasons": [
+      "closing in 11h, forecast 2.3d old"
+    ]
   }
 }
