@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-07-02T10:20:41.138699+00:00",
+  "checked_at": "2026-07-03T03:03:01.085651+00:00",
   "tournaments": {
     "FutureEval": {
       "tournament_id": 33022,
@@ -21,8 +21,8 @@
     },
     "Metaculus Cup": {
       "tournament_id": 33021,
-      "open_count": 25,
-      "forecasted_count": 25,
+      "open_count": 24,
+      "forecasted_count": 24,
       "missing_question_ids": []
     },
     "Nuclear Risk Horizons": {
