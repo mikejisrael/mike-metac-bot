@@ -1,16 +1,14 @@
 {
-  "checked_at": "2026-07-03T06:02:27.825233+00:00",
+  "checked_at": "2026-07-04T14:02:13.582949+00:00",
   "tournaments": {
     "FutureEval": {
       "tournament_id": 33022,
       "unverified_fetch_scope": false,
-      "open_count": 1,
+      "open_count": 0,
       "forecasted_count": 0,
       "missing_gated_ids": [],
       "missing_gated_reasons": {},
-      "missing_real_ids": [
-        44263
-      ]
+      "missing_real_ids": []
     },
     "ACX2026": {
       "tournament_id": 32880,
@@ -33,8 +31,8 @@
     "Metaculus Cup": {
       "tournament_id": 33021,
       "unverified_fetch_scope": false,
-      "open_count": 24,
-      "forecasted_count": 24,
+      "open_count": 23,
+      "forecasted_count": 23,
       "missing_gated_ids": [],
       "missing_gated_reasons": {},
       "missing_real_ids": []
@@ -111,7 +109,7 @@
       "tournament_id": 32774,
       "unverified_fetch_scope": true,
       "open_count": 11,
-      "forecasted_count": 5,
+      "forecasted_count": 6,
       "missing_gated_ids": [
         38218,
         38281,
@@ -123,7 +121,6 @@
         "too_far_out": 1
       },
       "missing_real_ids": [
-        39090,
         43472
       ]
     },
@@ -232,7 +229,7 @@
       "missing_real_ids": []
     }
   },
-  "total_gaps": 3,
+  "total_gaps": 1,
   "total_gated": 128,
   "total_gated_reasons": {
     "wrong_type": 62,
