@@ -115,9 +115,31 @@ def get_confirmed_user_id(client) -> int | None:
         return None
 
 
+def _parse_result_filename_timestamp(source_file: str):
+    """Parses the YYYYMMDD_HHMM timestamp embedded in
+    batch_results_YYYYMMDD_HHMM.json filenames (UTC) — same convention
+    meta_watch.py's _forecast_age_days and show_reasoning.py rely on.
+    Returns a UTC datetime, or None if the filename doesn't match."""
+    import re
+    m = re.search(r"batch_results_(?:refresh_)?(\d{8})_(\d{4})", os.path.basename(source_file or ""))
+    if not m:
+        return None
+    try:
+        return datetime.strptime(m.group(1) + m.group(2), "%Y%m%d%H%M").replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
+
+
 def load_local_results(dirs: list[str]) -> dict[int, dict]:
     """Merge every batch_results_*.json, keyed by question_id.
-    Most-recently-modified file wins on conflict."""
+    Most-recently-modified file wins on conflict.
+
+    Added 2026-07-05: each winning record is stamped with "_source_file"
+    and "_source_mtime" so the dashboard can show a "last predicted"
+    date/sort column. Prefers the timestamp embedded in the filename
+    (matches meta_watch.py's own dating convention exactly); falls back
+    to file mtime only if the filename doesn't match that pattern (e.g.
+    an older or manually-renamed file)."""
     by_qid: dict[int, dict] = {}
     by_qid_mtime: dict[int, float] = {}
     for d in dirs:
@@ -131,11 +153,54 @@ def load_local_results(dirs: list[str]) -> dict[int, dict]:
                     if qid is None:
                         continue
                     if qid not in by_qid or mtime > by_qid_mtime[qid]:
+                        r["_source_file"] = rf
+                        r["_source_mtime"] = mtime
                         by_qid[qid] = r
                         by_qid_mtime[qid] = mtime
             except Exception as e:
                 print(f"  (skipping unreadable file {rf}: {e})")
     return by_qid
+
+
+def load_prediction_history(qid: int, dirs: list[str]) -> list[dict]:
+    """Scans every batch_results_*.json across dirs (not just the winning
+    one load_local_results picked) for every record on this question_id,
+    for the detail page's prediction-history section. Returns a list of
+    {date_iso, submitted_summary, question_type, source_file}, most
+    recent first. A question refreshed 5 times has 5 entries here — one
+    per batch_results file that contains a successful result for it."""
+    entries = []
+    for d in dirs:
+        for rf in glob.glob(os.path.join(d, "batch_results_*.json")):
+            try:
+                with open(rf, encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception:
+                continue
+            for r in data.values():
+                if r.get("question_id") != qid:
+                    continue
+                if r.get("status") not in (None, "success"):
+                    continue
+                ts = _parse_result_filename_timestamp(rf)
+                if ts is None:
+                    try:
+                        ts = datetime.fromtimestamp(os.path.getmtime(rf), tz=timezone.utc)
+                    except Exception:
+                        ts = None
+                q_type = r.get("question_type") or "binary"
+                forecast = r.get("submitted_forecast") or r.get("probability") or r.get("probabilities")
+                entries.append({
+                    "date_iso": ts.isoformat() if ts else None,
+                    "_sort_ts": ts or datetime.min.replace(tzinfo=timezone.utc),
+                    "submitted_summary": summarize_forecast(q_type, forecast),
+                    "question_type": q_type,
+                    "source_file": os.path.basename(rf),
+                })
+    entries.sort(key=lambda e: e["_sort_ts"], reverse=True)
+    for e in entries:
+        del e["_sort_ts"]
+    return entries
 
 
 def load_phase0_reports() -> dict:
@@ -157,6 +222,19 @@ def load_phase0_reports() -> dict:
     except Exception:
         pass
     return {"coverage": coverage, "calibration": calibration}
+
+
+def load_refresh_candidate_state() -> dict:
+    """Reads watch_state/refresh_candidate_state.json, written by
+    meta_watch.py's check_refresh_candidates() (Phase 1). Keyed by
+    question_id (string) -> {alerted_at, reasons}. Read-only, same
+    None-safe-default pattern as load_phase0_reports — the dashboard
+    should never break if meta_watch.py hasn't run yet."""
+    try:
+        with open(os.path.join("watch_state", "refresh_candidate_state.json")) as f:
+            return json.load(f)
+    except Exception:
+        return {}
 
 
 def load_openrouter_balance() -> dict | None:
@@ -369,11 +447,52 @@ def classify_status(row: dict) -> str:
     return "open"
 
 
-def _make_row(qid, local_r, post, is_personal_only=False) -> dict:
+def _make_row(qid, local_r, post, is_personal_only=False, refresh_state: dict | None = None) -> dict:
     score  = extract_score_info(post) if post else extract_score_info(None)
     q_type = (local_r or {}).get("question_type") or (post.get("question") or {}).get("type") if post else None
     cp_val = extract_live_cp(post, q_type) if post else None
     tournaments = detect_tournaments(post) if post else []
+
+    # Last-predicted date: prefer the filename-embedded timestamp (matches
+    # meta_watch.py's dating convention exactly), fall back to file mtime.
+    # predicted_at_ts is epoch-ms for client-side JS sorting; None sorts
+    # last regardless of asc/desc via the JS comparator below.
+    predicted_at = None
+    predicted_at_ts = None
+    if local_r:
+        src = local_r.get("_source_file")
+        ts = _parse_result_filename_timestamp(src) if src else None
+        if ts is None and local_r.get("_source_mtime") is not None:
+            try:
+                ts = datetime.fromtimestamp(local_r["_source_mtime"], tz=timezone.utc)
+            except Exception:
+                ts = None
+        if ts is not None:
+            predicted_at = ts.isoformat()
+            predicted_at_ts = int(ts.timestamp() * 1000)
+
+    # Refresh-candidate highlighting (Phase 1 alerts from meta_watch.py):
+    # only counts as "still pending" if the alert fired AFTER the last
+    # known prediction — otherwise a stale alert from before the most
+    # recent refresh would keep highlighting a question that's already
+    # been handled. If predicted_at is unknown, err on the side of
+    # showing the highlight rather than silently hiding a real signal.
+    refresh_state = refresh_state or {}
+    alert_info = refresh_state.get(str(qid))
+    is_refresh_candidate = False
+    refresh_alert_reasons: list[str] = []
+    if alert_info:
+        alerted_at_str = alert_info.get("alerted_at")
+        still_pending = True
+        if alerted_at_str and predicted_at_ts is not None:
+            try:
+                alerted_ts = int(datetime.fromisoformat(alerted_at_str).timestamp() * 1000)
+                still_pending = alerted_ts >= predicted_at_ts
+            except Exception:
+                still_pending = True
+        if still_pending:
+            is_refresh_candidate = True
+            refresh_alert_reasons = alert_info.get("reasons") or []
     if is_personal_only:
         tournaments = [PERSONAL_LABEL] + [t for t in tournaments if t != OTHER_LABEL]
         if not tournaments:
@@ -387,22 +506,45 @@ def _make_row(qid, local_r, post, is_personal_only=False) -> dict:
     if post:
         post_id = post.get("id") or (post.get("question") or {}).get("post_id")
 
+    submitted_value = (
+        (local_r or {}).get("submitted_forecast")
+        or (local_r or {}).get("probability")
+        or (extract_submitted_forecast(post, q_type) if post else None)
+    )
+    # Sortable numeric proxy for the Submitted column: only meaningful for
+    # binary (a single float) — MC/numeric forecasts aren't a single
+    # comparable number, so they sort as blank (last) rather than fake-sorted.
+    submitted_sort = submitted_value if isinstance(submitted_value, (int, float)) else None
+
+    # FIXED 2026-07-06: "Resolved at" was sorted via parseFloat() on the raw
+    # ISO string (e.g. "2026-06-01T00:00:00Z") — parseFloat stops at the
+    # first non-numeric char, so every date collapses to just its leading
+    # year (2026, 2026, 2026...), making the sort a no-op for any two
+    # questions resolved in the same year. Same fix pattern as
+    # predicted_at_ts: parse to a real epoch-ms int at render time instead
+    # of handing a date string to a numeric comparator.
+    resolve_time_ts = None
+    if score["resolve_time"]:
+        try:
+            resolve_time_ts = int(
+                datetime.fromisoformat(score["resolve_time"].replace("Z", "+00:00")).timestamp() * 1000
+            )
+        except Exception:
+            resolve_time_ts = None
+
     return {
         "question_id":       qid,
         "post_id":           post_id,
         "question_text":     (local_r or {}).get("question_text") or score["title"] or "(unknown)",
         "question_type":     q_type,
-        "submitted_summary": summarize_forecast(
-            q_type,
-            (local_r or {}).get("submitted_forecast")
-            or (local_r or {}).get("probability")
-            or (extract_submitted_forecast(post, q_type) if post else None)
-        ),
+        "submitted_summary": summarize_forecast(q_type, submitted_value),
+        "submitted_sort":    submitted_sort,
         "cp_summary":        summarize_forecast(q_type, cp_val) if cp_val is not None else "—",
         "cp_available":      score["cp_available"],
         "resolved":          score["resolved"],
         "resolution":        score["resolution"],
         "resolve_time":      score["resolve_time"],
+        "resolve_time_ts":   resolve_time_ts,
         "peer_score":        score["peer_score"],
         "baseline_score":    score["baseline_score"],
         "close_time":        score["close_time"],
@@ -420,6 +562,10 @@ def _make_row(qid, local_r, post, is_personal_only=False) -> dict:
         "research_source":   (local_r or {}).get("research_source"),
         "refresh_reason":    (local_r or {}).get("refresh_reason", ""),
         "original_prob":     (local_r or {}).get("original_prob"),
+        "predicted_at":      predicted_at,
+        "predicted_at_ts":   predicted_at_ts,
+        "is_refresh_candidate": is_refresh_candidate,
+        "refresh_alert_reasons": refresh_alert_reasons,
     }
 
 
@@ -428,6 +574,7 @@ def build_dashboard_data():
     local          = load_local_results(LOCAL_RESULT_DIRS)
     bot_live       = fetch_predicted_questions(bot_client, "bot")
     personal_live  = fetch_predicted_questions(personal_client, "personal")
+    refresh_state  = load_refresh_candidate_state()
 
     rows = []
     seen = set()
@@ -441,14 +588,14 @@ def build_dashboard_data():
         if post is None and qid in personal_live:
             post = personal_live[qid]
             is_personal_only = True
-        rows.append(_make_row(qid, r, post, is_personal_only=is_personal_only))
+        rows.append(_make_row(qid, r, post, is_personal_only=is_personal_only, refresh_state=refresh_state))
         seen.add(qid)
 
     # Bot-live-only rows (no local result — manual predictions etc.)
     for qid, post in bot_live.items():
         if qid in seen:
             continue
-        rows.append(_make_row(qid, None, post, is_personal_only=False))
+        rows.append(_make_row(qid, None, post, is_personal_only=False, refresh_state=refresh_state))
         seen.add(qid)
 
     # Personal-only rows (not predicted by bot)
@@ -456,12 +603,26 @@ def build_dashboard_data():
         if qid in seen:
             continue
         local_r = local.get(qid)
-        rows.append(_make_row(qid, local_r, post, is_personal_only=True))
+        rows.append(_make_row(qid, local_r, post, is_personal_only=True, refresh_state=refresh_state))
         seen.add(qid)
 
     for row in rows:
         row["status_bucket"] = classify_status(row)
         row["status_label"]  = STATUS_LABELS[row["status_bucket"]]
+        # FIXED 2026-07-06: is_refresh_candidate was computed in _make_row
+        # purely from meta_watch.py's alert state file, with no check that
+        # the question is still actually open. FutureEval questions close
+        # within ~3 hours, so by dashboard-render time they're usually
+        # already closed_unresolved — but the CP-shift alert signal has no
+        # tournament/age gate, so a stale alert from just before close
+        # could still be sitting in refresh_candidate_state.json. A closed
+        # question can never actually be refreshed, so highlighting it is
+        # pure noise (confirmed live: 2 of 3 highlighted rows were
+        # already-closed FutureEval questions). Gate here, once
+        # status_bucket is known.
+        if row["status_bucket"] != "open":
+            row["is_refresh_candidate"] = False
+            row["refresh_alert_reasons"] = []
 
     # Drop withdrawn rows with nothing useful — no peer score, no resolution, no CP.
     # Keep withdrawn rows that have a peer score (resolved+scored before leaving the feed).
@@ -507,11 +668,13 @@ def build_dashboard_data():
 
     phase0 = load_phase0_reports()
     openrouter_balance = load_openrouter_balance()
+    refresh_candidate_count = sum(1 for r in rows if r["is_refresh_candidate"])
 
     data = {
         "rows":                rows,
         "phase0":              phase0,
         "openrouter_balance":  openrouter_balance,
+        "refresh_candidate_count": refresh_candidate_count,
         "status_counts":       status_counts,
         "avg_score":           avg_score,
         "chart_bot":           chart_bot,
@@ -581,9 +744,16 @@ PAGE_TEMPLATE = """
             overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); font-size: 13px; }
     th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
     th { background: #fafafa; color: #666; font-weight: 600; }
+    th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+    th.sortable:hover { color: #2563eb; }
+    th.sortable .arrow { display: inline-block; width: 12px; color: #bbb; font-size: 11px; }
+    th.sortable.sorted .arrow { color: #2563eb; }
     tr:hover { background: #fafbfc; }
     tr.highlight { animation: rowflash 3s ease-out; }
     @keyframes rowflash { 0% { background: #fef9c3; } 50% { background: #fef9c3; } 100% { background: transparent; } }
+    tr.refresh-candidate { box-shadow: inset 3px 0 0 #f59e0b; }
+    tr.refresh-candidate td:first-child { background: #fffbeb; }
+    .refresh-badge { display: inline-block; font-size: 11px; margin-left: 4px; cursor: help; }
     .pos { color: #16a34a; font-weight: 600; }
     .neg { color: #dc2626; font-weight: 600; }
     .muted { color: #999; }
@@ -593,8 +763,19 @@ PAGE_TEMPLATE = """
     .chart-wrap { background: white; border-radius: 8px; padding: 16px; margin-bottom: 8px; height: 280px; }
     .chart-note { color: #999; font-size: 12px; margin: 0 0 24px; }
     a.detail-link { font-size: 11px; color: #888; }
+    a.id-link { color: #2563eb; text-decoration: none; }
+    a.id-link:hover { text-decoration: underline; }
     .refresh-note { color: #999; font-size: 12px; margin: 8px 0 16px; }
     .cp-na { color: #ccc; font-size: 11px; }
+    .truncate { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 12px;
+                  padding: 14px; background: white; border-radius: 0 0 8px 8px; margin-top: -8px;
+                  box-shadow: 0 1px 3px rgba(0,0,0,.08); font-size: 13px; }
+    .pagination button { border: 1px solid #ddd; background: white; border-radius: 6px; padding: 5px 12px;
+                          cursor: pointer; font-size: 13px; color: #444; }
+    .pagination button:hover:not(:disabled) { background: #f3f4f6; }
+    .pagination button:disabled { color: #ccc; cursor: default; }
+    .pagination .page-info { color: #888; }
   </style>
 </head>
 <body>
@@ -616,6 +797,9 @@ PAGE_TEMPLATE = """
     <div class="card"><div class="label">Resolved &amp; scored</div><div class="value">{{ data.status_counts.resolved_scored }}</div></div>
     <div class="card"><div class="label">Resolved, no score</div><div class="value">{{ data.status_counts.resolved_unscored }}</div></div>
     <div class="card"><div class="label">Withdrawn</div><div class="value">{{ data.status_counts.not_found_live }}</div></div>
+    <div class="card"><div class="label">🔄 Refresh candidates</div>
+      <div class="value {{ 'neg' if data.refresh_candidate_count else '' }}">{{ data.refresh_candidate_count }}</div>
+    </div>
     <div class="card"><div class="label">Avg peer score</div>
       <div class="value {{ 'pos' if data.avg_score and data.avg_score > 0 else ('neg' if data.avg_score and data.avg_score < 0 else '') }}">
         {{ '%.2f'|format(data.avg_score) if data.avg_score is not none else '—' }}
@@ -673,6 +857,10 @@ PAGE_TEMPLATE = """
       <div class="pill" data-value="{{ s }}">{{ status_labels[s] }} ({{ data.status_counts[s] }})</div>
       {% endfor %}
     </div>
+    <div class="filter-group-label">Signals</div>
+    <div class="pills" id="signalPills">
+      <div class="pill" data-value="refresh_candidate">🔄 Refresh candidates only ({{ data.refresh_candidate_count }})</div>
+    </div>
     <div class="filter-footer">
       <span class="clear-btn" id="clearFilters">Clear all filters</span>
       <span class="showing-count" id="showingCount"></span>
@@ -689,40 +877,55 @@ PAGE_TEMPLATE = """
   <table id="rowsTable">
     <thead>
       <tr>
-        <th>ID</th><th>Question</th><th>Type</th><th>Submitted</th><th>CP</th>
-        <th>Status</th><th>Resolution</th><th>Resolved at</th><th>Peer score</th><th>Research</th><th>Tournament(s)</th><th></th>
+        <th class="sortable" data-key="id" data-type="num">ID <span class="arrow">▾</span></th>
+        <th class="sortable" data-key="question" data-type="str">Question <span class="arrow"></span></th>
+        <th class="sortable" data-key="type" data-type="str">Type <span class="arrow"></span></th>
+        <th class="sortable" data-key="submitted" data-type="num">Submitted <span class="arrow"></span></th>
+        <th class="sortable" data-key="predicted" data-type="num">Last predicted <span class="arrow"></span></th>
+        <th class="sortable" data-key="status" data-type="str">Status <span class="arrow"></span></th>
+        <th class="sortable" data-key="resolution" data-type="str">Resolution <span class="arrow"></span></th>
+        <th class="sortable" data-key="resolved" data-type="num">Resolved at <span class="arrow"></span></th>
+        <th class="sortable" data-key="peer" data-type="num">Peer score <span class="arrow"></span></th>
+        <th class="sortable" data-key="tournament" data-type="str">Tournament(s) <span class="arrow"></span></th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
       {% for row in data.rows %}
-      <tr id="row-{{ row.question_id }}" data-tournaments="{{ row.tournaments|join(',') }}" data-status="{{ row.status_bucket }}">
-        <td>{{ row.question_id }}</td>
-        <td>{{ row.question_text[:70] }}</td>
-        <td>{{ row.question_type or '—' }}</td>
-        <td>{{ row.submitted_summary }}</td>
+      <tr id="row-{{ row.question_id }}"
+          class="{{ 'refresh-candidate' if row.is_refresh_candidate else '' }}"
+          data-tournaments="{{ row.tournaments|join(',') }}" data-status="{{ row.status_bucket }}"
+          data-refresh="{{ 'true' if row.is_refresh_candidate else 'false' }}"
+          data-sort-id="{{ row.question_id }}"
+          data-sort-question="{{ row.question_text|lower|e }}"
+          data-sort-type="{{ row.question_type or '' }}"
+          data-sort-submitted="{{ row.submitted_sort if row.submitted_sort is not none else '' }}"
+          data-sort-predicted="{{ row.predicted_at_ts if row.predicted_at_ts is not none else '' }}"
+          data-sort-status="{{ row.status_label }}"
+          data-sort-resolution="{{ row.resolution if row.resolution is not none else '' }}"
+          data-sort-resolved="{{ row.resolve_time_ts if row.resolve_time_ts is not none else '' }}"
+          data-sort-peer="{{ row.peer_score if row.peer_score is not none else '' }}"
+          data-sort-tournament="{{ row.tournaments|join(',') }}">
         <td>
-          {% if row.cp_summary != '—' %}
-            {{ row.cp_summary }}
-          {% elif not row.cp_available %}
-            <span class="cp-na" title="CP not available — bots excluded from community aggregate on this question">n/a</span>
+          {% if row.post_id %}
+            <a class="id-link" href="https://www.metaculus.com/questions/{{ row.post_id }}/" target="_blank"
+               title="Open on Metaculus">{{ row.question_id }}</a>
           {% else %}
-            <span class="muted">—</span>
+            {{ row.question_id }}
+          {% endif %}
+          {% if row.is_refresh_candidate %}
+            <span class="refresh-badge" title="Refresh candidate: {{ row.refresh_alert_reasons|join(', ') }}">🔄</span>
           {% endif %}
         </td>
+        <td>{{ row.question_text[:70] }}</td>
+        <td>{{ row.question_type or '—' }}</td>
+        <td class="truncate" title="{{ row.submitted_summary }}">{{ row.submitted_summary }}</td>
+        <td>{{ row.predicted_at[:10] if row.predicted_at else '—' }}</td>
         <td>{{ row.status_label }}</td>
         <td>{{ row.resolution if row.resolution is not none else '—' }}</td>
         <td>{{ row.resolve_time[:10] if row.resolve_time else '—' }}</td>
         <td class="{{ 'pos' if row.peer_score and row.peer_score > 0 else ('neg' if row.peer_score and row.peer_score < 0 else 'muted') }}">
           {{ '%.2f'|format(row.peer_score) if row.peer_score is not none else (row.resolved and '?' or '—') }}
-        </td>
-        <td>
-          {% if row.research_source %}
-            <span class="tag {{ 'personal' if row.research_source == 'openrouter' else '' }}">{{ row.research_source }}</span>
-          {% elif row.research_text %}
-            <span class="muted" title="Research present but no source recorded (pre-2026-07-04 record)">?</span>
-          {% else %}
-            <span class="muted">—</span>
-          {% endif %}
         </td>
         <td>{% for t in row.tournaments %}<span class="tag {{ 'personal' if t == 'Personal' else '' }}">{{ t }}</span>{% endfor %}</td>
         <td><a class="detail-link" href="/detail/{{ row.question_id }}" target="_blank">detail</a></td>
@@ -730,6 +933,11 @@ PAGE_TEMPLATE = """
       {% endfor %}
     </tbody>
   </table>
+  <div class="pagination" id="pagination">
+    <button id="prevPage">← Prev</button>
+    <span class="page-info" id="pageInfo"></span>
+    <button id="nextPage">Next →</button>
+  </div>
 
   <script>
     const STORAGE_KEY = 'meta_dashboard_filters_v3';
@@ -742,7 +950,8 @@ PAGE_TEMPLATE = """
     }
     function saveFilters() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        t: [...getSelected('tournamentPills')], s: [...getSelected('statusPills')]
+        t: [...getSelected('tournamentPills')], s: [...getSelected('statusPills')],
+        g: [...getSelected('signalPills')]
       }));
     }
     function restoreFilters() {
@@ -754,6 +963,10 @@ PAGE_TEMPLATE = """
         });
         (saved.s || []).forEach(v => {
           const el = document.querySelector('#statusPills .pill[data-value="' + CSS.escape(v) + '"]');
+          if (el) el.classList.add('active');
+        });
+        (saved.g || []).forEach(v => {
+          const el = document.querySelector('#signalPills .pill[data-value="' + CSS.escape(v) + '"]');
           if (el) el.classList.add('active');
         });
       } catch(e) {}
@@ -815,29 +1028,114 @@ PAGE_TEMPLATE = """
         }
       });
     }
+    // ─── Sorting ──────────────────────────────────────────────────────────
+    // Default: ID descending (matches the server-side default order, but
+    // this makes it explicit and restorable after any other sort).
+    const SORT_KEY = 'meta_dashboard_sort_v1';
+    let sortState = { key: 'id', dir: 'desc' };
+    try {
+      const saved = JSON.parse(localStorage.getItem(SORT_KEY) || 'null');
+      if (saved && saved.key) sortState = saved;
+    } catch(e) {}
+
+    function sortValue(tr, key) {
+      const raw = tr.dataset['sort' + key.charAt(0).toUpperCase() + key.slice(1)];
+      return raw === undefined ? '' : raw;
+    }
+    function compareRows(a, b, key, type, dir) {
+      let va = sortValue(a, key), vb = sortValue(b, key);
+      const aEmpty = va === '', bEmpty = vb === '';
+      // Empty values always sort last, regardless of asc/desc — an
+      // unknown "last predicted" shouldn't jump to the top just because
+      // the sort direction flipped.
+      if (aEmpty && bEmpty) return 0;
+      if (aEmpty) return 1;
+      if (bEmpty) return -1;
+      if (type === 'num') { va = parseFloat(va); vb = parseFloat(vb); }
+      let cmp = va < vb ? -1 : (va > vb ? 1 : 0);
+      return dir === 'desc' ? -cmp : cmp;
+    }
+    function applySort() {
+      const th = document.querySelector('th[data-key="' + sortState.key + '"]');
+      const type = th ? th.dataset.type : 'str';
+      const tbody = document.querySelector('#rowsTable tbody');
+      const rows = [...tbody.querySelectorAll('tr')];
+      rows.sort((a, b) => compareRows(a, b, sortState.key, type, sortState.dir));
+      rows.forEach(tr => tbody.appendChild(tr));
+      document.querySelectorAll('th.sortable').forEach(h => {
+        h.classList.remove('sorted');
+        const arrow = h.querySelector('.arrow');
+        if (h.dataset.key === sortState.key) {
+          h.classList.add('sorted');
+          arrow.textContent = sortState.dir === 'desc' ? '▾' : '▴';
+        } else {
+          arrow.textContent = '';
+        }
+      });
+    }
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        if (sortState.key === th.dataset.key) {
+          sortState.dir = sortState.dir === 'desc' ? 'asc' : 'desc';
+        } else {
+          sortState = { key: th.dataset.key, dir: 'desc' };
+        }
+        localStorage.setItem(SORT_KEY, JSON.stringify(sortState));
+        applySort();
+        currentPage = 1;
+        applyFilters();
+      });
+    });
+
+    // ─── Pagination ───────────────────────────────────────────────────────
+    const PAGE_SIZE = 20;
+    let currentPage = 1;
+
     function applyFilters() {
       const selT = getSelected('tournamentPills');
       const selS = getSelected('statusPills');
-      let visible = 0;
+      const selG = getSelected('signalPills');
+      const onlyRefreshCandidates = selG.has('refresh_candidate');
+      const matched = [];
       document.querySelectorAll('#rowsTable tbody tr').forEach(tr => {
         const tours = tr.dataset.tournaments.split(',');
         const tMatch = selT.size === 0 || tours.some(t => selT.has(t));
         const sMatch = selS.size === 0 || selS.has(tr.dataset.status);
-        tr.style.display = tMatch && sMatch ? '' : 'none';
-        if (tMatch && sMatch) visible++;
+        const gMatch = !onlyRefreshCandidates || tr.dataset.refresh === 'true';
+        if (tMatch && sMatch && gMatch) matched.push(tr); else tr.style.display = 'none';
       });
+
+      const totalPages = Math.max(1, Math.ceil(matched.length / PAGE_SIZE));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+
+      matched.forEach((tr, i) => { tr.style.display = (i >= start && i < end) ? '' : 'none'; });
+
       const total = document.querySelectorAll('#rowsTable tbody tr').length;
-      document.getElementById('showingCount').textContent = 'Showing ' + visible + ' of ' + total;
+      document.getElementById('showingCount').textContent =
+        'Showing ' + Math.min(matched.length, PAGE_SIZE) + ' of ' + matched.length + ' filtered (' + total + ' total)';
+      document.getElementById('pageInfo').textContent = 'Page ' + currentPage + ' of ' + totalPages;
+      document.getElementById('prevPage').disabled = currentPage <= 1;
+      document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
       renderChart(selT);
     }
+    document.getElementById('prevPage').addEventListener('click', () => {
+      if (currentPage > 1) { currentPage--; applyFilters(); window.scrollTo({top: 0, behavior: 'smooth'}); }
+    });
+    document.getElementById('nextPage').addEventListener('click', () => {
+      currentPage++; applyFilters(); window.scrollTo({top: 0, behavior: 'smooth'});
+    });
     document.querySelectorAll('.pill').forEach(p =>
-      p.addEventListener('click', () => { p.classList.toggle('active'); saveFilters(); applyFilters(); })
+      p.addEventListener('click', () => { p.classList.toggle('active'); saveFilters(); currentPage = 1; applyFilters(); })
     );
     document.getElementById('clearFilters').addEventListener('click', () => {
       document.querySelectorAll('.pill.active').forEach(p => p.classList.remove('active'));
-      saveFilters(); applyFilters();
+      saveFilters(); currentPage = 1; applyFilters();
     });
     restoreFilters();
+    applySort();
     applyFilters();
     setTimeout(() => location.reload(), 300000);
   </script>
@@ -881,6 +1179,11 @@ DETAIL_TEMPLATE = """
                   overflow-x: auto; max-height: 500px; overflow-y: auto; white-space: pre-wrap; }
     .empty { color: #999; font-style: italic; font-size: 13px; }
     .cp-na { color: #ccc; font-size: 12px; }
+    .badge.refresh { background: #fef3c7; color: #92400e; }
+    .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .history-table th, .history-table td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #eee; }
+    .history-table th { color: #999; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+    .history-table tr:first-child td { font-weight: 600; }
   </style>
 </head>
 <body>
@@ -903,6 +1206,9 @@ DETAIL_TEMPLATE = """
     <span class="badge status-{{ status_class }}">{{ status_label }}</span>
     {% if close_time %}<span class="badge">Closes {{ close_time[:10] }}</span>{% endif %}
     {% if resolve_time %}<span class="badge">Resolved {{ resolve_time[:10] }}</span>{% endif %}
+    {% if is_refresh_candidate %}
+    <span class="badge refresh" title="{{ refresh_alert_reasons|join(', ') }}">🔄 Refresh candidate</span>
+    {% endif %}
   </div>
 
   <div class="scores">
@@ -947,6 +1253,25 @@ DETAIL_TEMPLATE = """
     </div>
     {% endif %}
   </div>
+
+  <section>
+    <h2>Prediction history</h2>
+    {% if prediction_history %}
+    <table class="history-table">
+      <thead><tr><th>Date</th><th>Prediction</th></tr></thead>
+      <tbody>
+        {% for h in prediction_history %}
+        <tr>
+          <td>{{ h.date_iso[:16].replace('T', ' ') if h.date_iso else 'unknown date' }}</td>
+          <td>{{ h.submitted_summary }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="empty">No prediction history found in local batch results for this question.</p>
+    {% endif %}
+  </section>
 
   {% if reasoning %}
   <section>
@@ -1033,6 +1358,8 @@ def detail(question_id):
         "not_found_live": "closed",
     }.get(row["status_bucket"], "closed")
 
+    prediction_history = load_prediction_history(question_id, LOCAL_RESULT_DIRS)
+
     return render_template_string(
         DETAIL_TEMPLATE,
         qid=question_id,
@@ -1047,6 +1374,7 @@ def detail(question_id):
         submitted_summary=row["submitted_summary"],
         original_prob=row["original_prob"],
         cp_summary=row["cp_summary"],
+        cp_available=row["cp_available"],
         resolution=row["resolution"],
         peer_score=row["peer_score"],
         baseline_score=row["baseline_score"],
@@ -1054,6 +1382,9 @@ def detail(question_id):
         reasoning=row["reasoning"],
         research_text=row["research_text"],
         research_source=row["research_source"],
+        is_refresh_candidate=row["is_refresh_candidate"],
+        refresh_alert_reasons=row["refresh_alert_reasons"],
+        prediction_history=prediction_history,
         raw_json=json.dumps(raw, indent=2, default=str),
     )
 

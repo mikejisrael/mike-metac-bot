@@ -1,4 +1,4 @@
-name: Phase 0 Reports (coverage + calibration)
+name: Phase 0 Reports (coverage + calibration + watch)
 
 on:
   workflow_dispatch:  # manual trigger from GitHub UI, and the target for a
@@ -65,17 +65,39 @@ jobs:
         env:
           METAC_TOURNAMENT_TOKEN: ${{ secrets.METAC_TOURNAMENT_TOKEN }}
 
-      - name: Commit reports for dashboard
+      - name: Run meta_watch.py (resolutions + refresh candidates)
+        # Added 2026-07-06 — moved off tournament_forecast.py's cadence
+        # (see meta_watch.py's module docstring for why). Runs
+        # check_resolutions() then check_refresh_candidates() via the new
+        # run_watch_checks() entry point. check_new_futureeval_questions()
+        # deliberately stays out — it needs tournament_forecast.py's own
+        # fetch loop data and is FutureEval-specific. if: always(), same
+        # reasoning as the calibration step above.
+        if: always()
+        run: poetry run python meta_watch.py
+        env:
+          METAC_TOURNAMENT_TOKEN: ${{ secrets.METAC_TOURNAMENT_TOKEN }}
+          ALERT_NTFY_TOPIC: ${{ secrets.ALERT_NTFY_TOPIC }}
+
+      - name: Commit reports + watch state for dashboard
         # if: always() — same lesson as tournament_forecast.yaml's commit
         # step (2026-07-02): don't let this step get silently skipped just
         # because a prior step failed. Whatever report(s) did get written
         # should still be committed.
+        #
+        # CHANGED (2026-07-06): now also commits watch_state/, needed for
+        # meta_watch.py's REFRESH_STATE_FILE and RESOLUTION_STATE_FILE to
+        # persist between runs now that this workflow calls it — this is
+        # the exact same class of bug already hit once before (watch_state/
+        # was gitignored, so every run treated everything as brand new and
+        # re-alerted repeatedly). Confirmed watch_state/ is NOT in
+        # .gitignore before relying on this — see that earlier fix.
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add reports/ 2>/dev/null || true
-          git diff --cached --quiet && echo "No new reports to commit." || (
-            git commit -m "chore: phase 0 reports (coverage + calibration) [skip ci]" &&
+          git add reports/ watch_state/ 2>/dev/null || true
+          git diff --cached --quiet && echo "No new reports/state to commit." || (
+            git commit -m "chore: phase 0 reports (coverage + calibration + watch) [skip ci]" &&
             git push
           )

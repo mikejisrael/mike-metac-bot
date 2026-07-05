@@ -37,6 +37,18 @@ fix needs a live check.
 
 All three checks persist their own small state files under watch_state/ so
 they only ever alert once per event, not every run.
+
+CHANGED (2026-07-06): checks 2 (check_resolutions) and 3
+(check_refresh_candidates) no longer need to ride along on
+tournament_forecast.py's cadence — they're fully self-contained (each
+hits the Metaculus API directly) and were only ever called from there
+because that's the script with the most frequent existing schedule, not
+because FutureEval's cadence actually matters to them. Moved onto
+meta_phase_reports.yaml's daily cron instead via the new run_watch_checks()
+entry point at the bottom of this file (`python meta_watch.py`). Check 1
+(check_new_futureeval_questions) stays tied to tournament_forecast.py's
+own fetch loop — it needs raw_posts_by_id from that loop and is
+FutureEval-specific, unrelated to the other two.
 """
 
 import os
@@ -483,3 +495,32 @@ def check_refresh_candidates() -> None:
         print("  No refresh candidates this run.")
 
     _save_json(REFRESH_STATE_FILE, state)
+
+
+# ─── Standalone entry point (added 2026-07-06) ─────────────────────────────
+def run_watch_checks() -> None:
+    """Runs the two checks that don't depend on tournament_forecast.py's
+    own fetch loop: check_resolutions() and check_refresh_candidates().
+    Added so these can move onto meta_phase_reports.yaml's daily cron
+    cadence instead — there was never a real reason they needed
+    tournament_forecast.py's frequent FutureEval-driven cadence; that's
+    just where they happened to get bolted on, and FutureEval's own
+    3-hour windows are too tight for a refresh to ever be actionable
+    there anyway. check_new_futureeval_questions() is deliberately NOT
+    called here — it needs raw_posts_by_id supplied by that fetch loop,
+    and it's a FutureEval-specific signal unrelated to the other two, so
+    it stays put.
+
+    Order matters: resolutions first, since check_refresh_candidates()
+    skips anything RESOLUTION_STATE_FILE already knows is resolved."""
+    if not WATCH_TOKEN:
+        print("⚠️  METAC_TOURNAMENT_TOKEN / METACULUS_TOKEN not set — cannot run watch checks.")
+        return
+    print("Checking resolutions...")
+    check_resolutions()
+    print("Checking refresh candidates...")
+    check_refresh_candidates()
+
+
+if __name__ == "__main__":
+    run_watch_checks()

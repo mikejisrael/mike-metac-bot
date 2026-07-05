@@ -40,10 +40,16 @@ from meta_cp_extract import extract_live_cp
 from meta_alerts import send_alert
 from meta_research import research_question
 from live_data import detect_data_needs, format_live_data_for_prompt
-from meta_watch import (
-    check_new_futureeval_questions, check_resolutions, check_refresh_candidates,
-    FUTUREEVAL_TOURNAMENT_ID,
-)
+from meta_watch import check_new_futureeval_questions, FUTUREEVAL_TOURNAMENT_ID
+# CHANGED (2026-07-06): check_resolutions and check_refresh_candidates
+# moved to meta_phase_reports.yaml's daily cron (via meta_watch.py's new
+# run_watch_checks() entry point) — they're fully self-contained (each
+# hits the Metaculus API directly) and only ever ran here because this
+# was the script with the most frequent existing cadence, not because
+# FutureEval's cadence actually matters to them; FutureEval's ~3-hour
+# windows are too tight for a refresh to ever be actionable anyway.
+# check_new_futureeval_questions stays — it needs open_tid_posts_by_id
+# from this script's own fetch loop below and is FutureEval-specific.
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 # Cost optimization split (2026-06-30): this script previously fetched and
@@ -1112,21 +1118,6 @@ async def run():
     print(f"\n{'=' * 50}")
     print(f"Submitted: {submitted} | Failed: {failed}")
     print(f"Results saved to {results_file}")
-
-    # Run AFTER forecasting/submission, deliberately — FutureEval questions
-    # can close in as little as 90 minutes, so nothing non-time-sensitive
-    # should delay getting forecasts submitted. Checking resolutions on
-    # already-forecast questions has no such urgency.
-    print(f"\n{'=' * 50}")
-    print("Checking for resolved questions (bot-submitted forecasts only)...")
-    check_resolutions()
-
-    # Phase 1 (added 2026-07-01): refresh-candidate check, same "after
-    # everything urgent is done" placement as check_resolutions() above.
-    # Alert-only — never triggers meta_refresh_forecast.py itself, you
-    # run that manually off the alert.
-    print("Checking for refresh candidates (closing soon / CP moved)...")
-    check_refresh_candidates()
 
 
 if __name__ == "__main__":
