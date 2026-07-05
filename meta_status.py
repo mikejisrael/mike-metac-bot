@@ -427,7 +427,6 @@ def main():
     print(f"  python meta_coverage_check.py              # Phase 0: tournament coverage gaps (real vs. gated)")
     print(f"  python meta_calibration_report.py          # Phase 0: calibration curve + peer scores")
     print(f"  python meta_watch.py                       # push-notification check (new questions, resolutions, refresh candidates)")
-    print(f"  python meta_backfill_page_urls.py --dry-run # occasional: preview backfilling post_id/page_url into old history")
     print(f"  python show_reasoning.py <id>         # show bot reasoning for question")
     print(f"  python meta_status.py                 # this dashboard")
     print(f"\n{'='*70}\n")

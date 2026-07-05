@@ -19,7 +19,7 @@ load_dotenv()
 
 from forecasting_tools import MetaculusClient, ApiFilter, BinaryQuestion
 from live_data import detect_data_needs, format_live_data_for_prompt
-from cached_llm import build_forecaster_system_prompt
+from cached_llm import build_batch_forecaster_system_prompt
 from meta_prompt_cache import cacheable_system_block
 from meta_cp_extract import extract_live_cp
 from meta_alerts import send_alert
@@ -75,19 +75,23 @@ client_metaculus._post_question_prediction = _types.MethodType(
 # ─── Config ───────────────────────────────────────────────────────────────────
 MODEL = "claude-haiku-4-5"
 MAX_TOKENS = 2000
-# FIXED 2026-07-02: dropped from 50 to 20 as a deliberate cost control —
+# FIXED 2026-07-02: dropped from 50 to 20 as a deliberate cost control -
 # ALLOWED_TOURNAMENTS is expanding from 3 to 8 tournaments below, so
 # holding new-questions-per-run steady rather than letting it scale with
 # tournament count keeps the Batch API bill from growing 8/3 = ~2.7x
-# alongside it. Revisit once the cost optimization review (deferred
-# 2026-06-28) actually happens.
-# FIXED 2026-07-02: dropped from 50 to 20 as a deliberate cost control —
-# ALLOWED_TOURNAMENTS is expanding from 3 to 8 tournaments below, so
-# holding new-questions-per-run steady rather than letting it scale with
-# tournament count keeps the Batch API bill from growing 8/3 = ~2.7x
-# alongside it. Revisit once the cost optimization review (deferred
-# 2026-06-28) actually happens.
-NUM_QUESTIONS = 20
+# alongside it.
+# RAISED 2026-07-04 (20 -> 30) after the cost optimization review deferred
+# 2026-06-28: research now runs primarily through OpenRouter (separate,
+# well-funded credit pool from ben@metaculus.com), and prompt caching is
+# now live on this batch path (see cached_llm.build_batch_forecaster_
+# system_prompt), so the marginal Anthropic-side cost of more questions
+# per run is small. Chosen as a moderate +50% step rather than doubling,
+# to observe real cost impact via the Console before going further. A
+# higher cap also gives the 5 question_series tournaments more chance to
+# get covered in a given run, since the 3 prize-money tournaments
+# (fetched first) need to supply more fresh questions before hitting a
+# now-higher ceiling.
+NUM_QUESTIONS = 30
 # CHANGED (2026-07-03): DAYS_AHEAD and MIN_FORECASTERS moved to
 # meta_forecast_gate.py — shared with meta_coverage_check.py's gap
 # classification, so both scripts can never disagree on what "worth
@@ -174,6 +178,18 @@ def _set_research_text(obj, text) -> None:
         obj.research_text_at_access_time = text
     except Exception:
         object.__setattr__(obj, "research_text_at_access_time", text)
+
+
+def _set_research_source(obj, source) -> None:
+    """Same pydantic-safe-set pattern as _set_research_text, for the
+    provider name ("openrouter" / "anthropic" / None) that produced the
+    research. Added 2026-07-04 when meta_research.research_question()
+    started supporting multiple providers, so the dashboard can show
+    which source backed each forecast."""
+    try:
+        obj.research_source_at_access_time = source
+    except Exception:
+        object.__setattr__(obj, "research_source_at_access_time", source)
 
 
 # ─── Question identity guard ────────────────────────────────────────────────
@@ -373,7 +389,14 @@ def build_user_prompt(question: BinaryQuestion) -> str:
     has_live_data = bool(live_data)  # live_data.py only covers crypto/stock/
     # index/FRED keywords — most non-financial questions get nothing here.
 
-    research_text = research_question(question.question_text, question.background_info or "")
+    # Opted in to OpenRouter-primary/Anthropic-fallback 2026-07-04 (new
+    # OpenRouter credit). tournament_forecast.py deliberately does NOT pass
+    # provider_order and so stays on Anthropic-only — see meta_research.py
+    # docstring.
+    research_text, research_source = research_question(
+        question.question_text, question.background_info or "",
+        provider_order=["openrouter", "anthropic"], return_source=True,
+    )
     has_research = research_text is not None
     research_block = (
         f"\nCURRENT RESEARCH (real-time web search, fetched for this question):\n{research_text}\n"
@@ -384,6 +407,7 @@ def build_user_prompt(question: BinaryQuestion) -> str:
     # it into batch_info/results JSON without re-running research_question
     # or threading a second return value through this function's signature.
     _set_research_text(question, research_text)
+    _set_research_source(question, research_source)
 
     # Either source counts as "real grounding" for anchoring purposes — a
     # question can have research but no live_data (e.g. politics) or vice
@@ -452,7 +476,13 @@ The last thing you write is: "Probability: ZZ%"
 # ─── Step 3: Submit batch ──────────────────────────────────────────────────────
 async def submit_batch(questions: list[BinaryQuestion]) -> str:
     ensure_batch_dir()
-    system_prompt = build_forecaster_system_prompt()
+    # Switched 2026-07-04 to the padded batch variant — the base prompt
+    # (still used by tournament_forecast.py, untouched) was only ~990
+    # tokens, well under Haiku 4.5's 4,096-token caching floor. Confirmed
+    # via a real API call: this variant hits 4,187 tokens and produces
+    # genuine cache_read_input_tokens on reuse. See cached_llm.py for the
+    # full explanation and content.
+    system_prompt = build_batch_forecaster_system_prompt()
     # Wrapped once, reused identically across every request in this batch
     # below — same cached prefix on every request means only the first
     # ever pays the cache-write premium; every subsequent one in the same
@@ -510,6 +540,12 @@ async def submit_batch(questions: list[BinaryQuestion]) -> str:
         # next to reasoning.
         "research_texts": {
             custom_id: getattr(q, 'research_text_at_access_time', None)
+            for custom_id, q in question_map.items()
+        },
+        # Which provider ("openrouter" / "anthropic" / None) produced the
+        # research above, for the dashboard's source column. Added 2026-07-04.
+        "research_sources": {
+            custom_id: getattr(q, 'research_source_at_access_time', None)
             for custom_id, q in question_map.items()
         },
         "question_texts": {
@@ -603,6 +639,7 @@ async def check_batch():
                 # prefetch in fetch_questions() found one.
                 "community_prediction": batch_info.get("community_predictions", {}).get(custom_id),
                 "research_text": batch_info.get("research_texts", {}).get(custom_id),
+                "research_source": batch_info.get("research_sources", {}).get(custom_id),
                 "status":        "success"
             }
         else:
@@ -615,6 +652,7 @@ async def check_batch():
                 "submitted_forecast": None,
                 "community_prediction": batch_info.get("community_predictions", {}).get(custom_id),
                 "research_text": batch_info.get("research_texts", {}).get(custom_id),
+                "research_source": batch_info.get("research_sources", {}).get(custom_id),
                 "status":        "failed",
                 "error":         str(result.result)
             }

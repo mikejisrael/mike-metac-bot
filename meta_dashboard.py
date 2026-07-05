@@ -44,6 +44,7 @@ import json
 import asyncio
 import threading
 import time
+import requests
 from datetime import datetime, timezone
 
 from flask import Flask, jsonify, render_template_string
@@ -156,6 +157,39 @@ def load_phase0_reports() -> dict:
     except Exception:
         pass
     return {"coverage": coverage, "calibration": calibration}
+
+
+def load_openrouter_balance() -> dict | None:
+    """Live credit balance for the OpenRouter key, via the same endpoint
+    Mike checks manually (GET /api/v1/key). Called once per cache refresh
+    cycle (every REFRESH_INTERVAL_SECONDS), not per page load, since it's
+    a live network call. Returns None on any failure or missing key so
+    the dashboard degrades gracefully — same pattern as load_phase0_reports.
+    Anthropic-side balance intentionally NOT shown here: no plain-balance
+    endpoint exists for a standard (non-Admin) API key — Mike's call
+    2026-07-04 was to skip it rather than provision an Admin key just for
+    this. Revisit if that changes."""
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        return None
+    try:
+        r = requests.get(
+            "https://openrouter.ai/api/v1/key",
+            headers={"Authorization": f"Bearer {api_key}"},
+            timeout=10,
+        )
+        r.raise_for_status()
+        d = r.json().get("data", {})
+        limit = d.get("limit")
+        remaining = d.get("limit_remaining")
+        return {
+            "limit": limit,
+            "remaining": remaining,
+            "checked_at": datetime.now(timezone.utc).isoformat(),
+        }
+    except Exception as e:
+        print(f"  ⚠️  OpenRouter balance check failed (non-fatal): {e}")
+        return None
 
 
 def fetch_predicted_questions(client, label: str) -> dict[int, dict]:
@@ -379,6 +413,11 @@ def _make_row(qid, local_r, post, is_personal_only=False) -> dict:
         # raw reasoning/research from local file (for detail page)
         "reasoning":         (local_r or {}).get("reasoning", ""),
         "research_text":     (local_r or {}).get("research_text", ""),
+        # Which provider produced the research above ("openrouter" /
+        # "anthropic" / None). Added 2026-07-04 alongside the OpenRouter
+        # switch-back, so calibration can be sliced by research source if
+        # peer score trends diverge between the two.
+        "research_source":   (local_r or {}).get("research_source"),
         "refresh_reason":    (local_r or {}).get("refresh_reason", ""),
         "original_prob":     (local_r or {}).get("original_prob"),
     }
@@ -467,10 +506,12 @@ def build_dashboard_data():
                            if any(t in r["tournaments"] for r in rows)]
 
     phase0 = load_phase0_reports()
+    openrouter_balance = load_openrouter_balance()
 
     data = {
         "rows":                rows,
         "phase0":              phase0,
+        "openrouter_balance":  openrouter_balance,
         "status_counts":       status_counts,
         "avg_score":           avg_score,
         "chart_bot":           chart_bot,
@@ -582,7 +623,7 @@ PAGE_TEMPLATE = """
     </div>
   </div>
 
-  {% if data.phase0.coverage or data.phase0.calibration %}
+  {% if data.phase0.coverage or data.phase0.calibration or data.openrouter_balance %}
   <div class="cards" style="margin-top:-4px;">
     {% if data.phase0.coverage %}
     <div class="card">
@@ -601,6 +642,18 @@ PAGE_TEMPLATE = """
       <div class="label">Avg peer score (own, resolved)</div>
       <div class="value {{ 'pos' if data.phase0.calibration.average_peer_score and data.phase0.calibration.average_peer_score > 0 else 'neg' }}">
         {{ '%.2f'|format(data.phase0.calibration.average_peer_score) if data.phase0.calibration.average_peer_score is not none else '—' }}
+      </div>
+    </div>
+    {% endif %}
+    {% if data.openrouter_balance %}
+    <div class="card">
+      <div class="label">OpenRouter credit remaining</div>
+      <div class="value {{ 'neg' if data.openrouter_balance.remaining is not none and data.openrouter_balance.remaining < 10 else '' }}">
+        {% if data.openrouter_balance.remaining is not none %}
+          ${{ '%.2f'|format(data.openrouter_balance.remaining) }}{% if data.openrouter_balance.limit %} / ${{ '%.0f'|format(data.openrouter_balance.limit) }}{% endif %}
+        {% else %}
+          —
+        {% endif %}
       </div>
     </div>
     {% endif %}
@@ -637,7 +690,7 @@ PAGE_TEMPLATE = """
     <thead>
       <tr>
         <th>ID</th><th>Question</th><th>Type</th><th>Submitted</th><th>CP</th>
-        <th>Status</th><th>Resolution</th><th>Resolved at</th><th>Peer score</th><th>Tournament(s)</th><th></th>
+        <th>Status</th><th>Resolution</th><th>Resolved at</th><th>Peer score</th><th>Research</th><th>Tournament(s)</th><th></th>
       </tr>
     </thead>
     <tbody>
@@ -661,6 +714,15 @@ PAGE_TEMPLATE = """
         <td>{{ row.resolve_time[:10] if row.resolve_time else '—' }}</td>
         <td class="{{ 'pos' if row.peer_score and row.peer_score > 0 else ('neg' if row.peer_score and row.peer_score < 0 else 'muted') }}">
           {{ '%.2f'|format(row.peer_score) if row.peer_score is not none else (row.resolved and '?' or '—') }}
+        </td>
+        <td>
+          {% if row.research_source %}
+            <span class="tag {{ 'personal' if row.research_source == 'openrouter' else '' }}">{{ row.research_source }}</span>
+          {% elif row.research_text %}
+            <span class="muted" title="Research present but no source recorded (pre-2026-07-04 record)">?</span>
+          {% else %}
+            <span class="muted">—</span>
+          {% endif %}
         </td>
         <td>{% for t in row.tournaments %}<span class="tag {{ 'personal' if t == 'Personal' else '' }}">{{ t }}</span>{% endfor %}</td>
         <td><a class="detail-link" href="/detail/{{ row.question_id }}" target="_blank">detail</a></td>
@@ -897,7 +959,7 @@ DETAIL_TEMPLATE = """
 
   {% if research_text %}
   <section>
-    <h2>Research</h2>
+    <h2>Research{% if research_source %} <span style="font-weight:400;font-size:14px;color:#666;">(via {{ research_source }})</span>{% endif %}</h2>
     <div class="research-text">{{ research_text }}</div>
   </section>
   {% endif %}
@@ -991,6 +1053,7 @@ def detail(question_id):
         refresh_reason=row["refresh_reason"],
         reasoning=row["reasoning"],
         research_text=row["research_text"],
+        research_source=row["research_source"],
         raw_json=json.dumps(raw, indent=2, default=str),
     )
 

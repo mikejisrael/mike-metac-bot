@@ -115,7 +115,7 @@ load_dotenv()
 
 from forecasting_tools import MetaculusClient, BinaryQuestion, MultipleChoiceQuestion, QuestionState
 from live_data import detect_data_needs, format_live_data_for_prompt
-from cached_llm import build_forecaster_system_prompt
+from cached_llm import build_forecaster_system_prompt, build_batch_forecaster_system_prompt
 from meta_prompt_cache import cacheable_system_block
 from meta_research import research_question
 from meta_refresh_gate import is_refresh_due, MIN_REFRESH_GAP_HOURS
@@ -245,6 +245,18 @@ def _set_research_text(obj, text) -> None:
         obj.research_text_at_access_time = text
     except Exception:
         object.__setattr__(obj, "research_text_at_access_time", text)
+
+
+def _set_research_source(obj, source) -> None:
+    """Same pydantic-safe-set pattern as _set_research_text, for the
+    provider name ("openrouter" / "anthropic" / None) that produced the
+    research. Added 2026-07-04 when meta_research.research_question()
+    started supporting multiple providers, so the dashboard can show
+    which source backed each forecast."""
+    try:
+        obj.research_source_at_access_time = source
+    except Exception:
+        object.__setattr__(obj, "research_source_at_access_time", source)
 
 
 # ─── Sliding community weight ─────────────────────────────────────────────────
@@ -634,7 +646,14 @@ def _fetch_grounding_blocks(question) -> tuple[str, str, bool]:
     # index/FRED keywords — empty dict means no real current information at
     # all for this question from that source alone.
 
-    research_text = research_question(question.question_text, question.background_info or "")
+    # Opted in to OpenRouter-primary/Anthropic-fallback 2026-07-04 (new
+    # OpenRouter credit). tournament_forecast.py deliberately does NOT pass
+    # provider_order and so stays on Anthropic-only — see meta_research.py
+    # docstring.
+    research_text, research_source = research_question(
+        question.question_text, question.background_info or "",
+        provider_order=["openrouter", "anthropic"], return_source=True,
+    )
     has_research = research_text is not None
     research_block = (
         f"\nCURRENT RESEARCH (real-time web search, fetched for this question):\n{research_text}\n"
@@ -643,6 +662,7 @@ def _fetch_grounding_blocks(question) -> tuple[str, str, bool]:
     # Stashed for submit_refresh_batch to persist below — same pattern as
     # meta_batch_forecast.py and as community_prediction_at_access_time.
     _set_research_text(question, research_text)
+    _set_research_source(question, research_source)
 
     # Either source counts as real grounding for anchoring purposes — see
     # build_community_context's docstring for why has_live_data alone is no
@@ -884,11 +904,13 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
     it was never capped, just flagged here for clarity."""
     ensure_batch_dir()
 
-    system_prompt = build_forecaster_system_prompt()
+    system_prompt = build_batch_forecaster_system_prompt()
     # See meta_prompt_cache.py — same caching treatment as
     # meta_batch_forecast.py's submit_batch, NOT applied to --single
     # below (call_claude_single), which is a one-off call that would
-    # never recover the cache-write premium.
+    # never recover the cache-write premium. Switched to the padded
+    # batch variant 2026-07-04 — see cached_llm.py; base prompt was only
+    # ~990 tokens, well under Haiku 4.5's 4,096-token caching floor.
     cached_system = cacheable_system_block(system_prompt)
     requests = []
     question_map = {}
@@ -1064,6 +1086,12 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
             custom_id: getattr(info["question"], 'research_text_at_access_time', None)
             for custom_id, info in question_map.items()
         },
+        # Which provider ("openrouter" / "anthropic" / None) produced the
+        # research above, for the dashboard's source column. Added 2026-07-04.
+        "research_sources": {
+            custom_id: getattr(info["question"], 'research_source_at_access_time', None)
+            for custom_id, info in question_map.items()
+        },
         "resolve_times": {
             custom_id: (
                 info["known_resolve_time"]
@@ -1147,6 +1175,7 @@ async def check_refresh_batch():
                     "refresh_reason": batch_info.get("refresh_reasons", {}).get(custom_id, ""),
                     "reasoning":      text,
                     "research_text":  batch_info.get("research_texts", {}).get(custom_id),
+                    "research_source": batch_info.get("research_sources", {}).get(custom_id),
                     "status":         "success" if probs is not None else "failed",
                 }
                 if probs is not None:
@@ -1177,6 +1206,7 @@ async def check_refresh_batch():
                     "refresh_reason": batch_info.get("refresh_reasons", {}).get(custom_id, ""),
                     "reasoning":      text,
                     "research_text":  batch_info.get("research_texts", {}).get(custom_id),
+                    "research_source": batch_info.get("research_sources", {}).get(custom_id),
                     "status":         "success" if prob is not None else "failed",
                 }
                 if prob is not None and original is not None:
@@ -1194,6 +1224,7 @@ async def check_refresh_batch():
                 "question_type": q_type,
                 "status":        "failed",
                 "research_text": batch_info.get("research_texts", {}).get(custom_id),
+                "research_source": batch_info.get("research_sources", {}).get(custom_id),
             }
             entry["probabilities" if is_mc else "probability"] = None
             results[custom_id] = entry
@@ -1433,6 +1464,7 @@ def _save_single_result(
             question, "community_prediction_at_access_time", None
         ),
         "research_text": getattr(question, "research_text_at_access_time", None),
+        "research_source": getattr(question, "research_source_at_access_time", None),
         "status": "success",
     }
     if is_mc:

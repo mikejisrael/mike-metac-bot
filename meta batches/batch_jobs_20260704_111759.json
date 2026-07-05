@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43498_20260704_111759",
+  "submitted_at": "2026-07-04T11:17:59.132655",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43498_20260704_111759": 43498
+  },
+  "post_ids": {
+    "single_43498_20260704_111759": 43491
+  },
+  "question_texts": {
+    "single_43498_20260704_111759": "Will a new High Representative for Bosnia and Herzegovina officially be in place before September 2, 2026?"
+  },
+  "original_probabilities": {
+    "single_43498_20260704_111759": 0.22
+  },
+  "refresh_reasons": {
+    "single_43498_20260704_111759": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43498_20260704_111759": null
+  },
+  "resolve_times": {
+    "single_43498_20260704_111759": "2026-09-02T11:00:00+00:00"
+  }
+}
