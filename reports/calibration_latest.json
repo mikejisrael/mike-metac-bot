@@ -1,9 +1,9 @@
 {
-  "checked_at": "2026-07-05T14:04:10.860795+00:00",
-  "questions_scored": 4,
-  "questions_predicted_total": 209,
-  "questions_resolved_checked": 5,
-  "average_peer_score": -1.8735481972069095,
+  "checked_at": "2026-07-06T14:03:55.931176+00:00",
+  "questions_scored": 7,
+  "questions_predicted_total": 225,
+  "questions_resolved_checked": 8,
+  "average_peer_score": -1.0402896495699454,
   "calibration": [],
   "score_scatter": [
     {
@@ -22,9 +22,24 @@
       "peer_score": -17.769498702567333
     },
     {
+      "question_id": 43465,
+      "close_time": "2026-07-01T00:00:00Z",
+      "peer_score": 0.5223837441034048
+    },
+    {
       "question_id": 43288,
       "close_time": "2026-06-30T23:00:00Z",
       "peer_score": 4.662948883489451
+    },
+    {
+      "question_id": 41544,
+      "close_time": "2026-06-30T22:23:00Z",
+      "peer_score": 0.011133402959947926
+    },
+    {
+      "question_id": 40916,
+      "close_time": "2026-06-30T22:00:00Z",
+      "peer_score": -0.3213519052253332
     }
   ]
 }
