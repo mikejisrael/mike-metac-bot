@@ -78,12 +78,37 @@ pre-filter through passes_forecast_gate() the way that function does,
 since coverage needs the FULL open set (gated and real alike) to
 classify, not just the forecast-worthy subset.
 
-unverified_fetch_scope is now False for these 5 tournaments in the
-report. Each series' raw open-question count is still printed on every
-run specifically so it can be eyeballed against Metaculus's own
-tournament page (or check_project_type.py) a few times before fully
-trusting it going forward — a proven mechanism used correctly is not
-the same as this specific integration being battle-tested yet.
+FURTHER FINDING (2026-07-06): after fixing the post_id/question_id
+conflation bug above, a live discrepancy against Metaculus's own UI (6
+"not predicted" shown for Current Events vs. this script only finding 2)
+led to a deeper investigation. Confirmed via direct API checks: the
+`project=` parameter itself — the SAME mechanism meta_batch_forecast.py
+already uses in production — silently fails to return some genuinely-
+open, correctly-associated questions. Ruled out every explainable cause:
+these questions have status='open' in their own detail view,
+default_project correctly set to the series id, and correct
+question_series membership. project=32774 with NO status filter at all
+still excludes them (confirmed via full raw dump, not a pagination
+artifact — response's own "next" field was None). ApiFilter has no
+purpose-built project/series filter to fall back on either (confirmed by
+inspecting ApiFilter.model_fields directly) — allowed_tournaments is the
+only tournament-scoping field, and that's the one already proven broken
+for question_series types.
+
+Decided NOT to chase this further (2026-07-06, Mike's call) — the
+returns dropped off fast: 5 rounds of live diagnostics to explain a
+handful of questions in one series, for a read-only reporting script.
+Practical impact assessed as near-zero rather than fixed: of the 4
+questions this affects in Current Events, 3 are multiple_choice/date
+type, which meta_batch_forecast.py never forecasts regardless of fetch
+correctness (binary-only), and the 4th is a group question, which has no
+unpack/forecast handling in this codebase at all yet — so even a perfect
+fetch wouldn't currently produce a real forecast for it. unverified_fetch_scope
+is back to True for these 5 tournaments; a clean count from this mechanism
+is not proof of full coverage. The extraction-failure fix below (no more
+silently substituting post_id for question_id) stays, since it's a real
+improvement independent of this open question, and makes failures loud
+instead of invisible whenever they do occur.
 """
 
 import os
@@ -377,7 +402,7 @@ def run_coverage_check():
         report["tournaments"][label] = {
             "tournament_id": tid,
             "fetch_method": "project_param" if tid in QUESTION_SERIES_IDS else "allowed_tournaments",
-            "unverified_fetch_scope": False,  # FIXED 2026-07-06 — see module docstring
+            "unverified_fetch_scope": tid in QUESTION_SERIES_IDS,  # confirmed unreliable 2026-07-06 — see module docstring
             "open_count": len(open_qs),
             "forecasted_count": len(open_qs) - len(missing),
             "missing_gated_ids": gated_ids,
@@ -408,11 +433,14 @@ def run_coverage_check():
         for s in too_far_out_samples:
             print(f"    Q{s['question_id']} ({s['tournament']}): {s['close_time']}")
     series_labels = [TOURNAMENTS[tid] for tid in QUESTION_SERIES_IDS if tid in TOURNAMENTS]
-    print(f"  ℹ️  {', '.join(series_labels)} now fetched via the proven project= mechanism "
-          f"(same one meta_batch_forecast.py forecasts from) instead of the broken "
-          f"ApiFilter(allowed_tournaments=...) path — per-series open counts are printed "
-          f"above as they're fetched. Worth eyeballing those against Metaculus's own "
-          f"tournament pages a few times before treating this integration as fully proven.")
+    print(f"  ⚠️  Unverified fetch scope for: {', '.join(series_labels)} — the project= "
+          f"mechanism used here is confirmed (2026-07-06) to silently miss some genuinely-"
+          f"open questions for reasons not explainable from the data itself (not a status,"
+          f" pagination, or default_project issue — see module docstring). A clean gap "
+          f"count for these 5 isn't proof of full coverage. Practical forecasting impact "
+          f"assessed as near-zero for now (affected questions so far are non-binary or "
+          f"group-type, which meta_batch_forecast.py doesn't forecast regardless), but "
+          f"that hasn't been checked for every series — treat with appropriate caution.")
     # Per-tournament breakdown is available in the JSON report (and on
     # metaculus.com directly) for whenever that level of detail is wanted —
     # console/alert output stays at the summary level deliberately.

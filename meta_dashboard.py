@@ -670,11 +670,30 @@ def build_dashboard_data():
     openrouter_balance = load_openrouter_balance()
     refresh_candidate_count = sum(1 for r in rows if r["is_refresh_candidate"])
 
+    # Finish-line flag (added 2026-07-06): Mike's plan is to let the
+    # existing refresh pipeline naturally re-forecast (under the bot
+    # account) any still-open question that was only ever forecasted
+    # under Personal historically — no code changes needed there, since
+    # already_done/find_questions_to_refresh() were never account-aware
+    # to begin with. Once every Personal-tagged row is closed, there's
+    # nothing left for the refresh pipeline to pick up, and it's safe to
+    # go remove personal-account code (personal_client, PERSONAL_TOKEN,
+    # this dashboard's own Personal-tag display, etc.) — this banner is
+    # that "you can stop waiting now" signal. False (no banner) if there
+    # are zero Personal rows at all — that's a different state (nothing
+    # to migrate, not "migration complete") and shouldn't look identical.
+    personal_rows = [r for r in rows if r["is_personal_only"]]
+    personal_open_count = sum(1 for r in personal_rows if r["status_bucket"] == "open")
+    personal_finish_line = len(personal_rows) > 0 and personal_open_count == 0
+
     data = {
         "rows":                rows,
         "phase0":              phase0,
         "openrouter_balance":  openrouter_balance,
         "refresh_candidate_count": refresh_candidate_count,
+        "personal_total_count": len(personal_rows),
+        "personal_open_count":  personal_open_count,
+        "personal_finish_line": personal_finish_line,
         "status_counts":       status_counts,
         "avg_score":           avg_score,
         "chart_bot":           chart_bot,
@@ -767,6 +786,10 @@ PAGE_TEMPLATE = """
     a.id-link:hover { text-decoration: underline; }
     .refresh-note { color: #999; font-size: 12px; margin: 8px 0 16px; }
     .cp-na { color: #ccc; font-size: 11px; }
+    .finish-line-banner { background: #dcfce7; border: 1px solid #86efac; color: #14532d;
+                           border-radius: 8px; padding: 14px 18px; margin-bottom: 16px;
+                           font-size: 14px; line-height: 1.5; }
+    .finish-line-banner strong { color: #166534; }
     .truncate { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .pagination { display: flex; align-items: center; justify-content: center; gap: 12px;
                   padding: 14px; background: white; border-radius: 0 0 8px 8px; margin-top: -8px;
@@ -806,6 +829,15 @@ PAGE_TEMPLATE = """
       </div>
     </div>
   </div>
+
+  {% if data.personal_finish_line %}
+  <div class="finish-line-banner">
+    🏁 <strong>Personal-account migration complete</strong> — all {{ data.personal_total_count }}
+    question(s) previously tracked under Personal are now closed (0 still open). The refresh
+    pipeline has nothing further to pick up here. Safe to go remove personal-account code
+    (personal_client, METACULUS_TOKEN usage, this dashboard's Personal-tag display) from the pipeline.
+  </div>
+  {% endif %}
 
   {% if data.phase0.coverage or data.phase0.calibration or data.openrouter_balance %}
   <div class="cards" style="margin-top:-4px;">
