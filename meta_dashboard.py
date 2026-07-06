@@ -51,6 +51,7 @@ from flask import Flask, jsonify, render_template_string
 from dotenv import load_dotenv
 from forecasting_tools import MetaculusClient, ApiFilter
 from meta_cp_extract import extract_live_cp
+from meta_refresh_exclusions import load_excluded_ids
 
 load_dotenv()
 
@@ -447,7 +448,8 @@ def classify_status(row: dict) -> str:
     return "open"
 
 
-def _make_row(qid, local_r, post, is_personal_only=False, refresh_state: dict | None = None) -> dict:
+def _make_row(qid, local_r, post, is_personal_only=False, refresh_state: dict | None = None,
+              excluded_ids: dict | None = None) -> dict:
     score  = extract_score_info(post) if post else extract_score_info(None)
     q_type = (local_r or {}).get("question_type") or (post.get("question") or {}).get("type") if post else None
     cp_val = extract_live_cp(post, q_type) if post else None
@@ -493,6 +495,19 @@ def _make_row(qid, local_r, post, is_personal_only=False, refresh_state: dict | 
         if still_pending:
             is_refresh_candidate = True
             refresh_alert_reasons = alert_info.get("reasons") or []
+
+    # Permanent refresh exclusion (added 2026-07-06, see
+    # meta_refresh_exclusions.py) — rare, manually-curated edge cases
+    # where the refresh preview would otherwise keep surfacing a question
+    # forever with nothing actually actionable (e.g. confirmed closed to
+    # forecasting despite a local resolve_time that's still months out).
+    # Labeled here rather than silently hidden, since Mike specifically
+    # wants these visible, not invisible.
+    excluded_ids = excluded_ids or {}
+    exclusion_info = excluded_ids.get(qid)
+    is_refresh_excluded = exclusion_info is not None
+    refresh_exclusion_reason = exclusion_info.get("reason", "") if exclusion_info else ""
+
     if is_personal_only:
         tournaments = [PERSONAL_LABEL] + [t for t in tournaments if t != OTHER_LABEL]
         if not tournaments:
@@ -566,6 +581,8 @@ def _make_row(qid, local_r, post, is_personal_only=False, refresh_state: dict | 
         "predicted_at_ts":   predicted_at_ts,
         "is_refresh_candidate": is_refresh_candidate,
         "refresh_alert_reasons": refresh_alert_reasons,
+        "is_refresh_excluded": is_refresh_excluded,
+        "refresh_exclusion_reason": refresh_exclusion_reason,
     }
 
 
@@ -575,6 +592,7 @@ def build_dashboard_data():
     bot_live       = fetch_predicted_questions(bot_client, "bot")
     personal_live  = fetch_predicted_questions(personal_client, "personal")
     refresh_state  = load_refresh_candidate_state()
+    excluded_ids   = load_excluded_ids()
 
     rows = []
     seen = set()
@@ -588,14 +606,14 @@ def build_dashboard_data():
         if post is None and qid in personal_live:
             post = personal_live[qid]
             is_personal_only = True
-        rows.append(_make_row(qid, r, post, is_personal_only=is_personal_only, refresh_state=refresh_state))
+        rows.append(_make_row(qid, r, post, is_personal_only=is_personal_only, refresh_state=refresh_state, excluded_ids=excluded_ids))
         seen.add(qid)
 
     # Bot-live-only rows (no local result — manual predictions etc.)
     for qid, post in bot_live.items():
         if qid in seen:
             continue
-        rows.append(_make_row(qid, None, post, is_personal_only=False, refresh_state=refresh_state))
+        rows.append(_make_row(qid, None, post, is_personal_only=False, refresh_state=refresh_state, excluded_ids=excluded_ids))
         seen.add(qid)
 
     # Personal-only rows (not predicted by bot)
@@ -603,7 +621,7 @@ def build_dashboard_data():
         if qid in seen:
             continue
         local_r = local.get(qid)
-        rows.append(_make_row(qid, local_r, post, is_personal_only=True, refresh_state=refresh_state))
+        rows.append(_make_row(qid, local_r, post, is_personal_only=True, refresh_state=refresh_state, excluded_ids=excluded_ids))
         seen.add(qid)
 
     for row in rows:
@@ -948,6 +966,9 @@ PAGE_TEMPLATE = """
           {% if row.is_refresh_candidate %}
             <span class="refresh-badge" title="Refresh candidate: {{ row.refresh_alert_reasons|join(', ') }}">🔄</span>
           {% endif %}
+          {% if row.is_refresh_excluded %}
+            <span class="refresh-badge" title="Permanently excluded from refresh: {{ row.refresh_exclusion_reason }}">🚫</span>
+          {% endif %}
         </td>
         <td>{{ row.question_text[:70] }}</td>
         <td>{{ row.question_type or '—' }}</td>
@@ -1241,6 +1262,9 @@ DETAIL_TEMPLATE = """
     {% if is_refresh_candidate %}
     <span class="badge refresh" title="{{ refresh_alert_reasons|join(', ') }}">🔄 Refresh candidate</span>
     {% endif %}
+    {% if is_refresh_excluded %}
+    <span class="badge refresh" title="{{ refresh_exclusion_reason }}">🚫 Excluded from refresh</span>
+    {% endif %}
   </div>
 
   <div class="scores">
@@ -1416,6 +1440,8 @@ def detail(question_id):
         research_source=row["research_source"],
         is_refresh_candidate=row["is_refresh_candidate"],
         refresh_alert_reasons=row["refresh_alert_reasons"],
+        is_refresh_excluded=row["is_refresh_excluded"],
+        refresh_exclusion_reason=row["refresh_exclusion_reason"],
         prediction_history=prediction_history,
         raw_json=json.dumps(raw, indent=2, default=str),
     )

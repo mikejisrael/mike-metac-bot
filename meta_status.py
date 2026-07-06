@@ -27,6 +27,22 @@ meta_batch_forecast.py, meta_backfill_page_urls.py, and meta_watch.py.
 This was the last file in the codebase still pointing at the capital-M
 folder; harmless on Windows (case-insensitive filesystem) but would
 silently show an empty dashboard if this script ever ran on Linux.
+
+ADDED (2026-07-06): meta_refresh_forecast.py's find_questions_to_refresh()
+now has two additional buckets worth knowing about when reading its
+output (not surfaced in this dashboard directly, but explains behavior
+you'll see when running it): a loud no_post_id warning for any locally-
+recorded forecast missing post_id (pre-dates the post_id fix; can never
+actually be refreshed until backfilled — see meta_backfill_post_ids.py),
+and a quiet permanent-exclusion note for questions manually marked via
+the new meta_refresh_exclusions.py (e.g. Q39825, confirmed closed to
+forecasting despite a local resolve_time still months out — something
+only discoverable via a live fetch, not worth automating detection for
+given how rare it is). Both exist because Q6462 and Q39825 sat silently
+stuck at the top of the STALE preview for weeks before anyone noticed —
+the no_post_id flag alone caught 21 more on its very first real run
+(1 already fixed, 8 auto-backfillable since question_id happened to
+equal post_id, 14 needing manual Metaculus lookups — all now resolved).
 """
 
 import json
@@ -43,10 +59,13 @@ METACULUS_FILES = [
     ("meta_refresh_forecast.py",    "Re-forecast closing-soon / stale questions (binary + MC, --single)"),
     ("meta_forecast_gate.py",       "Shared: is-this-question-worth-forecasting gate (type/forecasters/close-time)"),
     ("meta_refresh_gate.py",        "Shared: minimum-refresh-gap gate (used by refresh + watch alerting)"),
+    ("meta_refresh_exclusions.py",  "Shared: permanent manual exclusion list for refresh (CLI: add/remove/list)"),
     ("meta_coverage_check.py",      "Phase 0: tournament coverage gaps (real vs. correctly-gated)"),
     ("meta_calibration_report.py",  "Phase 0: calibration curve + peer-score report"),
     ("meta_watch.py",               "Push notifications — new questions, resolutions, refresh candidates"),
     ("meta_backfill_page_urls.py",  "Occasional-use: backfill page_url/post_id into old local history"),
+    ("meta_backfill_post_ids.py",   "Occasional-use: backfill missing post_id for specific question_ids"),
+    ("meta_audit_phantom_forecasts.py", "Occasional-use: cross-check local 'success' records against live Metaculus forecasts"),
     ("meta_question_matching.py",   "Shared: titles_match() — guards against recycled Metaculus IDs"),
     ("meta_alerts.py",              "Shared: send_alert() (ntfy push notifications)"),
     ("meta_research.py",            "Shared: research_question() (real-time web search grounding)"),
@@ -427,6 +446,7 @@ def main():
     print(f"  python meta_coverage_check.py              # Phase 0: tournament coverage gaps (real vs. gated)")
     print(f"  python meta_calibration_report.py          # Phase 0: calibration curve + peer scores")
     print(f"  python meta_watch.py                       # push-notification check (new questions, resolutions, refresh candidates)")
+    print(f"  python meta_refresh_exclusions.py          # list questions permanently excluded from refresh, and why")
     print(f"  python show_reasoning.py <id>         # show bot reasoning for question")
     print(f"  python meta_status.py                 # this dashboard")
     print(f"\n{'='*70}\n")

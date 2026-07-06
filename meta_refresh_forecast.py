@@ -119,6 +119,7 @@ from cached_llm import build_forecaster_system_prompt, build_batch_forecaster_sy
 from meta_prompt_cache import cacheable_system_block
 from meta_research import research_question
 from meta_refresh_gate import is_refresh_due, MIN_REFRESH_GAP_HOURS
+from meta_refresh_exclusions import load_excluded_ids
 
 client_anthropic = anthropic.Anthropic()
 
@@ -448,7 +449,7 @@ def load_all_batches() -> list[dict]:
 # ─── Identify questions needing refresh ───────────────────────────────────────
 def find_questions_to_refresh(
     all_forecasts: list[dict]
-) -> tuple[list[dict], list[dict], list[dict]]:
+) -> tuple[list[dict], list[dict], list[dict], list[dict], list[dict]]:
     now = datetime.now(timezone.utc)
     closing_soon = []
     stale = []
@@ -461,6 +462,35 @@ def find_questions_to_refresh(
     # dropped, matching this file's established pattern (stale-cap
     # deferrals, MC eligibility) of never hiding a skip without a reason.
     gated = []
+    # ADDED 2026-07-06: fourth bucket — forecasts with no post_id on file
+    # (pre-dates the post_id fix; see fetch_question_by_id's own "no
+    # post_id on file" skip). These can NEVER actually be refreshed by
+    # this script no matter how stale or closing-soon they become —
+    # fetch_question_by_id needs post_id to look the question up at all,
+    # and silently skips (rather than guessing) when it's missing. Before
+    # this fix, that meant a question like this would sit at the very top
+    # of the STALE preview indefinitely — accurately aged (age comes from
+    # the batch_jobs file's own submitted_at, which was always populated)
+    # but permanently unrefreshable (post_id comes from the SAME file's
+    # post_ids dict, which is genuinely absent for pre-fix history) —
+    # discoverable only by a human noticing the same question keep
+    # reappearing run after run, which is exactly how Q6462 and Q39825
+    # were found (2026-07-06). Flagged here instead, checked for EVERY
+    # forecast with a usable probability regardless of its date bucket —
+    # not just ones currently closing-soon/stale-eligible — so a question
+    # that isn't stale yet but is already missing post_id gets caught
+    # before it becomes a silent problem, not after.
+    no_post_id = []
+    # ADDED 2026-07-06: manually-curated permanent exclusions (see
+    # meta_refresh_exclusions.py) — for rare edge cases like Q39825, which
+    # has a perfectly valid post_id but is confirmed closed to new
+    # forecasting despite a local resolve_time that's still months away
+    # (only discoverable via a live fetch, which this local-data-only
+    # preview deliberately never does). Mike's call: not worth automating
+    # detection for something this infrequent — scratch it via this list
+    # instead of letting it clutter STALE forever.
+    excluded_ids = load_excluded_ids()
+    excluded = []
     seen_question_ids = set()
 
     sorted_forecasts = sorted(
@@ -494,6 +524,20 @@ def find_questions_to_refresh(
             # permanently dropping the question here.
             continue
         seen_question_ids.add(q_id)
+
+        if q_id in excluded_ids:
+            f["exclusion_reason"] = excluded_ids[q_id].get("reason", "")
+            excluded.append(f)
+            continue  # categorically handled — don't also flag/bucket it below
+
+        if f.get("post_id") is None:
+            no_post_id.append(f)
+            # Deliberately NOT `continue`-ing past the rest of this loop —
+            # still let it fall through into closing_soon/stale/gated below
+            # too, so the existing preview behavior (and the "why is this
+            # not getting refreshed" visibility) stays exactly as before;
+            # this is purely additive flagging, not a behavior change to
+            # what's eligible.
 
         resolve_time_str = f.get("resolve_time")
         submitted_at_str = f.get("submitted_at")
@@ -541,7 +585,7 @@ def find_questions_to_refresh(
                 f["refresh_reason"] = f"forecast is {age_days} days old"
                 stale.append(f)
 
-    return closing_soon, stale, gated
+    return closing_soon, stale, gated, no_post_id, excluded
 
 
 # ─── Fetch fresh question data from Metaculus ─────────────────────────────────
@@ -1919,7 +1963,34 @@ async def main(submit: bool = False):
     if not all_forecasts:
         return
 
-    closing_soon, stale, gated = find_questions_to_refresh(all_forecasts)
+    closing_soon, stale, gated, no_post_id, excluded = find_questions_to_refresh(all_forecasts)
+
+    # ADDED 2026-07-06: quiet, one-line-per-question — these are KNOWN and
+    # already handled (see meta_refresh_exclusions.py), unlike no_post_id
+    # below which is a live problem needing attention. Deliberately no
+    # "!!!" styling here — this is a "here's what's being skipped and why"
+    # note, not a warning.
+    if excluded:
+        print(f"\nℹ️  {len(excluded)} question(s) permanently excluded from refresh "
+              f"(see meta_refresh_exclusions.py):")
+        for f in excluded:
+            print(f"    Q{f['question_id']}: {f.get('exclusion_reason', '')} — {f['question_text'][:60]}")
+
+    # ADDED 2026-07-06: printed FIRST, before anything else, specifically
+    # so it can't be missed the way Q6462/Q39825 were for weeks — those
+    # two were only found because Mike happened to notice the same
+    # questions reappearing across separate dry-run outputs. This surfaces
+    # every currently-known case up front, every single run, regardless of
+    # whether it's a dry run or --submit.
+    if no_post_id:
+        print(f"\n{'!' * 55}")
+        print(f"⚠️  {len(no_post_id)} question(s) have NO post_id on file and can NEVER "
+              f"be refreshed by this script — permanently stuck until manually backfilled:")
+        for f in sorted(no_post_id, key=lambda f: f.get("submitted_at") or ""):
+            print(f"    Q{f['question_id']}: {f['question_text'][:70]}")
+        print(f"  (These will keep reappearing in CLOSING SOON / STALE below every run "
+              f"until their post_id is backfilled into the relevant batch_jobs_*.json file.)")
+        print(f"{'!' * 55}")
 
     # Added 2026-07-03: sort closing_soon by urgency for display (all of
     # them still go through — this is purely cosmetic ordering, unlike the
@@ -1929,7 +2000,8 @@ async def main(submit: bool = False):
     print(f"\n{'='*55}")
     print(f"CLOSING SOON (within {CLOSING_SOON_DAYS} days): {len(closing_soon)} questions — never capped")
     for f in closing_soon:
-        print(f"  [{f['days_to_close']}d] {_format_forecast_summary(f)} — {f['question_text'][:60]}")
+        no_pid_tag = " [⚠️ NO POST_ID]" if f.get("post_id") is None else ""
+        print(f"  [{f['days_to_close']}d] {_format_forecast_summary(f)} — {f['question_text'][:60]}{no_pid_tag}")
     # CHANGED (2026-07-03): surfaces questions that WOULD be closing-soon
     # eligible but were refreshed too recently (see meta_refresh_gate,
     # MIN_REFRESH_GAP_HOURS). Previously these were silently re-included
@@ -1938,7 +2010,8 @@ async def main(submit: bool = False):
         gated_sorted = sorted(gated, key=lambda f: f.get("days_to_close", 9999))
         print(f"  ({len(gated)} more closing-soon but refreshed <{MIN_REFRESH_GAP_HOURS}h ago, skipped this run:)")
         for f in gated_sorted:
-            print(f"    [{f['days_to_close']}d] {_format_forecast_summary(f)} — {f['question_text'][:60]}")
+            no_pid_tag = " [⚠️ NO POST_ID]" if f.get("post_id") is None else ""
+            print(f"    [{f['days_to_close']}d] {_format_forecast_summary(f)} — {f['question_text'][:60]}{no_pid_tag}")
 
     # CHANGED (2026-07-03): stale questions are sorted by soonest
     # resolve/close date; only STALE_REFRESH_CAP are actually queued per
@@ -1968,7 +2041,8 @@ async def main(submit: bool = False):
     for f in stale_preview:
         dtr = _days_until_resolve(f)
         dtr_str = f"{dtr}d to resolve" if dtr is not None else "resolve date unknown"
-        print(f"  [{f['age_days']}d old, {dtr_str}] {_format_forecast_summary(f)} — {f['question_text'][:60]}")
+        no_pid_tag = " [⚠️ NO POST_ID]" if f.get("post_id") is None else ""
+        print(f"  [{f['age_days']}d old, {dtr_str}] {_format_forecast_summary(f)} — {f['question_text'][:60]}{no_pid_tag}")
     if stale_deferred:
         print(f"  ... {len(stale_deferred)} more in reserve, used only if a preview pick above turns out closed")
 
