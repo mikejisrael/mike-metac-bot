@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-07-06T14:02:34.179728+00:00",
+  "checked_at": "2026-07-07T14:02:31.740510+00:00",
   "tournaments": {
     "FutureEval": {
       "tournament_id": 33022,
@@ -35,11 +35,18 @@
       "tournament_id": 33021,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 23,
+      "open_count": 26,
       "forecasted_count": 23,
-      "missing_gated_ids": [],
-      "missing_gated_reasons": {},
-      "missing_real_ids": []
+      "missing_gated_ids": [
+        43345,
+        43492
+      ],
+      "missing_gated_reasons": {
+        "wrong_type": 2
+      },
+      "missing_real_ids": [
+        44369
+      ]
     },
     "Nuclear Risk Horizons": {
       "tournament_id": 1173,
@@ -170,9 +177,10 @@
       "missing_real_ids": []
     }
   },
-  "total_gaps": 0,
-  "total_gated": 66,
+  "total_gaps": 1,
+  "total_gated": 68,
   "total_gated_reasons": {
+    "wrong_type": 2,
     "too_far_out": 66
   },
   "too_far_out_samples": [
