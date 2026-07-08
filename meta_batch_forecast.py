@@ -511,6 +511,20 @@ async def submit_batch(questions: list[BinaryQuestion]) -> str:
 
     print(f"Submitting batch of {len(requests)} requests...")
 
+    # ADDED 2026-07-08: one-time sanity check for the scheduled_close_time
+    # attribute added below (close_times). Prints once per run, not per
+    # question, so it's cheap and won't spam. If this ever prints "NOT
+    # FOUND", the attribute name has drifted on this forecasting_tools
+    # version and close_times will silently save all-None until it's
+    # re-checked against a live object — the same failure mode close_times
+    # was added to fix in the first place, just one level up.
+    if question_map:
+        _sample_q = next(iter(question_map.values()))
+        _has_attr = getattr(_sample_q, "scheduled_close_time", None) is not None
+        print(f"  (close_time attr check: scheduled_close_time = "
+              f"{getattr(_sample_q, 'scheduled_close_time', 'NOT FOUND')}"
+              f"{'  ✅' if _has_attr else '  ⚠️ verify attribute name'})")
+
     batch = client_anthropic.messages.batches.create(requests=requests)
     batch_id = batch.id
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
@@ -558,6 +572,23 @@ async def submit_batch(questions: list[BinaryQuestion]) -> str:
         },
         "resolve_times": {
             custom_id: q.scheduled_resolution_time.isoformat() if q.scheduled_resolution_time else None
+            for custom_id, q in question_map.items()
+        },
+        # ADDED 2026-07-08: separate from resolve_times above. Found live
+        # (Q43615, the Shakira chart-peak question) that close and resolve
+        # dates can diverge by weeks — this one closes 2026-07-15 but
+        # doesn't resolve until 2026-07-31 — and meta_refresh_forecast.py's
+        # CLOSING_SOON bucket was keyed off resolve_time, so it silently
+        # never flagged the question as closing-soon in time to catch it
+        # before the actual close date passed. scheduled_close_time is the
+        # correct field for that check; resolve_times above is left
+        # untouched since other things may still want the resolution date.
+        # Attribute name assumed to mirror scheduled_resolution_time's
+        # naming — VERIFY against a real run (see the one-time debug print
+        # below) before trusting this blindly, same practice as the MC
+        # centers-ordering assumption elsewhere in this codebase.
+        "close_times": {
+            custom_id: q.scheduled_close_time.isoformat() if getattr(q, "scheduled_close_time", None) else None
             for custom_id, q in question_map.items()
         },
         "categories": {

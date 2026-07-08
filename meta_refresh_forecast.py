@@ -416,6 +416,14 @@ def load_all_batches() -> list[dict]:
             question_ids    = batch_info.get("question_ids", {})
             question_texts  = batch_info.get("question_texts", {})
             resolve_times   = batch_info.get("resolve_times", {})
+            # ADDED 2026-07-08: absent entirely from any batch_jobs file
+            # written before meta_batch_forecast.py started saving it —
+            # .get(custom_id) on a missing/empty dict just returns None per
+            # entry below, which find_questions_to_refresh treats as "no
+            # close_time on file, fall back to resolve_time" rather than
+            # crashing. See find_questions_to_refresh for the fallback and
+            # backfill_close_times.py for closing that gap on old files.
+            close_times     = batch_info.get("close_times", {})
             categories      = batch_info.get("categories", {})
             community_preds = batch_info.get("community_predictions", {})
 
@@ -430,6 +438,7 @@ def load_all_batches() -> list[dict]:
                     "question_text":  question_texts.get(custom_id, ""),
                     "submitted_at":   submitted_at,
                     "resolve_time":   resolve_times.get(custom_id),
+                    "close_time":     close_times.get(custom_id),
                     "category":       (categories.get(custom_id) or [""])[0],
                     "community_pred": community_preds.get(custom_id),
                     "probability":    entry.get("probability"),
@@ -540,6 +549,7 @@ def find_questions_to_refresh(
             # what's eligible.
 
         resolve_time_str = f.get("resolve_time")
+        close_time_str   = f.get("close_time")
         submitted_at_str = f.get("submitted_at")
 
         resolve_time = None
@@ -548,6 +558,27 @@ def find_questions_to_refresh(
                 resolve_time = datetime.fromisoformat(resolve_time_str.replace("Z", "+00:00"))
             except Exception:
                 pass
+
+        close_time = None
+        if close_time_str:
+            try:
+                close_time = datetime.fromisoformat(close_time_str.replace("Z", "+00:00"))
+            except Exception:
+                pass
+
+        # CHANGED (2026-07-08): CLOSING_SOON now keys off the real close
+        # date, not resolve_time — see close_times' docstring in
+        # meta_batch_forecast.py for why (Q43615: closes 2026-07-15,
+        # resolves 2026-07-31; a 16-day gap that pushed it entirely outside
+        # the 14-day window and made it invisible until it would have
+        # already been too late). Falls back to resolve_time ONLY for
+        # batch files written before close_times existed — flagged via
+        # used_resolve_fallback so that fallback is never silent (same
+        # "never hide a skip without a reason" pattern as gated/no_post_id
+        # above). Run backfill_close_times.py to close this gap on old
+        # files rather than relying on the fallback long-term.
+        effective_close_time = close_time or resolve_time
+        used_resolve_fallback = close_time is None and resolve_time is not None
 
         submitted_at = None
         if submitted_at_str:
@@ -558,8 +589,10 @@ def find_questions_to_refresh(
             except Exception:
                 pass
 
-        if resolve_time:
-            days_to_close = (resolve_time - now).days
+        if effective_close_time:
+            days_to_close = (effective_close_time - now).days
+            if used_resolve_fallback:
+                f["used_resolve_fallback"] = True
             if 0 <= days_to_close <= CLOSING_SOON_DAYS:
                 # CHANGED (2026-07-03): gate on how recently this was last
                 # refreshed. A question that isn't due yet is genuinely NOT
@@ -1997,11 +2030,21 @@ async def main(submit: bool = False):
     # stale cap below).
     closing_soon = sorted(closing_soon, key=lambda f: f.get("days_to_close", 9999))
 
+    # ADDED 2026-07-08: count of closing_soon entries running on the
+    # resolve_time fallback (no close_times on file yet) — surfaced up
+    # front so old, un-backfilled batch files stay visible as a known gap
+    # rather than a silent one. See backfill_close_times.py.
+    fallback_count = sum(1 for f in closing_soon if f.get("used_resolve_fallback"))
+
     print(f"\n{'='*55}")
     print(f"CLOSING SOON (within {CLOSING_SOON_DAYS} days): {len(closing_soon)} questions — never capped")
+    if fallback_count:
+        print(f"  ⚠️  {fallback_count} of these are using the resolve_time fallback (no close_time on "
+              f"file) — dates may be off; run backfill_close_times.py")
     for f in closing_soon:
         no_pid_tag = " [⚠️ NO POST_ID]" if f.get("post_id") is None else ""
-        print(f"  [{f['days_to_close']}d] {_format_forecast_summary(f)} — {f['question_text'][:60]}{no_pid_tag}")
+        fallback_tag = " [~resolve_time fallback]" if f.get("used_resolve_fallback") else ""
+        print(f"  [{f['days_to_close']}d] {_format_forecast_summary(f)} — {f['question_text'][:60]}{no_pid_tag}{fallback_tag}")
     # CHANGED (2026-07-03): surfaces questions that WOULD be closing-soon
     # eligible but were refreshed too recently (see meta_refresh_gate,
     # MIN_REFRESH_GAP_HOURS). Previously these were silently re-included
@@ -2011,7 +2054,8 @@ async def main(submit: bool = False):
         print(f"  ({len(gated)} more closing-soon but refreshed <{MIN_REFRESH_GAP_HOURS}h ago, skipped this run:)")
         for f in gated_sorted:
             no_pid_tag = " [⚠️ NO POST_ID]" if f.get("post_id") is None else ""
-            print(f"    [{f['days_to_close']}d] {_format_forecast_summary(f)} — {f['question_text'][:60]}{no_pid_tag}")
+            fallback_tag = " [~resolve_time fallback]" if f.get("used_resolve_fallback") else ""
+            print(f"    [{f['days_to_close']}d] {_format_forecast_summary(f)} — {f['question_text'][:60]}{no_pid_tag}{fallback_tag}")
 
     # CHANGED (2026-07-03): stale questions are sorted by soonest
     # resolve/close date; only STALE_REFRESH_CAP are actually queued per

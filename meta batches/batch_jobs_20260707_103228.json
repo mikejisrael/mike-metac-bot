@@ -1,0 +1,31 @@
+{
+  "batch_id": "single_43342_20260707_103228",
+  "submitted_at": "2026-07-07T10:32:28.386488",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43342_20260707_103228": 43342
+  },
+  "post_ids": {
+    "single_43342_20260707_103228": 43343
+  },
+  "question_texts": {
+    "single_43342_20260707_103228": "Will any host nation (USA, Mexico or Canada) reach the semifinals of the 2026 World Cup?"
+  },
+  "original_probabilities": {
+    "single_43342_20260707_103228": 0.79
+  },
+  "refresh_reasons": {
+    "single_43342_20260707_103228": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43342_20260707_103228": null
+  },
+  "resolve_times": {
+    "single_43342_20260707_103228": "2026-07-12T04:00:00+00:00"
+  },
+  "close_times": {
+    "single_43342_20260707_103228": "2026-07-12T17:00:00Z"
+  }
+}

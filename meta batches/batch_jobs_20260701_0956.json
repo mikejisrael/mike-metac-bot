@@ -34,5 +34,9 @@
       "Economy & Business",
       "Geopolitics"
     ]
+  },
+  "close_times": {
+    "q_44250": "2026-08-24T21:00:00Z",
+    "q_44014": "2026-08-16T06:59:00Z"
   }
 }

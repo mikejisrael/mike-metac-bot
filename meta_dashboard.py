@@ -133,31 +133,52 @@ def _parse_result_filename_timestamp(source_file: str):
 
 def load_local_results(dirs: list[str]) -> dict[int, dict]:
     """Merge every batch_results_*.json, keyed by question_id.
-    Most-recently-modified file wins on conflict.
+    Most-recent-forecast file wins on conflict.
+
+    CHANGED (2026-07-08): "most recent" now means the timestamp embedded
+    in the filename (via _parse_result_filename_timestamp), not raw
+    filesystem mtime. Found live (Q43615/Shakira, dashboard showing "last
+    predicted June 29" when the real most recent refresh was July 3):
+    these result files are pulled down via git checkout/pull, and git
+    does NOT preserve original commit timestamps — files get stamped with
+    local checkout/pull time, not the time they were actually written by
+    the pipeline. So two files' mtimes can come out in an order that has
+    nothing to do with which forecast is actually newer, especially after
+    a fresh clone or pull where many files land within the same second.
+    _parse_result_filename_timestamp already existed and was already used
+    for the *display* date below — this was the one place still trusting
+    mtime for the *selection* itself, which is the more consequential of
+    the two (a wrong winner silently drops a real, newer forecast, not
+    just mislabels its date). mtime is now only a fallback for files whose
+    name doesn't match the batch_results_(refresh_)?YYYYMMDD_HHMM pattern
+    (e.g. an old manually-renamed file) — same fallback predicted_at
+    already used, now applied consistently in both places.
 
     Added 2026-07-05: each winning record is stamped with "_source_file"
     and "_source_mtime" so the dashboard can show a "last predicted"
-    date/sort column. Prefers the timestamp embedded in the filename
-    (matches meta_watch.py's own dating convention exactly); falls back
-    to file mtime only if the filename doesn't match that pattern (e.g.
-    an older or manually-renamed file)."""
+    date/sort column."""
     by_qid: dict[int, dict] = {}
-    by_qid_mtime: dict[int, float] = {}
+    by_qid_sort_key: dict[int, float] = {}
     for d in dirs:
         for rf in glob.glob(os.path.join(d, "batch_results_*.json")):
             try:
                 mtime = os.path.getmtime(rf)
+                name_ts = _parse_result_filename_timestamp(rf)
+                # Prefer the filename's own timestamp for deciding the
+                # winner — falls back to mtime only when the filename
+                # doesn't parse, same fallback predicted_at uses below.
+                sort_key = name_ts.timestamp() if name_ts is not None else mtime
                 with open(rf, encoding="utf-8") as f:
                     data = json.load(f)
                 for r in data.values():
                     qid = r.get("question_id")
                     if qid is None:
                         continue
-                    if qid not in by_qid or mtime > by_qid_mtime[qid]:
+                    if qid not in by_qid or sort_key > by_qid_sort_key[qid]:
                         r["_source_file"] = rf
                         r["_source_mtime"] = mtime
                         by_qid[qid] = r
-                        by_qid_mtime[qid] = mtime
+                        by_qid_sort_key[qid] = sort_key
             except Exception as e:
                 print(f"  (skipping unreadable file {rf}: {e})")
     return by_qid
