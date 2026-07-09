@@ -1,0 +1,17 @@
+{
+  "q_44384": {
+    "question_id": 44384,
+    "post_id": 44374,
+    "question_text": "How many ETFs will Vanguard have on September 1, 2026?",
+    "question_type": "multiple_choice",
+    "status": "success",
+    "submitted_forecast": {
+      "Less than 116": 0.08,
+      "Exactly 116": 0.45,
+      "Exactly 117": 0.35,
+      "Greater than 117": 0.12
+    },
+    "reasoning": "# Analysis\n\n## (a) Time left until resolution\nFrom July 9, 2026 to September 1, 2026: **54 days** (roughly 7.7 weeks)\n\n## (b) Most likely outcome and why\n\nAccording to the CURRENT RESEARCH, Vanguard had **115 ETFs as of early July 2026**. The background mentions that on June 4, 2026, Vanguard launched a U.S. High-Yield Corporate Bond Index ETF. This suggests the 115 count may already incorporate that launch.\n\nThe resolution criteria note that as of June 23, 2026, the source showed \"116 results\" \u2014 this is higher than the \"115\" stated in the research summary from early July. This apparent discrepancy suggests either:\n1. The counts may vary by source or update timing\n2. There may have been additional launches between June 23 and early July\n\nGiven we're now at July 9, 2026 with ~54 days until resolution, the key question is: **how many new Vanguard ETFs will launch in the next two months?**\n\n**Historical context on ETF launch rates:**\n- The research mentions industry-wide ETF launches were 370 by May 2026 vs. 290 in the same period in 2025\n- However, Vanguard is a much more conservative launcher than the industry average\n- Vanguard typically launches ETFs on a measured schedule, not continuously\n\n**Most likely scenario:**\nVanguard will likely launch 0\u20132 new ETFs in the 54-day window to September 1. This is based on:\n- Their historical conservatism vs. industry pace\n- A 2-month window is relatively short for ETF product development and regulatory approval\n- No specific announcements of imminent launches appear in the provided research\n\nIf the current count is 115\u2013116, the most likely outcomes are:\n- **116 (exact)** \u2014 if the current count is already 116 and no new launches occur\n- **117 (exact)** \u2014 if exactly one new ETF launches\n- **Greater than 117** \u2014 if 2+ new ETFs launch (less likely)\n- **Less than 116** \u2014 very unlikely (would require a recount/correction downward)\n\n## (c) Key uncertainties\n\n1. **Exact current count**: The research states 115 as of early July, but the resolution criteria reference 116 as of June 23. Which is the true baseline?\n2. **Launch pipeline**: No specific information on upcoming Vanguard ETF launches in the next 54 days\n3. **Recount/correction risk**: Small possibility the count could be adjusted downward if Vanguard delists an ETF or the website count is corrected\n4. **Definition of \"open\"**: The resolution uses a filtered list (\"open\" ETFs), which could affect the count if any ETFs transition status\n\n---\n\n## Option probabilities:\n\nGiven the baseline of ~115\u2013116 and a 54-day window, I expect:\n- **Less than 116**: 8% (recount/delisting unlikely but possible)\n- **Exactly 116**: 45% (assuming current count is 116 and no launches)\n- **Exactly 117**: 35% (one new launch most probable if baseline is 116)\n- **Greater than 117**: 12% (two or more launches less likely but plausible)\n\nOption probabilities:\nLess than 116: 8%\nExactly 116: 45%\nExactly 117: 35%\nGreater than 117: 12%",
+    "community_prediction": null
+  }
+}
