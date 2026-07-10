@@ -1,12 +1,12 @@
 {
-  "checked_at": "2026-07-09T14:02:34.920993+00:00",
+  "checked_at": "2026-07-10T14:02:22.786606+00:00",
   "tournaments": {
     "FutureEval": {
       "tournament_id": 33022,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 0,
-      "forecasted_count": 0,
+      "open_count": 1,
+      "forecasted_count": 1,
       "missing_gated_ids": [],
       "missing_gated_reasons": {},
       "missing_real_ids": []
