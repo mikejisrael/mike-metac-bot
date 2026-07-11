@@ -1,76 +1,55 @@
 """
-diag_shakira_43615.py — one-off diagnostic, delete after use.
-
-Checks two things about the "Dai Dai vs Waka Waka" question:
-1. What resolve_time is actually stored locally for post_id 43612/43615,
-   vs. the real close_time/scheduled_close_time on the live API. This
-   confirms/refutes the "closing_soon bucket keys off the wrong field"
-   theory.
-2. Whether 43612 and 43615 are the same underlying question posted
-   twice (like the Housing Act case, 2026-07-04) or genuinely unrelated.
+test3.py — ground truth check. Both project=33066 and
+allowed_tournaments=[33066] returned 0 questions, via the raw endpoint AND
+the forecasting_tools library — so 33066 likely isn't the right ID (or
+isn't populated the way we expect). Rather than keep guessing IDs, fetch
+one KNOWN question directly (grab its numeric ID from the URL of an
+actual open question on the Market Pulse 26Q3 page in your browser) and
+print its full `projects` field — that'll show the real project id/slug/
+type for Market Pulse directly from the source of truth.
 
 Usage:
-  python diag_shakira_43615.py
+    python test3.py <question_id>
+
+Example: if the question URL is metaculus.com/questions/44601/some-slug/
+that means:
+    python test3.py 44601
 """
 
-import glob
-import json
 import os
+import sys
+import json
+import requests
+from dotenv import load_dotenv
 
-BATCH_DIR = "batches"  # adjust if your batch_jobs files live elsewhere
+load_dotenv()
 
+if len(sys.argv) < 2:
+    raise SystemExit("Usage: python test3.py <question_id>\n"
+                      "Grab the numeric ID from the URL of an open question "
+                      "on the Market Pulse 26Q3 tournament page.")
 
-def scan_local_batches():
-    print("=== LOCAL BATCH FILES ===")
-    job_files = (
-        glob.glob(os.path.join(BATCH_DIR, "batch_jobs_2*.json")) +
-        glob.glob(os.path.join(BATCH_DIR, "batch_jobs_refresh_*.json"))
-    )
-    for jf in sorted(job_files):
-        try:
-            with open(jf) as f:
-                data = json.load(f)
-        except Exception as e:
-            print(f"  (skip {jf}: {e})")
-            continue
+question_id = sys.argv[1]
 
-        post_ids = data.get("post_ids", {})
-        resolve_times = data.get("resolve_times", {})
-        q_texts = data.get("question_texts", {})
-        q_ids = data.get("question_ids", {})
+TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN") or os.getenv("METACULUS_TOKEN")
+if not TOKEN:
+    raise SystemExit("No METAC_TOURNAMENT_TOKEN or METACULUS_TOKEN found in .env")
 
-        for cid, pid in post_ids.items():
-            if pid in (43612, 43615):
-                print(f"\n  file: {jf}")
-                print(f"  custom_id: {cid}")
-                print(f"  post_id: {pid}")
-                print(f"  question_id: {q_ids.get(cid)}")
-                print(f"  resolve_time (stored): {resolve_times.get(cid)}")
-                print(f"  text: {q_texts.get(cid, '')[:80]}")
+headers = {"Authorization": f"Token {TOKEN}"}
 
+resp = requests.get(
+    f"https://www.metaculus.com/api2/questions/{question_id}/",
+    headers=headers,
+    timeout=30,
+)
+print(f"HTTP {resp.status_code}")
+resp.raise_for_status()
+data = resp.json()
 
-def check_live(post_id: int):
-    import requests
-    from dotenv import load_dotenv
-    load_dotenv()
-    token = os.getenv("METAC_TOURNAMENT_TOKEN") or os.getenv("METACULUS_TOKEN")
-    headers = {"Authorization": f"Token {token}"} if token else {}
-    url = f"https://www.metaculus.com/api2/questions/{post_id}/"
-    r = requests.get(url, headers=headers, timeout=15)
-    print(f"\n=== LIVE API: post_id {post_id} (status {r.status_code}) ===")
-    if r.status_code != 200:
-        print(f"  {r.text[:300]}")
-        return
-    d = r.json()
-    print(f"  id: {d.get('id')}")
-    print(f"  title: {d.get('title', '')[:80]}")
-    # field names vary by API version — print anything close-related
-    for key in d:
-        if "close" in key.lower() or "resolve" in key.lower():
-            print(f"  {key}: {d[key]}")
+print(f"\nTitle: {data.get('title')}")
+print(f"Question type: {(data.get('question') or data).get('type')}")
+print(f"Is this a group-of-questions container? "
+      f"{'group_of_questions' in data or data.get('group_of_questions') is not None}")
 
-
-if __name__ == "__main__":
-    scan_local_batches()
-    check_live(43612)
-    check_live(43615)
+print(f"\n--- Full 'projects' field ---")
+print(json.dumps(data.get("projects", {}), indent=2))

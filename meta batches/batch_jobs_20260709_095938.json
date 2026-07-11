@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43430_20260709_095938",
+  "submitted_at": "2026-07-09T09:59:38.113433",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43430_20260709_095938": 43430
+  },
+  "post_ids": {
+    "single_43430_20260709_095938": 43435
+  },
+  "question_texts": {
+    "single_43430_20260709_095938": "Will Pope Leo XIV visit another country other than Spain before September 2026?"
+  },
+  "original_probabilities": {
+    "single_43430_20260709_095938": 0.18
+  },
+  "refresh_reasons": {
+    "single_43430_20260709_095938": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43430_20260709_095938": null
+  },
+  "resolve_times": {
+    "single_43430_20260709_095938": "2026-09-01T11:00:00+00:00"
+  }
+}

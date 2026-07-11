@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43603_20260709_100731",
+  "submitted_at": "2026-07-09T10:07:31.726998",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43603_20260709_100731": 43603
+  },
+  "post_ids": {
+    "single_43603_20260709_100731": 43606
+  },
+  "question_texts": {
+    "single_43603_20260709_100731": "Will a case of Bundibugyo Ebola disease be first confirmed in the US before 2027?"
+  },
+  "original_probabilities": {
+    "single_43603_20260709_100731": 0.012
+  },
+  "refresh_reasons": {
+    "single_43603_20260709_100731": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43603_20260709_100731": null
+  },
+  "resolve_times": {
+    "single_43603_20260709_100731": "2027-01-01T01:00:00+00:00"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43612_20260709_100231",
+  "submitted_at": "2026-07-09T10:02:31.570070",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43612_20260709_100231": 43612
+  },
+  "post_ids": {
+    "single_43612_20260709_100231": 43615
+  },
+  "question_texts": {
+    "single_43612_20260709_100231": "Will Shakira's \"Dai Dai\" outpeak Shakira's \"Waka Waka\" on the Billboard Hot 100?"
+  },
+  "original_probabilities": {
+    "single_43612_20260709_100231": 0.28
+  },
+  "refresh_reasons": {
+    "single_43612_20260709_100231": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43612_20260709_100231": null
+  },
+  "resolve_times": {
+    "single_43612_20260709_100231": "2026-07-31T22:00:00+00:00"
+  }
+}

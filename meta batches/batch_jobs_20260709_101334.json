@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43716_20260709_101334",
+  "submitted_at": "2026-07-09T10:13:34.065707",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43716_20260709_101334": 43716
+  },
+  "post_ids": {
+    "single_43716_20260709_101334": 43688
+  },
+  "question_texts": {
+    "single_43716_20260709_101334": "Will the Federal Reserve raise the federal funds target range before July 30, 2026?"
+  },
+  "original_probabilities": {
+    "single_43716_20260709_101334": 0.28
+  },
+  "refresh_reasons": {
+    "single_43716_20260709_101334": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43716_20260709_101334": null
+  },
+  "resolve_times": {
+    "single_43716_20260709_101334": "2026-07-30T00:00:00+00:00"
+  }
+}
