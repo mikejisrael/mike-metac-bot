@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43501_20260712_102103",
+  "submitted_at": "2026-07-12T10:21:03.077001",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43501_20260712_102103": 43501
+  },
+  "post_ids": {
+    "single_43501_20260712_102103": 43494
+  },
+  "question_texts": {
+    "single_43501_20260712_102103": "Will any U.S. state or EU member state restrict large-scale data center grid connections before September 2026?"
+  },
+  "original_probabilities": {
+    "single_43501_20260712_102103": 0.28
+  },
+  "refresh_reasons": {
+    "single_43501_20260712_102103": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43501_20260712_102103": null
+  },
+  "resolve_times": {
+    "single_43501_20260712_102103": "2026-09-02T15:00:00+00:00"
+  }
+}

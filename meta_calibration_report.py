@@ -143,7 +143,20 @@ def run_calibration_report():
     try:
         questions = asyncio.run(
             client.get_questions_matching_filter(
-                ApiFilter(is_previously_forecasted_by_user=True),
+                # CHANGED (2026-07-13): added group_question_mode=
+                # "unpack_subquestions" — without it (default "exclude"),
+                # Market Pulse's group_of_questions sub-questions would be
+                # silently excluded from this fetch entirely, same bug
+                # already found and fixed this week in meta_dashboard.py
+                # and meta_coverage_check.py. Calibration CURVES stay
+                # binary-only regardless (per the module docstring — that
+                # part of Market Pulse genuinely doesn't apply, it's all
+                # numeric), but score_scatter/average_peer_score/
+                # questions_scored aggregate every type once resolved, and
+                # would have silently missed Market Pulse questions there
+                # without this fix.
+                ApiFilter(is_previously_forecasted_by_user=True,
+                          group_question_mode="unpack_subquestions"),
                 num_questions=1000,
                 error_if_question_target_missed=False,
             )

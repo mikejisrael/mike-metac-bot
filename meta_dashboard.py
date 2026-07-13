@@ -39,6 +39,7 @@ Then open http://localhost:5002
 """
 
 import os
+import re
 import glob
 import json
 import asyncio
@@ -67,19 +68,21 @@ personal_client = MetaculusClient(token=PERSONAL_TOKEN) if PERSONAL_TOKEN else N
 print(f"Bot client:      {'ready' if bot_client      else '⚠️  METAC_TOURNAMENT_TOKEN not set'}")
 print(f"Personal client: {'ready' if personal_client else '⚠️  METACULUS_TOKEN not set'}")
 
-LOCAL_RESULT_DIRS = ["tournament_batches", "Meta batches"]
+LOCAL_RESULT_DIRS = ["tournament_batches", "tournament_batches_v2", "Meta batches"]
 
 TOURNAMENT_LABELS = {
     33022: "FutureEval",
     32880: "ACX2026",
      1756: "Climate Tipping Points",
     33021: "Metaculus Cup",
+    33066: "Market Pulse Challenge 26Q3",  # added 2026-07-12 alongside group-row support
 }
 PERSONAL_LABEL = "Personal"
 OTHER_LABEL    = "Other"
 UNKNOWN_LABEL  = "Unknown"
 TOURNAMENT_ORDER = [
     "FutureEval", "ACX2026", "Climate Tipping Points", "Metaculus Cup",
+    "Market Pulse Challenge 26Q3",
     PERSONAL_LABEL, OTHER_LABEL, UNKNOWN_LABEL,
 ]
 
@@ -309,9 +312,20 @@ def fetch_predicted_questions(client, label: str) -> dict[int, dict]:
             print(f"  fetch_predicted_questions [{label}] pass failed: {e}")
             return []
 
-    for q in _run(ApiFilter(is_previously_forecasted_by_user=True)):
+    # FIXED (2026-07-12): both ApiFilter calls previously had no
+    # group_question_mode, which defaults to "exclude" — confirmed via
+    # forecasting_tools source inspection (2026-07-10 session). This
+    # silently dropped every Market Pulse group_of_questions sub-question
+    # from bot_live entirely, which would have made every Market Pulse row
+    # show live_match_found=False -> status "Withdrawn", despite being
+    # genuinely open and forecast. "unpack_subquestions" makes each
+    # sub-question come back as its own normal object, same as the fetch
+    # fix already applied in tournament_forecast_v2.py.
+    for q in _run(ApiFilter(is_previously_forecasted_by_user=True,
+                             group_question_mode="unpack_subquestions")):
         by_qid[q.id_of_question] = q.api_json
-    for q in _run(ApiFilter(is_previously_forecasted_by_user=True, allowed_statuses=["resolved"])):
+    for q in _run(ApiFilter(is_previously_forecasted_by_user=True, allowed_statuses=["resolved"],
+                             group_question_mode="unpack_subquestions")):
         by_qid.setdefault(q.id_of_question, q.api_json)
 
     print(f"  fetch_predicted_questions [{label}]: {len(by_qid)} unique questions")
@@ -607,6 +621,159 @@ def _make_row(qid, local_r, post, is_personal_only=False, refresh_state: dict | 
     }
 
 
+def _make_group_row(post_id: int, members: list[dict]) -> dict:
+    """Collapses N sub-question rows sharing one post_id (a Market
+    Pulse-style group_of_questions post — sharing a post_id is itself a
+    reliable "this is a group" signal, since Metaculus never gives two
+    independent standalone questions the same post_id) into a single
+    summary row for the main table.
+
+    Individual member data is NOT lost — full member rows stay available
+    via data['groups_by_post_id'][post_id] for the /group/<post_id>
+    detail page. This function only builds the aggregate summary shown
+    in the collapsed table row itself.
+
+    Column choices confirmed with Mike 2026-07-12:
+      - Status: compact aggregate, e.g. "5 open, 1 closed"
+      - Submitted: comma-separated per-member forecast summaries
+      - Peer score: average across members that HAVE a score (open/
+        unresolved members contribute nothing, not a zero — otherwise the
+        average would be dragged down by not-yet-scored questions)
+    """
+    # Common title: strip each member's trailing "(date range)" suffix —
+    # same regex approach used for the ntfy alert grouping in
+    # tournament_forecast_v2.py — then take whichever stripped title is
+    # most common (should be identical across all members in practice;
+    # `most common` is just a defensive tie-breaker, not expected to
+    # matter in normal operation).
+    titles = [re.sub(r"\s*\([^)]*\)\s*$", "", m["question_text"]).strip() or m["question_text"]
+              for m in members]
+    common_title = max(set(titles), key=titles.count)
+
+    members_sorted = sorted(members, key=lambda m: m["question_id"])
+
+    status_counts: dict[str, int] = {}
+    for m in members:
+        status_counts[m["status_bucket"]] = status_counts.get(m["status_bucket"], 0) + 1
+    status_agg = ", ".join(
+        f"{status_counts[s]} {STATUS_LABELS[s].lower()}"
+        for s in STATUS_ORDER if status_counts.get(s)
+    )
+    # Overall bucket for THIS row, so the Status filter pills behave
+    # sensibly against group rows too: "open" if ANY member still needs
+    # attention, else whichever status is present, in STATUS_ORDER.
+    overall_bucket = "open" if status_counts.get("open") else next(
+        (s for s in STATUS_ORDER if status_counts.get(s)), "not_found_live"
+    )
+
+    submitted_list = ", ".join(
+        m["submitted_summary"] for m in members_sorted if m["submitted_summary"] != "—"
+    )
+
+    scored = [m["peer_score"] for m in members if m["peer_score"] is not None]
+    avg_peer = (sum(scored) / len(scored)) if scored else None
+
+    predicted_candidates = [m["predicted_at_ts"] for m in members if m["predicted_at_ts"] is not None]
+    predicted_at_ts = max(predicted_candidates) if predicted_candidates else None
+    predicted_at = (
+        datetime.fromtimestamp(predicted_at_ts / 1000, tz=timezone.utc).isoformat()
+        if predicted_at_ts is not None else None
+    )
+
+    # Search needs to reach into EVERY member's own text/id — a search for
+    # e.g. "Jul 13" or a specific question_id lives on a member, not the
+    # group's own (de-suffixed) title, so the group row must still match.
+    # FIXED (2026-07-12, confirmed live via jsdom test): this previously
+    # omitted post_id itself — searching "44536" (the exact number shown
+    # in this row's own ID column) returned zero results, since only
+    # MEMBER question_ids (44691-44696) were included, never the group's
+    # own post_id. post_id is now prepended explicitly.
+    search_blob = (f"{post_id} " + " ".join(
+        f"{m['question_text']} {m['question_id']}" for m in members
+    )).lower()
+
+    exclusion_reasons = sorted({m["refresh_exclusion_reason"] for m in members if m["refresh_exclusion_reason"]})
+
+    return {
+        "is_group":          True,
+        # Reuses the existing "question_id" slot for sorting/the ID
+        # column/detail-link plumbing — post_id IS this row's identity,
+        # consistent with the post_id-first-column change applied
+        # everywhere else in this file.
+        "question_id":       post_id,
+        "post_id":           post_id,
+        "question_text":     common_title,
+        "question_type":     members[0]["question_type"] if members else None,
+        "submitted_summary": submitted_list or "—",
+        "submitted_sort":    None,  # not a single comparable number — sorts last, same convention as MC/numeric rows
+        "cp_summary":        "—",  # per-member CP aggregation isn't meaningful the same way group peer score is — kept simple
+        "cp_available":      False,
+        "resolved":          bool(members) and all(m["resolved"] for m in members),
+        "resolution":        None,
+        "resolve_time":      None,
+        "resolve_time_ts":   None,
+        "peer_score":        avg_peer,
+        "baseline_score":    None,
+        "close_time":        None,
+        "api_status":        None,
+        "live_match_found":  any(m["live_match_found"] for m in members),
+        "tournaments":       members[0]["tournaments"] if members else [],
+        "is_personal_only":  False,
+        "reasoning": "", "research_text": "", "research_source": None, "refresh_reason": "",
+        "original_prob":     None,
+        "predicted_at":      predicted_at,
+        "predicted_at_ts":   predicted_at_ts,
+        "is_refresh_candidate": any(m["is_refresh_candidate"] for m in members),
+        "refresh_alert_reasons": sorted({reason for m in members for reason in m["refresh_alert_reasons"]}),
+        "is_refresh_excluded": bool(members) and all(m["is_refresh_excluded"] for m in members),
+        "refresh_exclusion_reason": "; ".join(exclusion_reasons),
+        "status_bucket":     overall_bucket,
+        "status_label":      status_agg or STATUS_LABELS[overall_bucket],
+        "member_question_ids": [m["question_id"] for m in members_sorted],
+        "member_count":      len(members),
+        "search_blob":       search_blob,
+    }
+
+
+def collapse_groups(flat_rows: list[dict]) -> tuple[list[dict], dict[int, list[dict]]]:
+    """Splits flat_rows into (table_rows, groups_by_post_id):
+      - table_rows: what the main table actually renders — any post_id
+        shared by >1 row becomes ONE group summary row; everything else
+        (every non-Market-Pulse question, and any group with exactly one
+        currently-visible member) passes through unchanged.
+      - groups_by_post_id: post_id -> full list of that group's member
+        rows, for the /group/<post_id> detail page. NOT limited to
+        collapsed groups' members only — kept as a straightforward full
+        index so the detail route doesn't need special-casing.
+
+    Called AFTER status_counts/avg_score/chart data/etc. are already
+    computed from flat_rows elsewhere in build_dashboard_data() — those
+    stats intentionally stay based on the full individual-question set,
+    not collapsed groups, so e.g. the "Open (23)" status pill count
+    means 23 actual questions, not 23 groups-with-an-open-member."""
+    by_post_id: dict[int, list[dict]] = {}
+    for r in flat_rows:
+        if r["post_id"] is not None:
+            by_post_id.setdefault(r["post_id"], []).append(r)
+
+    group_post_ids = {pid for pid, members in by_post_id.items() if len(members) > 1}
+
+    table_rows = []
+    for r in flat_rows:
+        if r["post_id"] in group_post_ids:
+            continue  # replaced by its group row, added once below
+        table_rows.append(r)
+    for pid in group_post_ids:
+        table_rows.append(_make_group_row(pid, by_post_id[pid]))
+
+    # Group rows get appended after the loop above, so re-sort to restore
+    # the same default ID-descending order flat_rows already had — matches
+    # the sort already applied to `rows` before this function is called.
+    table_rows.sort(key=lambda r: r["question_id"], reverse=True)
+
+    return table_rows, by_post_id
+
+
 # ─── Data assembly ────────────────────────────────────────────────────────────
 def build_dashboard_data():
     local          = load_local_results(LOCAL_RESULT_DIRS)
@@ -725,8 +892,17 @@ def build_dashboard_data():
     personal_open_count = sum(1 for r in personal_rows if r["status_bucket"] == "open")
     personal_finish_line = len(personal_rows) > 0 and personal_open_count == 0
 
+    # NEW (2026-07-12): collapse Market-Pulse-style group_of_questions
+    # sub-questions into one summary row per group for the TABLE only —
+    # every stat above (status_counts, avg_score, chart, tournaments_present,
+    # refresh_candidate_count, personal_*) intentionally stays computed on
+    # the full flat `rows` list, not the collapsed one, so e.g. "Open (23)"
+    # means 23 actual questions, not 23 groups-with-an-open-member.
+    table_rows, groups_by_post_id = collapse_groups(rows)
+
     data = {
-        "rows":                rows,
+        "rows":                table_rows,
+        "groups_by_post_id":   groups_by_post_id,
         "phase0":              phase0,
         "openrouter_balance":  openrouter_balance,
         "refresh_candidate_count": refresh_candidate_count,
@@ -916,6 +1092,10 @@ PAGE_TEMPLATE = """
   {% endif %}
 
   <div class="filter-bar">
+    <div class="filter-group-label">Search</div>
+    <input type="text" id="searchBox" placeholder="Search question text or ID…"
+           style="width:100%;max-width:400px;padding:7px 10px;border:1px solid #ddd;
+                  border-radius:6px;font-size:13px;margin-bottom:12px;box-sizing:border-box;">
     <div class="filter-group-label">Tournament</div>
     <div class="pills" id="tournamentPills">
       {% for t in data.tournaments_present %}
@@ -967,6 +1147,7 @@ PAGE_TEMPLATE = """
           class="{{ 'refresh-candidate' if row.is_refresh_candidate else '' }}"
           data-tournaments="{{ row.tournaments|join(',') }}" data-status="{{ row.status_bucket }}"
           data-refresh="{{ 'true' if row.is_refresh_candidate else 'false' }}"
+          data-search="{{ (row.search_blob if row.is_group else (row.question_text ~ ' ' ~ row.question_id ~ ' ' ~ (row.post_id or '')))|lower|e }}"
           data-sort-id="{{ row.question_id }}"
           data-sort-question="{{ row.question_text|lower|e }}"
           data-sort-type="{{ row.question_type or '' }}"
@@ -980,9 +1161,9 @@ PAGE_TEMPLATE = """
         <td>
           {% if row.post_id %}
             <a class="id-link" href="https://www.metaculus.com/questions/{{ row.post_id }}/" target="_blank"
-               title="Open on Metaculus">{{ row.question_id }}</a>
+               title="Open on Metaculus">{{ row.post_id }}</a>
           {% else %}
-            {{ row.question_id }}
+            {{ row.post_id or row.question_id }}
           {% endif %}
           {% if row.is_refresh_candidate %}
             <span class="refresh-badge" title="Refresh candidate: {{ row.refresh_alert_reasons|join(', ') }}">🔄</span>
@@ -991,7 +1172,10 @@ PAGE_TEMPLATE = """
             <span class="refresh-badge" title="Permanently excluded from refresh: {{ row.refresh_exclusion_reason }}">🚫</span>
           {% endif %}
         </td>
-        <td>{{ row.question_text[:70] }}</td>
+        <td>
+          {% if row.is_group %}<span title="Group of {{ row.member_count }} sub-questions">🗂️</span>{% endif %}
+          {{ row.question_text[:70] }}{% if row.is_group %} <span class="muted" style="font-size:11px;">({{ row.member_count }})</span>{% endif %}
+        </td>
         <td>{{ row.question_type or '—' }}</td>
         <td class="truncate" title="{{ row.submitted_summary }}">{{ row.submitted_summary }}</td>
         <td>{{ row.predicted_at[:10] if row.predicted_at else '—' }}</td>
@@ -1002,7 +1186,13 @@ PAGE_TEMPLATE = """
           {{ '%.2f'|format(row.peer_score) if row.peer_score is not none else (row.resolved and '?' or '—') }}
         </td>
         <td>{% for t in row.tournaments %}<span class="tag {{ 'personal' if t == 'Personal' else '' }}">{{ t }}</span>{% endfor %}</td>
-        <td><a class="detail-link" href="/detail/{{ row.question_id }}" target="_blank">detail</a></td>
+        <td>
+          {% if row.is_group %}
+            <a class="detail-link" href="/group/{{ row.post_id }}" target="_blank">detail</a>
+          {% else %}
+            <a class="detail-link" href="/detail/{{ row.question_id }}" target="_blank">detail</a>
+          {% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>
@@ -1025,7 +1215,7 @@ PAGE_TEMPLATE = """
     function saveFilters() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         t: [...getSelected('tournamentPills')], s: [...getSelected('statusPills')],
-        g: [...getSelected('signalPills')]
+        g: [...getSelected('signalPills')], q: document.getElementById('searchBox').value
       }));
     }
     function restoreFilters() {
@@ -1043,6 +1233,7 @@ PAGE_TEMPLATE = """
           const el = document.querySelector('#signalPills .pill[data-value="' + CSS.escape(v) + '"]');
           if (el) el.classList.add('active');
         });
+        if (saved.q) document.getElementById('searchBox').value = saved.q;
       } catch(e) {}
     }
     function filterPoints(points, selT) {
@@ -1170,13 +1361,20 @@ PAGE_TEMPLATE = """
       const selS = getSelected('statusPills');
       const selG = getSelected('signalPills');
       const onlyRefreshCandidates = selG.has('refresh_candidate');
+      const searchTerm = document.getElementById('searchBox').value.trim().toLowerCase();
       const matched = [];
       document.querySelectorAll('#rowsTable tbody tr').forEach(tr => {
         const tours = tr.dataset.tournaments.split(',');
         const tMatch = selT.size === 0 || tours.some(t => selT.has(t));
         const sMatch = selS.size === 0 || selS.has(tr.dataset.status);
         const gMatch = !onlyRefreshCandidates || tr.dataset.refresh === 'true';
-        if (tMatch && sMatch && gMatch) matched.push(tr); else tr.style.display = 'none';
+        // data-search is pre-lowercased at render time (Jinja |lower filter) —
+        // for a group row it's the search_blob (every member's own text/id
+        // concatenated), so searching a specific sub-question's date range or
+        // question_id still surfaces its parent group row, even though that
+        // text isn't in the group's own (de-suffixed) title.
+        const qMatch = !searchTerm || tr.dataset.search.includes(searchTerm);
+        if (tMatch && sMatch && gMatch && qMatch) matched.push(tr); else tr.style.display = 'none';
       });
 
       const totalPages = Math.max(1, Math.ceil(matched.length / PAGE_SIZE));
@@ -1204,8 +1402,12 @@ PAGE_TEMPLATE = """
     document.querySelectorAll('.pill').forEach(p =>
       p.addEventListener('click', () => { p.classList.toggle('active'); saveFilters(); currentPage = 1; applyFilters(); })
     );
+    document.getElementById('searchBox').addEventListener('input', () => {
+      saveFilters(); currentPage = 1; applyFilters();
+    });
     document.getElementById('clearFilters').addEventListener('click', () => {
       document.querySelectorAll('.pill.active').forEach(p => p.classList.remove('active'));
+      document.getElementById('searchBox').value = '';
       saveFilters(); currentPage = 1; applyFilters();
     });
     restoreFilters();
@@ -1376,6 +1578,87 @@ DETAIL_TEMPLATE = """
 </html>
 """
 
+GROUP_TEMPLATE = """
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ group_title }} — Group</title>
+  <style>
+    body { font-family: -apple-system, Segoe UI, Arial, sans-serif; margin: 0; padding: 32px;
+           background: #f7f8fa; color: #1a1a1a; max-width: 900px; }
+    h1 { font-size: 18px; margin: 0 0 6px; line-height: 1.4; }
+    .back { font-size: 13px; color: #888; margin-bottom: 20px; display: block; }
+    .meta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; font-size: 13px; }
+    .badge { background: #eef0f3; color: #555; border-radius: 4px; padding: 2px 8px; }
+    .badge.status-open { background: #dcfce7; color: #166534; }
+    .badge.status-closed { background: #fef9c3; color: #854d0e; }
+    .badge.status-resolved { background: #dbeafe; color: #1e40af; }
+    section { background: white; border-radius: 8px; padding: 20px 24px; margin-bottom: 16px;
+              box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    section h2 { font-size: 13px; color: #999; text-transform: uppercase; letter-spacing: .04em;
+                 margin: 0 0 12px; font-weight: 600; }
+    .pos { color: #16a34a; } .neg { color: #dc2626; }
+    .members-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .members-table th, .members-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; }
+    .members-table th { color: #999; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+    .members-table a { color: #2563eb; text-decoration: none; }
+    .members-table a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <a class="back" href="/">← Back to dashboard</a>
+  <h1>
+    🗂️
+    {% if post_id %}
+      <a href="https://www.metaculus.com/questions/{{ post_id }}/" target="_blank"
+         style="color:inherit;text-decoration:none;border-bottom:1px solid #ccc;">{{ group_title }}</a>
+    {% else %}
+      {{ group_title }}
+    {% endif %}
+  </h1>
+
+  <div class="meta-row">
+    <span class="badge">Group post {{ post_id }}</span>
+    <span class="badge">{{ members|length }} sub-questions</span>
+    {% for t in tournaments %}
+    <span class="badge">{{ t }}</span>
+    {% endfor %}
+  </div>
+
+  <section>
+    <h2>Sub-questions</h2>
+    <table class="members-table">
+      <thead>
+        <tr>
+          <th>Period</th>
+          <th>Status</th>
+          <th>Submitted</th>
+          <th>Peer score</th>
+          <th>Last predicted</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in members %}
+        <tr>
+          <td>{{ m.period_label }}</td>
+          <td><span class="badge status-{{ m.status_class }}">{{ m.status_label }}</span></td>
+          <td>{{ m.submitted_summary }}</td>
+          <td class="{{ 'pos' if m.peer_score and m.peer_score > 0 else ('neg' if m.peer_score and m.peer_score < 0 else '') }}">
+            {{ '%.2f'|format(m.peer_score) if m.peer_score is not none else '—' }}
+          </td>
+          <td>{{ m.predicted_at[:10] if m.predicted_at else '—' }}</td>
+          <td><a href="/detail/{{ m.question_id }}" target="_blank">detail</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</body>
+</html>
+"""
+
 LOADING_TEMPLATE = """
 <!DOCTYPE html><html><head><meta charset="utf-8"><title>Loading…</title>
 <meta http-equiv="refresh" content="3"></head>
@@ -1419,8 +1702,18 @@ def detail(question_id):
     if data is None:
         return render_template_string(LOADING_TEMPLATE, cache_error=CACHE["error"])
 
-    # Find the row for this question
+    # Find the row for this question. Direct lookup covers every
+    # standalone question and any group's OWN post_id (shouldn't normally
+    # be dereferenced directly, but harmless if it is). Group MEMBER rows
+    # (2026-07-12+) are no longer in data["rows"] directly — they were
+    # collapsed into their group's summary row — so fall back to
+    # searching every group's member list before giving up.
     row = next((r for r in data["rows"] if r["question_id"] == question_id), None)
+    if row is None:
+        for members in data.get("groups_by_post_id", {}).values():
+            row = next((m for m in members if m["question_id"] == question_id), None)
+            if row is not None:
+                break
     if row is None:
         return f"Question {question_id} not found in dashboard data.", 404
 
@@ -1465,6 +1758,60 @@ def detail(question_id):
         refresh_exclusion_reason=row["refresh_exclusion_reason"],
         prediction_history=prediction_history,
         raw_json=json.dumps(raw, indent=2, default=str),
+    )
+
+
+_STATUS_CLASS_MAP = {
+    "open": "open",
+    "closed_unresolved": "closed",
+    "resolved_scored": "resolved",
+    "resolved_unscored": "resolved",
+    "not_found_live": "closed",
+}
+
+
+@app.route("/group/<int:post_id>")
+def group_detail(post_id):
+    with CACHE_LOCK:
+        data = CACHE["data"]
+    if data is None:
+        return render_template_string(LOADING_TEMPLATE, cache_error=CACHE["error"])
+
+    members = data.get("groups_by_post_id", {}).get(post_id)
+    if not members:
+        return f"Group post {post_id} not found in dashboard data.", 404
+
+    members_sorted = sorted(members, key=lambda m: m["question_id"])
+    # Common title (same de-suffixing as _make_group_row) for the page
+    # heading — recomputed here rather than stored, since it's cheap and
+    # keeps this route self-contained.
+    titles = [re.sub(r"\s*\([^)]*\)\s*$", "", m["question_text"]).strip() or m["question_text"]
+              for m in members_sorted]
+    group_title = max(set(titles), key=titles.count)
+
+    members_view = []
+    for m in members_sorted:
+        # Period label: whatever's inside the trailing "(...)" that
+        # _make_group_row strips off to build the common title — e.g.
+        # "Jul 13 - Jul 24". Falls back to the full question text if a
+        # member genuinely has no such suffix (shouldn't happen for a
+        # real group, but better than showing nothing).
+        match = re.search(r"\(([^)]*)\)\s*$", m["question_text"])
+        period_label = match.group(1) if match else m["question_text"][:40]
+        members_view.append({
+            **m,
+            "period_label": period_label,
+            "status_class": _STATUS_CLASS_MAP.get(m["status_bucket"], "closed"),
+        })
+
+    tournaments = members_sorted[0]["tournaments"] if members_sorted else []
+
+    return render_template_string(
+        GROUP_TEMPLATE,
+        post_id=post_id,
+        group_title=group_title,
+        tournaments=tournaments,
+        members=members_view,
     )
 
 

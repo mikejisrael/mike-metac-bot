@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43336_20260712_104831",
+  "submitted_at": "2026-07-12T10:48:31.233137",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43336_20260712_104831": 43336
+  },
+  "post_ids": {
+    "single_43336_20260712_104831": 43333
+  },
+  "question_texts": {
+    "single_43336_20260712_104831": "Will another country announce they will quit OPEC or OPEC+ before September 2026?"
+  },
+  "original_probabilities": {
+    "single_43336_20260712_104831": 0.42
+  },
+  "refresh_reasons": {
+    "single_43336_20260712_104831": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43336_20260712_104831": null
+  },
+  "resolve_times": {
+    "single_43336_20260712_104831": "2026-09-02T16:00:00+00:00"
+  }
+}

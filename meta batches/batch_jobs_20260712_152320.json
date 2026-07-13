@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_40795_20260712_152320",
+  "submitted_at": "2026-07-12T15:23:20.193767",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_40795_20260712_152320": 40795
+  },
+  "post_ids": {
+    "single_40795_20260712_152320": 41090
+  },
+  "question_texts": {
+    "single_40795_20260712_152320": "Will the winner of the 2026 FIFA World Cup be a country that has never won before?"
+  },
+  "original_probabilities": {
+    "single_40795_20260712_152320": 0.18
+  },
+  "refresh_reasons": {
+    "single_40795_20260712_152320": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_40795_20260712_152320": null
+  },
+  "resolve_times": {
+    "single_40795_20260712_152320": "2026-07-19T23:00:00+00:00"
+  }
+}

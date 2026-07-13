@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43506_20260712_105011",
+  "submitted_at": "2026-07-12T10:50:11.866121",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43506_20260712_105011": 43506
+  },
+  "post_ids": {
+    "single_43506_20260712_105011": 43501
+  },
+  "question_texts": {
+    "single_43506_20260712_105011": "Will Instructure be subject to another major hack before September 1, 2026?"
+  },
+  "original_probabilities": {
+    "single_43506_20260712_105011": 0.31
+  },
+  "refresh_reasons": {
+    "single_43506_20260712_105011": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43506_20260712_105011": null
+  },
+  "resolve_times": {
+    "single_43506_20260712_105011": "2026-09-01T01:00:00+00:00"
+  }
+}

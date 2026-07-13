@@ -142,7 +142,22 @@ TOURNAMENTS = {
      3048: "Taiwan Tinderbox",
      2018: "Economic Indicators",
      2995: "Animal Welfare",
+    # ADDED 2026-07-13: Market Pulse Challenge 26Q3. type='tournament' (not
+    # question_series), so it goes through the normal fetch_open_questions()
+    # path below, NOT fetch_open_questions_series() — but needs its own
+    # special-cased gate logic (see MARKET_PULSE_TOURNAMENT_ID usage in
+    # run_coverage_check() below) since it's forecasted by a DIFFERENT
+    # script (tournament_forecast_v2.py) with different eligibility rules
+    # than meta_batch_forecast.py's binary-only + MIN_FORECASTERS gate this
+    # file otherwise checks missing questions against.
+    33066: "Market Pulse Challenge 26Q3",
 }
+
+# Matches tournament_forecast_v2.py's own constant of the same name/value.
+# Not imported from there directly to avoid pulling in that file's much
+# heavier dependency chain (Anthropic client, forecasting prompt builders,
+# etc.) just for one integer this read-only reporting script needs.
+MARKET_PULSE_TOURNAMENT_ID = 33066
 
 BOT_TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN")
 
@@ -250,13 +265,22 @@ def fetch_open_questions(client, tournament_id: int) -> list:
     """CHANGED (2026-07-03): now returns the full question objects, not
     just a bare set of ids — gate classification needs question_type,
     num_forecasters, and close_time off each one. Callers needing just the
-    id set can do {q.id_of_question for q in fetch_open_questions(...)}."""
+    id set can do {q.id_of_question for q in fetch_open_questions(...)}.
+
+    CHANGED (2026-07-13): added group_question_mode="unpack_subquestions".
+    Without it (default "exclude", confirmed via forecasting_tools source
+    inspection), Market Pulse's group_of_questions posts would be silently
+    dropped entirely — same bug already found and fixed in meta_dashboard.py
+    and tournament_forecast_v2.py this same week. No allowed_types is set
+    here, so this doesn't restrict by type post-unpack — safe no-op for
+    every non-grouped tournament."""
     try:
         questions = asyncio.run(
             client.get_questions_matching_filter(
                 ApiFilter(
                     allowed_tournaments=[tournament_id],
                     allowed_statuses=["open"],
+                    group_question_mode="unpack_subquestions",
                 ),
                 num_questions=1000,
                 error_if_question_target_missed=False,
@@ -287,11 +311,21 @@ def _gate_inputs(q) -> tuple:
 
 
 def fetch_forecasted_questions(client) -> set[int]:
-    """All question_ids mike_iz_-bot has ever forecasted, across tournaments."""
+    """All question_ids mike_iz_-bot has ever forecasted, across tournaments.
+
+    CHANGED (2026-07-13): added group_question_mode="unpack_subquestions",
+    same reasoning as fetch_open_questions() above — this is the OTHER
+    side of the gap comparison (missing = open_qs - forecasted), so if
+    only one side unpacks groups, Market Pulse sub-questions would either
+    all look like permanent gaps (open side unpacked, this side not) or
+    never show up at all (neither side unpacked). Both sides need this."""
     try:
         questions = asyncio.run(
             client.get_questions_matching_filter(
-                ApiFilter(is_previously_forecasted_by_user=True),
+                ApiFilter(
+                    is_previously_forecasted_by_user=True,
+                    group_question_mode="unpack_subquestions",
+                ),
                 num_questions=1000,
                 error_if_question_target_missed=False,
             )
@@ -359,7 +393,26 @@ def run_coverage_check():
                 continue
             q_type, num_forecasters, close_time = _gate_inputs(q)
             extraction_failed = q_type is None and num_forecasters is None and close_time is None
-            if extraction_failed:
+
+            if tid == MARKET_PULSE_TOURNAMENT_ID:
+                # ADDED 2026-07-13: Market Pulse is forecasted by
+                # tournament_forecast_v2.py, a SEPARATE script from
+                # meta_batch_forecast.py — with different eligibility
+                # rules entirely (every open numeric sub-question,
+                # unconditionally, no forecaster-count threshold, no
+                # DAYS_AHEAD limit — sub-questions close within days by
+                # design). Running these through forecast_gate_failure_
+                # reason() (built for meta_batch_forecast.py's binary-only
+                # funnel) would misclassify EVERY Market Pulse question as
+                # "gated: wrong_type" — even when v2 genuinely should have
+                # forecasted it and, for whatever reason, didn't. That
+                # would make coverage reporting silently useless for this
+                # tournament: permanently "0 real gaps" regardless of
+                # actual state. So: any missing Market Pulse question is
+                # always a REAL gap, full stop — matches v2's own
+                # unconditional-on-first-encounter behavior.
+                real_ids.append(qid)
+            elif extraction_failed:
                 # Couldn't tell whether this SHOULD be gated — treat as a
                 # real gap so an extraction problem surfaces loudly rather
                 # than silently hiding a possible genuine miss.

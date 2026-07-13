@@ -328,13 +328,13 @@ def check_resolutions() -> None:
         url = f"https://www.metaculus.com/api2/questions/{post_id}/"
         r = _get_with_retry(url)
         if r is None or r.status_code != 200:
-            print(f"    ❌ Q{q_id} (post {post_id}): could not fetch — will retry next run.")
+            print(f"    ❌ Post {post_id} (Q{q_id}): could not fetch — will retry next run.")
             continue
 
         try:
             data = r.json()
         except Exception:
-            print(f"    ❌ Q{q_id} (post {post_id}): non-JSON response — will retry next run.")
+            print(f"    ❌ Post {post_id} (Q{q_id}): non-JSON response — will retry next run.")
             continue
 
         # Multiple signals checked defensively rather than trusting one
@@ -352,7 +352,7 @@ def check_resolutions() -> None:
             prob = info.get("probability")
             prob_str = f"{prob:.0%}" if isinstance(prob, (int, float)) else "n/a"
             send_alert(
-                f"Q{q_id}: {info['question_text'][:100]}\n"
+                f"Post {post_id} (Q{q_id}): {info['question_text'][:100]}\n"
                 f"Resolved: {resolution_value}\n"
                 f"You forecast: {prob_str}",
                 title="✅ Forecast resolved"
@@ -485,7 +485,8 @@ def check_refresh_candidates() -> None:
         MAX_LISTED = 15
         lines = []
         for q_id, info, reasons, tournament_label in candidates[:MAX_LISTED]:
-            lines.append(f"- Q{q_id} [{tournament_label}]: {info['question_text'][:70]} — {', '.join(reasons)}")
+            lines.append(f"- Post {info['post_id']} (Q{q_id}) [{tournament_label}]: "
+                         f"{info['question_text'][:70]} — {', '.join(reasons)}")
         body = "\n".join(lines)
         if len(candidates) > MAX_LISTED:
             body += f"\n...and {len(candidates) - MAX_LISTED} more."

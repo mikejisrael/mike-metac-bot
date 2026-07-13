@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43510_20260712_105400",
+  "submitted_at": "2026-07-12T10:54:00.137018",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43510_20260712_105400": 43510
+  },
+  "post_ids": {
+    "single_43510_20260712_105400": 43505
+  },
+  "question_texts": {
+    "single_43510_20260712_105400": "Will the Senate of the Philippines remove Vice President Sara Duterte from office before September 2026?"
+  },
+  "original_probabilities": {
+    "single_43510_20260712_105400": 0.18
+  },
+  "refresh_reasons": {
+    "single_43510_20260712_105400": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43510_20260712_105400": null
+  },
+  "resolve_times": {
+    "single_43510_20260712_105400": "2026-09-01T11:00:00+00:00"
+  }
+}

@@ -37,19 +37,25 @@ unchanged:
    announcement, EA Forum). So already_done now also carries a
    submitted_at timestamp per question (added to each result record at
    write time in run(), below), and Market Pulse questions specifically
-   are gated through meta_refresh_gate.is_refresh_due() instead of being
+   are gated through a purpose-built "final hour before close" check
+   (see the dedup block below) instead of being
    permanently excluded once forecast. Every other tournament's dedup
    behavior is untouched — this only branches differently when a
    question's source post is tagged with MARKET_PULSE_TOURNAMENT_ID (see
    the _source_tournament_id tagging in the per-tournament fetch loop).
 
-DELIBERATE CHOICE: TOURNAMENT_BATCH_DIR below points at a SEPARATE
-directory ("tournament_batches_v2") rather than the production
-"tournament_batches" folder, specifically so testing this branch can't
-interfere with the live 30-min-cron production data while we're still
-proving it out. When this is promoted to replace tournament_forecast.py,
-this needs a deliberate decision — either merge histories or start fresh
-— not just quietly repointing at the production folder.
+MERGE STATUS (v1 -> v2), updated as it progresses:
+  Stage 1 (2026-07-13): FutureEval re-added to TOURNAMENT_IDS, tested
+  against real FutureEval + Market Pulse data with TOURNAMENT_BATCH_DIR
+  still isolated ("tournament_batches_v2") — validated cleanly.
+  Stage 2 (2026-07-13): TOURNAMENT_BATCH_DIR below now points at the REAL
+  production "tournament_batches" — v2's already_done dedup can see v1's
+  actual forecast history now, so it won't re-forecast something v1
+  already answered. This also resolves punch-list item #9's "merge
+  strategy" decision: full merge, shared history from here on.
+  Stage 3 (not yet): retire v1's cron, decommission tournament_forecast.py.
+  UNTIL STAGE 3: v1's cron remains the production system for FutureEval's
+  90-minute windows — run this file manually only, not on a schedule.
 
 Handles binary, numeric, discrete, multiple_choice, AND (new) numeric
 sub-questions unpacked from group_of_questions containers.
@@ -60,6 +66,14 @@ Usage:
   python tournament_forecast_v2.py --dry-run   # fetch + show what WOULD be forecast, no
                                                  # Claude/OpenRouter calls, no Metaculus
                                                  # submissions, no state written to disk
+  python tournament_forecast_v2.py --simulate-now=2026-07-13T02:30:00Z
+                                                # Override "now" for the final-hour Market
+                                                # Pulse refresh trigger and all close-time
+                                                # math — lets you test that trigger on
+                                                # demand instead of waiting on real time.
+                                                # Everything else (Metaculus fetch,
+                                                # Claude calls, submissions) still happens
+                                                # for real unless combined with --dry-run.
 
 Choosing tournaments:
   Defaults to [FUTUREEVAL_TOURNAMENT_ID, MARKET_PULSE_TOURNAMENT_ID]. Override
@@ -76,7 +90,7 @@ import glob
 import json
 import math
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -94,7 +108,12 @@ from meta_alerts import send_alert
 from meta_research import research_question
 from live_data import detect_data_needs, format_live_data_for_prompt
 from meta_watch import check_new_futureeval_questions, FUTUREEVAL_TOURNAMENT_ID
-from meta_refresh_gate import is_refresh_due, MIN_REFRESH_GAP_HOURS
+# NOTE (2026-07-11): meta_refresh_gate.is_refresh_due()/MIN_REFRESH_GAP_HOURS
+# are no longer used here — replaced by the final-hour-before-close check
+# in the dedup block below (see that block's comments for why the generic
+# 192h gate was structurally too long for Market Pulse's 59-155h sub-
+# question lifespans). Not importing them keeps it obvious this file no
+# longer depends on that shared constant.
 # CHANGED (2026-07-06): check_resolutions and check_refresh_candidates
 # moved to meta_phase_reports.yaml's daily cron (via meta_watch.py's new
 # run_watch_checks() entry point) — they're fully self-contained (each
@@ -106,6 +125,15 @@ from meta_refresh_gate import is_refresh_due, MIN_REFRESH_GAP_HOURS
 # from this script's own fetch loop below and is FutureEval-specific.
 
 # ─── Config ───────────────────────────────────────────────────────────────────
+# NOTE: the paragraph below describes tournament_forecast.py's (v1's)
+# original design — inherited into this file when v2 was created and never
+# updated since. Kept for historical context on WHY meta_batch_forecast.py
+# handles ACX2026/Climate/Metaculus Cup via its cheaper Batch API path
+# rather than synchronously here (that reasoning still holds), but the
+# "defaults to FutureEval ONLY" claim is no longer accurate for THIS file
+# as of the Stage 1 v1->v2 merge (2026-07-13) — see the TOURNAMENT_IDS
+# block below for what v2 actually defaults to now.
+#
 # Cost optimization split (2026-06-30): this script previously fetched and
 # synchronously forecast ALL of bf.ALLOWED_TOURNAMENTS — including ACX2026,
 # Climate Tipping Points, and Metaculus Cup, none of which are remotely as
@@ -113,9 +141,7 @@ from meta_refresh_gate import is_refresh_due, MIN_REFRESH_GAP_HOURS
 # only get forecast via meta_batch_forecast.py's Batch API path (50%
 # cheaper, on its own ~every-3-days cron schedule, separate from this
 # script's tighter cadence) — see meta_batch_forecast.py's ALLOWED_TOURNAMENTS
-# for the other side of this split. This script now defaults to FutureEval
-# ONLY, using meta_watch.FUTUREEVAL_TOURNAMENT_ID as the single source of
-# truth (same constant meta_watch.py's new-question alert already uses).
+# for the other side of this split.
 # Override without editing either file: set METAC_TOURNAMENT_IDS to a
 # comma-separated list, e.g.
 #     set METAC_TOURNAMENT_IDS=32977
@@ -132,33 +158,66 @@ from meta_refresh_gate import is_refresh_due, MIN_REFRESH_GAP_HOURS
 # tournaments.
 MARKET_PULSE_TOURNAMENT_ID = 33066
 
-# TEST_QUESTION_ID_LIMIT REMOVED (2026-07-10): validated cleanly against
-# the first group (Nvidia vs Microsoft, Q44691-Q44696) — distinct bounds
-# per sub-question confirmed, submitted_at tracked correctly, live
-# submission confirmed both via terminal ("Submitted: 6 | Failed: 0") and
-# the API-level batch_results file. Set back to a real set if we ever
-# need to re-restrict testing.
+# TEMPORARY test limiter (2026-07-13, Stage 1 of the v1->v2 merge): scope
+# this first real run to exactly two questions — 44457 (the one currently-
+# open FutureEval question's post_id, from
+# https://www.metaculus.com/questions/44457/ — matched via post_id below,
+# NOT assumed equal to question_id; see the matching logic's comment for
+# why that assumption was wrong) and 44679 (VIX Jul13-24 sub-question's
+# actual question_id, needed for precision since its post_id, 44534,
+# covers the whole 6-sub-question group). Deliberately small first pass
+# before running against everything currently open in either tournament.
+# Set back to None once this looks right.
 TEST_QUESTION_ID_LIMIT = None
 
 _env_override = os.getenv("METAC_TOURNAMENT_IDS")
 if _env_override:
     TOURNAMENT_IDS = [t.strip() for t in _env_override.split(",") if t.strip()]
 else:
-    # TEMPORARILY Market-Pulse-only (Mike's request, 2026-07-10): this
-    # branch is unproven and FutureEval is prize-eligible, live, and
-    # already well-served by the production tournament_forecast.py on its
-    # 30-min cron — no reason for this dev branch to touch it at all while
-    # we're still validating group-of-questions unpacking and the refresh
-    # gate. Re-add FUTUREEVAL_TOURNAMENT_ID here (and only here) once this
-    # branch is proven and ready to take over from production.
+    # STAGE 1 of the v1->v2 merge (2026-07-13, Mike's call after reviewing
+    # where the project's heading): FutureEval re-added here. Deliberately
+    # staged, not a single cutover — TOURNAMENT_BATCH_DIR below STAYS
+    # pointed at tournament_batches_v2, NOT the real tournament_batches,
+    # for this stage specifically. That means:
+    #   - This exercises the full funnel (check_new_futureeval_questions,
+    #     binary/numeric/MC parsing, submission) against REAL FutureEval
+    #     questions, for real validation — not synthetic test data.
+    #   - v2's already_done dedup can't see v1's forecast history yet
+    #     (different directory), so v2 will treat every FutureEval
+    #     question as new and forecast+submit it independently of
+    #     whatever v1's own 30-min cron already did or will do.
+    #   - This MUST run alongside (not instead of) v1's existing
+    #     production cron for now — v1 is still the one Metaculus actually
+    #     relies on for FutureEval's 90-minute windows during this stage.
+    #     Both scripts submitting real forecasts to real FutureEval
+    #     questions independently is the intended comparison, not a bug —
+    #     but it does mean don't run this unattended/on a cron yet.
+    # Stage 2 (once this output looks right): point TOURNAMENT_BATCH_DIR
+    # at the real tournament_batches, so already_done dedup sees v1's
+    # actual history. Stage 3: retire v1's cron, decommission v1.
     TOURNAMENT_IDS = [
-        # FUTUREEVAL_TOURNAMENT_ID,
+        FUTUREEVAL_TOURNAMENT_ID,
         MARKET_PULSE_TOURNAMENT_ID,
     ]
-# DEV BRANCH: separate directory from production's "tournament_batches" —
-# see module docstring. Deliberately not "tournament_batches" while this
-# branch is unproven.
-TOURNAMENT_BATCH_DIR = "tournament_batches_v2"
+# STAGE 2 of the v1->v2 merge (2026-07-13, Mike's call after Stage 1
+# validated cleanly against real FutureEval + Market Pulse data): now
+# pointed at the REAL production "tournament_batches", not the isolated
+# tournament_batches_v2 sandbox. This is the whole point of Stage 2 —
+# v2's already_done dedup can now see v1's actual forecast history, so it
+# won't try to re-forecast a FutureEval question v1 already answered.
+#
+# CONSEQUENCE WORTH BEING DELIBERATE ABOUT: this file's writes
+# (batch_results_<timestamp>.json) now land in the SAME directory v1
+# writes to and meta_dashboard.py reads from — v2-submitted forecasts
+# will appear in the dashboard mixed with v1's, indistinguishable by
+# directory alone. That's the intended end state (this effectively
+# resolves punch-list item #9's "merge strategy" decision: full merge,
+# shared history from here on, not a separate reconciliation later).
+#
+# STILL TRUE, same caution as Stage 1: v1's cron is still the production
+# system for FutureEval's 90-minute windows. Run this manually only,
+# not on a schedule, until Stage 3 (retire v1's cron, decommission v1).
+TOURNAMENT_BATCH_DIR = "tournament_batches"
 MODEL                = "claude-haiku-4-5"
 MAX_TOKENS           = 2000
 
@@ -251,8 +310,53 @@ def _set_cp(obj, cp) -> None:
         object.__setattr__(obj, "community_prediction_at_access_time", cp)
 
 
+def _set_research_text(obj, text) -> None:
+    """Set research_text_at_access_time regardless of whether the
+    underlying pydantic model declares that field — same pydantic-safe
+    pattern as _set_cp/_set_research_source, matching meta_batch_forecast.py's
+    equivalent helper exactly (confirmed via reading that file directly,
+    2026-07-13). Added alongside the research_source fix: run() never
+    stored research_text at all (only reasoning), so the dashboard's
+    detail page — which reads (local_r or {}).get("research_text", "")
+    per record — has been silently showing nothing for every question
+    this file has ever forecast. bf.build_user_prompt() already sets this
+    for binary questions on the same object build_binary_prompt() passes
+    through; this covers numeric/multiple_choice the same way."""
+    try:
+        obj.research_text_at_access_time = text
+    except Exception:
+        object.__setattr__(obj, "research_text_at_access_time", text)
+
+
+def _set_research_source(obj, source) -> None:
+    """Same pydantic-safe side-channel pattern as _set_cp above, for
+    tracking which provider (openrouter/anthropic/None) actually served
+    the research call for this question. Added 2026-07-13 (punch list
+    item #6).
+
+    FIXED 2026-07-13: originally used a different attribute name
+    (research_source_used) than meta_batch_forecast.py's own equivalent
+    helper — confirmed via reading that file directly — which uses
+    research_source_at_access_time and already sets it inside
+    bf.build_user_prompt() (called by build_binary_prompt() below on the
+    SAME question object). Renamed to match exactly, so binary/numeric/
+    multiple_choice all converge on one attribute regardless of which
+    code path set it — run() only needs to read one name now, and binary
+    questions are covered "for free" via bf.build_user_prompt() without
+    needing any changes to that shared production file.
+
+    Set on the question object itself (not returned from the builder
+    functions) so run() can read it back the same way it already reads
+    cp — build_numeric_prompt(question)/build_multiple_choice_prompt(question)
+    mutate the SAME object passed into forecast_question(q), not a copy."""
+    try:
+        obj.research_source_at_access_time = source
+    except Exception:
+        object.__setattr__(obj, "research_source_at_access_time", source)
+
+
 # ─── Step 1: Fetch open tournament questions ───────────────────────────────────
-async def fetch_tournament_questions() -> list:
+async def fetch_tournament_questions(simulate_now: datetime | None = None) -> list:
     # already_done maps question_id -> the title we forecast it under, so a
     # recycled ID (genuinely a different question on Metaculus's side) can be
     # detected via _titles_match instead of being silently skipped as a dup.
@@ -274,21 +378,33 @@ async def fetch_tournament_questions() -> list:
     # tournament), it would no longer be excluded by this scoping — low
     # risk given the listing has been complete (3 full pages, no
     # MAX_PAGES truncation) every time so far.
-    # CHANGED (v2): value is now a dict {"title":..., "submitted_at":...}
-    # instead of a bare title string — Market Pulse's refresh gate (below)
-    # needs the timestamp; everything else still just reads ["title"],
-    # same as it read the bare string before.
+    # CHANGED (v2): value is now a dict {"title":..., "submitted_at":...,
+    # "status":...} instead of a bare title string — Market Pulse's
+    # refresh/final-hour logic (below) needs the timestamp AND whether
+    # that attempt succeeded or failed.
+    #
+    # FIXED (2026-07-11): this was using glob.glob() in whatever order the
+    # OS filesystem happens to return (NOT guaranteed chronological) combined
+    # with setdefault() (keeps the FIRST record seen per question_id) — so
+    # already_done_raw could silently reflect an OLD attempt instead of the
+    # most recent one, depending on directory listing order. Since
+    # batch_results_<timestamp>.json filenames sort chronologically as
+    # strings, sorting the glob results fixes ordering; switching from
+    # setdefault() to plain assignment means the LAST (most recent) file
+    # processed always wins per question_id, so this always reflects the
+    # actual latest attempt — success or failure.
     already_done_raw: dict[int, dict] = {}
-    for rf in glob.glob(os.path.join(TOURNAMENT_BATCH_DIR, "batch_results_2*.json")):
+    for rf in sorted(glob.glob(os.path.join(TOURNAMENT_BATCH_DIR, "batch_results_2*.json"))):
         try:
             with open(rf) as f:
                 data = json.load(f)
             for r in data.values():
                 if r.get("question_id"):
-                    already_done_raw.setdefault(r["question_id"], {
+                    already_done_raw[r["question_id"]] = {
                         "title": r.get("question_text", ""),
-                        "submitted_at": r.get("submitted_at"),  # None for pre-v2 records — is_refresh_due(None) treats that as "due"
-                    })
+                        "submitted_at": r.get("submitted_at"),  # None for pre-v2 records — treated as "due" (no prior attempt on file)
+                        "status": r.get("status"),
+                    }
         except Exception:
             pass
 
@@ -306,7 +422,10 @@ async def fetch_tournament_questions() -> list:
     }
 
     raw_posts_by_id: dict[int, dict] = {}
-    now = datetime.now(timezone.utc)
+    now = simulate_now or datetime.now(timezone.utc)
+    if simulate_now:
+        print(f"  🧪 SIMULATED NOW: {simulate_now.isoformat()} (real time NOT used for "
+              f"final-hour/close-time calculations this run)", flush=True)
 
     def _is_open_question(q: dict) -> bool:
         """True if a Metaculus question dict (the NESTED 'question' object
@@ -560,35 +679,95 @@ async def fetch_tournament_questions() -> list:
                 prior = already_done[obj.id_of_question]
                 stored_title = prior["title"]
                 if titles_match(stored_title, obj.question_text):
-                    # CHANGED (v2): Market Pulse questions are refresh-
-                    # gated instead of permanently excluded — Metaculus
-                    # requires bots to "continuously update forecasts
-                    # during the question lifetime" for this tournament
-                    # specifically (unlike FutureEval, which explicitly
-                    # does NOT require updating). Every other tournament
-                    # keeps the original forecast-once behavior untouched.
+                    # CHANGED (v2, 2026-07-11): replaced the generic
+                    # 192h/8-day refresh gate for Market Pulse with a
+                    # purpose-built "final hour" trigger, per Mike's
+                    # request. Reasoning: check_subq_windows.py confirmed
+                    # live (2026-07-11) that every Market Pulse
+                    # sub-question's ENTIRE open lifespan is only
+                    # 59-155 hours (2.5-6.5 days) — shorter than the old
+                    # 192h gate, meaning that gate could structurally
+                    # never fire a second forecast before a sub-question
+                    # closed. Sub-questions close at the START of their
+                    # own labeled period (locking in a forward-looking
+                    # forecast before the observed window begins), so the
+                    # most valuable moment for a second, fresher forecast
+                    # is right before that lock — hence: refresh once
+                    # more if we're within 60 minutes of close AND our
+                    # last attempt happened before that final-hour window
+                    # started. With the 30-min cron cadence, this
+                    # reliably catches exactly one "final" refresh per
+                    # sub-question (fires on whichever of the ~2 cron
+                    # ticks inside that hour gets there first; the second
+                    # tick sees submitted_at already inside the final
+                    # hour and skips).
+                    #
+                    # FAILURE-RETRY FIX (2026-07-11, Mike's request): a
+                    # FAILED attempt no longer blocks a retry at all —
+                    # previously it got the exact same treatment as a
+                    # success (stamped submitted_at, gated the same way),
+                    # so a parse/submission failure could go unretried
+                    # for the rest of the question's short open window.
+                    # Now: status=="failed" always means "due", full
+                    # stop, regardless of timing — the very next cron
+                    # tick (≤30 min later) will retry it. This relies on
+                    # already_done_raw now correctly reflecting the LATEST
+                    # attempt per question_id (see the sort+overwrite fix
+                    # above), not an arbitrary earlier one.
                     is_market_pulse = post.get("_source_tournament_id") == MARKET_PULSE_TOURNAMENT_ID
                     if is_market_pulse:
-                        submitted_at_str = prior.get("submitted_at")
-                        submitted_at = None
-                        if submitted_at_str:
-                            try:
-                                submitted_at = datetime.fromisoformat(submitted_at_str)
-                                if submitted_at.tzinfo is None:
-                                    submitted_at = submitted_at.replace(tzinfo=timezone.utc)
-                            except Exception:
-                                submitted_at = None  # unparseable — treat as due, same as no prior record
-                        if not is_refresh_due(submitted_at, now=now):
-                            dedup_skipped += 1
-                            continue  # refreshed within MIN_REFRESH_GAP_HOURS — not due yet
-                        print(f"  🔄 Q{obj.id_of_question}: Market Pulse refresh due "
-                              f"(last forecast {submitted_at_str or 'unknown — no submitted_at on file'}) "
-                              f"— re-forecasting")
+                        if prior.get("status") == "failed":
+                            print(f"  🔁 Post {post.get('id')} (Q{obj.id_of_question}): last attempt failed — retrying "
+                                  f"(no cooldown applied to failures)")
+                        else:
+                            submitted_at_str = prior.get("submitted_at")
+                            submitted_at = None
+                            if submitted_at_str:
+                                try:
+                                    submitted_at = datetime.fromisoformat(submitted_at_str)
+                                    if submitted_at.tzinfo is None:
+                                        submitted_at = submitted_at.replace(tzinfo=timezone.utc)
+                                except Exception:
+                                    submitted_at = None  # unparseable — treat as due, same as no prior record
+
+                            close_time = None
+                            close_time_str = q.get("scheduled_close_time")
+                            if close_time_str:
+                                try:
+                                    close_time = datetime.fromisoformat(close_time_str.replace("Z", "+00:00"))
+                                except Exception:
+                                    close_time = None
+
+                            within_final_hour = (
+                                close_time is not None
+                                and (close_time - now) <= timedelta(minutes=60)
+                                and (close_time - now) > timedelta(0)  # not already past close
+                            )
+                            already_did_final_refresh = (
+                                within_final_hour and submitted_at is not None
+                                and submitted_at >= (close_time - timedelta(minutes=60))
+                            )
+
+                            # DEBUG print removed (2026-07-12) — mechanism fully
+                            # validated across 3 simulated-time test runs
+                            # (2026-07-11/12) against Q44679: not due before the
+                            # window, fires correctly inside it, doesn't
+                            # double-fire on a second check. The verbose
+                            # per-question time-math line isn't needed for
+                            # routine runs; --simulate-now is still available
+                            # if this needs re-debugging later, just add the
+                            # print back if so.
+
+                            if not (within_final_hour and not already_did_final_refresh):
+                                dedup_skipped += 1
+                                continue  # not in the final hour yet, or already refreshed within it
+                            print(f"  🔄 Post {post.get('id')} (Q{obj.id_of_question}): within final hour before close "
+                                  f"({close_time_str}) — final refresh")
                     else:
                         dedup_skipped += 1
                         continue  # genuine duplicate — already forecast this question
                 else:
-                    print(f"  🛑 Q{obj.id_of_question}: ID was previously forecast under a different "
+                    print(f"  🛑 Post {post.get('id')} (Q{obj.id_of_question}): ID was previously forecast under a different "
                           f"title — treating as a NEW question (ID likely recycled).")
                     print(f"       Previously: {stored_title[:90]}")
                     print(f"       Now:        {obj.question_text[:90]}")
@@ -603,18 +782,33 @@ async def fetch_tournament_questions() -> list:
             supported_post_ids.append(post.get("id"))
         except Exception as e:
             parse_errors += 1
-            print(f"  ⚠️  Could not parse Q{q.get('id')}: {e}")
+            print(f"  ⚠️  Could not parse post {post.get('id')} (Q{q.get('id')}): {e}")
 
     if TEST_QUESTION_ID_LIMIT is not None:
+        # FIXED (2026-07-13): previously matched q.id_of_question ONLY.
+        # WRONG ASSUMPTION, corrected by Mike directly: post_id and
+        # question_id are NOT reliably equal even for standalone
+        # (non-grouped) questions — almost every standalone question
+        # we've actually seen has DIFFERENT post_id and question_id, this
+        # isn't a group-only quirk. Mike's own words: "You should always
+        # default to the post ID as that is what I can see on the
+        # website." Matching on EITHER post_id or question_id now, so
+        # this works with whatever's actually visible on the page
+        # (standalone questions: the URL id, which is post_id) while
+        # still allowing sub-question-level precision within a group
+        # (Market Pulse: post_id alone would match ALL sub-questions in
+        # that group, which is usually NOT what's wanted — question_id
+        # narrows to one specific period).
         _before_limit = len(supported)
         _limited_pairs = [
             (q, pid) for q, pid in zip(supported, supported_post_ids)
-            if q.id_of_question in TEST_QUESTION_ID_LIMIT
+            if pid in TEST_QUESTION_ID_LIMIT or q.id_of_question in TEST_QUESTION_ID_LIMIT
         ]
         supported = [q for q, _ in _limited_pairs]
         supported_post_ids = [pid for _, pid in _limited_pairs]
         print(f"  🧪 TEST_QUESTION_ID_LIMIT active: {_before_limit} -> {len(supported)} "
-              f"question(s) (restricted to {sorted(TEST_QUESTION_ID_LIMIT)})")
+              f"question(s) (restricted to {sorted(TEST_QUESTION_ID_LIMIT)}, matched by "
+              f"post_id or question_id)")
 
     # Real CP fetch — CONCURRENT, capped, via the SINGULAR /api2/questions/
     # {id}/ endpoint, keyed by post_id.
@@ -753,10 +947,16 @@ def build_numeric_prompt(question: NumericQuestion) -> str:
     # funded pool. NOTE: _verify_research() inside research_question()
     # still always uses ANTHROPIC_API_KEY regardless of provider_order —
     # this reduces but does not zero out Anthropic spend on research.
-    research_text = research_question(
+    # CHANGED (2026-07-13, punch list #6): now captures return_source=True
+    # and stores it via _set_research_source, so run() can log which
+    # provider actually served this call.
+    research_text, research_source = research_question(
         question.question_text, question.background_info or "",
         provider_order=["openrouter", "anthropic"],
+        return_source=True,
     )
+    _set_research_text(question, research_text)
+    _set_research_source(question, research_source)
     has_research = research_text is not None
     research_block = (
         f"\nCURRENT RESEARCH (real-time web search, fetched for this question):\n{research_text}\n"
@@ -945,10 +1145,15 @@ def build_multiple_choice_prompt(question: MultipleChoiceQuestion) -> str:
     # currently have multiple_choice sub-questions (all confirmed numeric),
     # but no reason to leave this call site on the old Anthropic-only
     # default while the numeric one right above it isn't.
-    research_text = research_question(
+    # CHANGED (2026-07-13, punch list #6): captures return_source=True too,
+    # same as build_numeric_prompt above.
+    research_text, research_source = research_question(
         question.question_text, question.background_info or "",
         provider_order=["openrouter", "anthropic"],
+        return_source=True,
     )
+    _set_research_text(question, research_text)
+    _set_research_source(question, research_source)
     has_research = research_text is not None
     research_block = (
         f"\nCURRENT RESEARCH (real-time web search, fetched for this question):\n{research_text}\n"
@@ -1187,11 +1392,13 @@ def forecast_question(question) -> tuple[str, any, str | None]:
             result = None
 
         if result is None:
-            print(f"  ⚠️  Could not parse {q_type} response for Q{question.id_of_question}")
+            print(f"  ⚠️  Could not parse {q_type} response for post "
+                  f"{getattr(question, 'id_of_post', None)} (Q{question.id_of_question})")
         return q_type, result, text
 
     except Exception as e:
-        print(f"  ❌ Claude error for Q{question.id_of_question}: {e}")
+        print(f"  ❌ Claude error for post {getattr(question, 'id_of_post', None)} "
+              f"(Q{question.id_of_question}): {e}")
         return q_type, None, None
 
 
@@ -1226,7 +1433,8 @@ def submit_forecast(question, q_type: str, forecast) -> bool:
         return True
 
     except Exception as e:
-        print(f"  ❌ Submission error: {str(e)[:80]}")
+        print(f"  ❌ Submission error for post {getattr(question, 'id_of_post', None)} "
+              f"(Q{question.id_of_question}): {str(e)[:80]}")
         return False
 
 
@@ -1247,13 +1455,13 @@ def summarize_forecast_for_alert(q_type: str, forecast) -> str:
     return str(forecast)[:60]
 
 
-async def run(dry_run: bool = False):
+async def run(dry_run: bool = False, simulate_now: datetime | None = None):
     mode_label = "DRY RUN — no Claude calls, no Metaculus submissions" if dry_run else "LIVE"
     print(f"METACULUS TOURNAMENT FORECASTER (synchronous) — v2 DEV BRANCH [{mode_label}]")
-    print(f"(Market Pulse refresh gate: {MIN_REFRESH_GAP_HOURS}h min gap)")
+    print("(Market Pulse refresh: final-hour-before-close trigger, no generic time gate)")
     print("=" * 50)
 
-    questions = await fetch_tournament_questions()
+    questions = await fetch_tournament_questions(simulate_now=simulate_now)
     if not questions:
         print("No questions found — either none are open right now, or all already forecast.")
         return
@@ -1271,7 +1479,7 @@ async def run(dry_run: bool = False):
         print(f"\n{'='*50}")
         print(f"Would forecast {len(questions)} question(s):")
         for q in questions:
-            print(f"  Q{q.id_of_question} ({type(q).__name__}): {q.question_text[:80]}")
+            print(f"  Post {getattr(q, 'id_of_post', None)} (Q{q.id_of_question}, {type(q).__name__}): {q.question_text[:80]}")
         # Rough per-instance cost from the 2026-07-10 costing exercise:
         # ~$0.025-0.03 covering 1 research call (web search + tokens) + 1
         # forecast call (Haiku, system prompt cached where it clears the
@@ -1290,6 +1498,47 @@ async def run(dry_run: bool = False):
     submitted = 0
     failed    = 0
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+    # NEW (v2, 2026-07-11): buffer successful-submission alerts by post_id
+    # instead of firing send_alert() immediately per question. All
+    # sub-questions in a group_of_questions post share one post_id (see
+    # 2026-07-10 notes — confirmed live, e.g. the whole VIX biweekly group
+    # is post_id 44534 regardless of which of its 6 sub-questions), so
+    # this collapses "one alert per sub-question" into "one alert per
+    # group" — with ZERO special-casing for Market Pulse specifically: a
+    # standalone, non-grouped question just ends up as a "group" of one,
+    # so every other tournament's alert behavior is unchanged.
+    #
+    # CHANGED (2026-07-11, Mike's request): flush each group's alert as
+    # soon as that group's LAST member for this run finishes processing,
+    # rather than waiting for the whole run to end — a slow run (42+
+    # questions) shouldn't hold every earlier group's notification
+    # hostage until the very last question completes. Membership counts
+    # are computed up front from the actual `questions` list this run is
+    # about to process (i.e. AFTER dedup/refresh-gate/test-limit
+    # filtering already ran) — so a group where some sub-questions were
+    # already excluded (already forecast, refresh not due yet, etc.)
+    # still flushes correctly once its REMAINING members are done,
+    # without needing every original group member to be present.
+    from collections import Counter
+    post_id_remaining = Counter(
+        getattr(q, "id_of_post", None) or q.id_of_question for q in questions
+    )
+    group_alert_buffer: dict[int, dict] = {}
+
+    def _flush_group_alert(post_id):
+        group = group_alert_buffer.pop(post_id, None)
+        if not group or not group["lines"]:
+            return  # nothing succeeded in this group — nothing to alert on
+        n = len(group["lines"])
+        if n == 1:
+            send_alert(group["lines"][0], title="New forecast submitted (tournament)")
+        else:
+            body = "\n\n".join(group["lines"])
+            send_alert(
+                f"{n} forecasts submitted:\n\n{body}",
+                title=f"{n} forecasts: {group['title'][:60]}"
+            )
+
     # FIXED 2026-06-30: previously only written once, at the very end —
     # confirmed live: a run was interrupted (terminal closed, exact cause
     # unknown) partway through 66 questions; some had already been
@@ -1307,10 +1556,25 @@ async def run(dry_run: bool = False):
             json.dump(results, f, indent=2)
 
     for i, q in enumerate(questions, 1):
-        print(f"\n[{i}/{len(questions)}] Q{q.id_of_question} ({type(q).__name__}): {q.question_text[:70]}")
+        print(f"\n[{i}/{len(questions)}] Post {getattr(q, 'id_of_post', None)} "
+              f"(Q{q.id_of_question}, {type(q).__name__}): {q.question_text[:70]}")
 
         q_type, forecast, reasoning_text = forecast_question(q)
         cp = getattr(q, "community_prediction_at_access_time", None)
+        # Punch list #6 (2026-07-13): which provider (openrouter/anthropic/
+        # None) actually served the research call for this question — set
+        # via _set_research_source() inside build_numeric_prompt()/
+        # build_multiple_choice_prompt(), OR (2026-07-13, gap closed)
+        # already set by bf.build_user_prompt() for binary questions —
+        # confirmed by reading meta_batch_forecast.py directly: it uses
+        # the exact same attribute name (research_source_at_access_time),
+        # so this one getattr covers all three question types with no
+        # further changes needed to the shared production file.
+        research_source = getattr(q, "research_source_at_access_time", None)
+        # Companion fix, same pass: research_text itself (not just which
+        # provider served it) was never stored either — see
+        # _set_research_text's docstring above.
+        research_text_value = getattr(q, "research_text_at_access_time", None)
 
         if forecast is None:
             results[f"q_{q.id_of_question}"] = {
@@ -1322,20 +1586,40 @@ async def run(dry_run: bool = False):
                 "submitted_forecast": None,
                 "reasoning":     reasoning_text,
                 "community_prediction": cp,
+                "research_source": research_source,
+                "research_text": research_text_value,
                 # NEW (v2): per-question timestamp (not a shared batch-level
                 # one — this file is synchronous, one question at a time, so
                 # this is a genuine per-question "when did we last touch
-                # this" record). Stamped even on failure so a failed attempt
-                # doesn't look identical to "never tried" — but note
-                # is_refresh_due() gating above is only reached via the
-                # titles_match/already_done path regardless of prior
-                # status, matching this file's existing (pre-v2) dedup
-                # behavior, which also didn't distinguish success/failure.
-                # Not changing that here — out of scope for this change.
-                "submitted_at": datetime.now(timezone.utc).isoformat(),
+                # this" record). Stamped even on failure, for audit ("when
+                # did we last attempt this") — but as of 2026-07-11, status
+                # now DOES matter for Market Pulse gating: a "failed" status
+                # here means the dedup block above will treat this question
+                # as immediately due again on the very next run, regardless
+                # of this timestamp. See the failure-retry fix in the dedup
+                # block for the full reasoning.
+                # FIXED (2026-07-12): uses simulate_now when provided, not
+                # always real wall-clock time — otherwise a --simulate-now
+                # test run would stamp with REAL time while the final-hour
+                # comparison (in fetch_tournament_questions, above) runs on
+                # the SIMULATED clock, making already_did_final_refresh
+                # checks on a subsequent test run unreliable (confirmed
+                # live 2026-07-12: real time was still Jul 12 while the
+                # simulated close-time math was set to Jul 13, so a
+                # freshly-stamped real submitted_at would look "before"
+                # the simulated final-hour window on the next check).
+                "submitted_at": (simulate_now or datetime.now(timezone.utc)).isoformat(),
             }
             failed += 1
             _save_results_so_far()
+            # NEW (v2, 2026-07-11): this question's group membership is
+            # "done" (with a failure) too — decrement and flush if it was
+            # the last outstanding member, same as the success/failure
+            # path below.
+            _pid = getattr(q, "id_of_post", None) or q.id_of_question
+            post_id_remaining[_pid] -= 1
+            if post_id_remaining[_pid] <= 0:
+                _flush_group_alert(_pid)
             continue
 
         submission_ok = submit_forecast(q, q_type, forecast)
@@ -1362,23 +1646,49 @@ async def run(dry_run: bool = False):
             # type. This was the single biggest gap before today's update.
             "reasoning":     reasoning_text,
             "community_prediction": cp,
+            "research_source": research_source,
+            "research_text": research_text_value,
             # NEW (v2): see docstring on the failed-branch record above —
             # same reasoning, same field.
-            "submitted_at": datetime.now(timezone.utc).isoformat(),
+            "submitted_at": (simulate_now or datetime.now(timezone.utc)).isoformat(),
         }
 
         if submission_ok:
             submitted += 1
             alert_summary = summarize_forecast_for_alert(q_type, forecast)
-            send_alert(
-                f"Q{q.id_of_question}: {alert_summary}\n{q.question_text[:100]}",
-                title="New forecast submitted (tournament)"
-            )
+            post_id = getattr(q, "id_of_post", None) or q.id_of_question  # fall back to
+            # question's own id if id_of_post is somehow missing, so this never crashes —
+            # worst case it just doesn't group with siblings, same as today's per-question behavior.
+            # Strip a trailing "(...)" date-range suffix (e.g. "(Jul 13 - Jul 24)")
+            # to get the shared group name common to every sub-question in
+            # this post — falls back to the full question text if there's no
+            # such suffix (i.e. a normal, non-grouped question).
+            common_title = re.sub(r"\s*\([^)]*\)\s*$", "", q.question_text).strip() or q.question_text
+            group = group_alert_buffer.setdefault(post_id, {"title": common_title, "lines": []})
+            group["lines"].append(f"Post {post_id} (Q{q.id_of_question}): {alert_summary}\n{q.question_text[:100]}")
         else:
             failed += 1
+            post_id = getattr(q, "id_of_post", None) or q.id_of_question
+
+        # NEW (v2, 2026-07-11): this group member is done (success or
+        # failure either way) — decrement its group's countdown and flush
+        # immediately once the LAST outstanding member of that group (for
+        # THIS run's queue, post-filtering) finishes, rather than waiting
+        # for the whole run to end.
+        post_id_remaining[post_id] -= 1
+        if post_id_remaining[post_id] <= 0:
+            _flush_group_alert(post_id)
 
         _save_results_so_far()
         await asyncio.sleep(0.5)
+
+    # Safety net only — every group should already have been flushed above
+    # the moment its last member finished. Anything left here means the
+    # post_id_remaining count didn't match reality for some reason (e.g. an
+    # exception skipped a decrement) — flush it now rather than silently
+    # dropping the notification.
+    for post_id in list(group_alert_buffer.keys()):
+        _flush_group_alert(post_id)
 
     print(f"\n{'=' * 50}")
     print(f"Submitted: {submitted} | Failed: {failed}")
@@ -1387,4 +1697,15 @@ async def run(dry_run: bool = False):
 
 if __name__ == "__main__":
     import sys
-    asyncio.run(run(dry_run="--dry-run" in sys.argv))
+    _simulate_now = None
+    for _arg in sys.argv:
+        if _arg.startswith("--simulate-now="):
+            _iso = _arg.split("=", 1)[1]
+            try:
+                _simulate_now = datetime.fromisoformat(_iso.replace("Z", "+00:00"))
+                if _simulate_now.tzinfo is None:
+                    _simulate_now = _simulate_now.replace(tzinfo=timezone.utc)
+            except Exception as _e:
+                raise SystemExit(f"Could not parse --simulate-now value {_iso!r}: {_e}\n"
+                                  f"Expected ISO format, e.g. --simulate-now=2026-07-13T02:30:00Z")
+    asyncio.run(run(dry_run="--dry-run" in sys.argv, simulate_now=_simulate_now))

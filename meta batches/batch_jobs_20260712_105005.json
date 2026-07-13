@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43522_20260712_105005",
+  "submitted_at": "2026-07-12T10:50:05.287383",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43522_20260712_105005": 43522
+  },
+  "post_ids": {
+    "single_43522_20260712_105005": 43525
+  },
+  "question_texts": {
+    "single_43522_20260712_105005": "Will OpenAI's ChatGPT Atlas browser be released for Windows before September 1, 2026?"
+  },
+  "original_probabilities": {
+    "single_43522_20260712_105005": 0.28
+  },
+  "refresh_reasons": {
+    "single_43522_20260712_105005": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43522_20260712_105005": null
+  },
+  "resolve_times": {
+    "single_43522_20260712_105005": "2026-09-01T00:01:00+00:00"
+  }
+}
