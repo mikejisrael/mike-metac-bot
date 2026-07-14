@@ -189,4 +189,6 @@ reports/calibration_2*.json
 # workflow's `git add watch_state/` step was silently staging nothing,
 # every run, forever, so state (which questions were already seen /
 # already alerted on) never persisted between runs. These files are
-# meant to be committed — see meta_watch.py's module docstring..tmp.driveupload/ 
+# meant to be committed — see meta_watch.py's module docstring.
+
+.tmp.driveupload/
