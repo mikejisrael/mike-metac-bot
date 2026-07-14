@@ -40,15 +40,17 @@ Then open http://localhost:5002
 
 import os
 import re
+import sys
 import glob
 import json
 import asyncio
 import threading
 import time
+import subprocess
 import requests
 from datetime import datetime, timezone
 
-from flask import Flask, jsonify, render_template_string
+from flask import Flask, jsonify, render_template_string, request
 from dotenv import load_dotenv
 from forecasting_tools import MetaculusClient, ApiFilter
 from meta_cp_extract import extract_live_cp
@@ -1128,6 +1130,7 @@ PAGE_TEMPLATE = """
   <table id="rowsTable">
     <thead>
       <tr>
+        <th style="width:26px;"><input type="checkbox" id="selectAllVisible" title="Select all visible non-group rows"></th>
         <th class="sortable" data-key="id" data-type="num">ID <span class="arrow">▾</span></th>
         <th class="sortable" data-key="question" data-type="str">Question <span class="arrow"></span></th>
         <th class="sortable" data-key="type" data-type="str">Type <span class="arrow"></span></th>
@@ -1158,6 +1161,12 @@ PAGE_TEMPLATE = """
           data-sort-resolved="{{ row.resolve_time_ts if row.resolve_time_ts is not none else '' }}"
           data-sort-peer="{{ row.peer_score if row.peer_score is not none else '' }}"
           data-sort-tournament="{{ row.tournaments|join(',') }}">
+        <td>
+          {% if not row.is_group and row.post_id %}
+            <input type="checkbox" class="row-select" value="{{ row.post_id }}"
+                   onclick="toggleRowSelect(this)">
+          {% endif %}
+        </td>
         <td>
           {% if row.post_id %}
             <a class="id-link" href="https://www.metaculus.com/questions/{{ row.post_id }}/" target="_blank"
@@ -1201,6 +1210,16 @@ PAGE_TEMPLATE = """
     <button id="prevPage">← Prev</button>
     <span class="page-info" id="pageInfo"></span>
     <button id="nextPage">Next →</button>
+  </div>
+
+  <div id="selectionBar" style="display:none;position:fixed;bottom:0;left:0;right:0;
+       background:#1a1a1a;color:white;padding:12px 24px;align-items:center;
+       gap:16px;box-shadow:0 -2px 8px rgba(0,0,0,.2);z-index:1000;">
+    <span id="selectionCount"></span>
+    <button id="refreshSelected" style="background:#2563eb;color:white;border:none;
+            border-radius:4px;padding:6px 14px;cursor:pointer;font-size:13px;">Refresh Selected</button>
+    <button id="clearSelection" style="background:transparent;color:#ccc;border:1px solid #555;
+            border-radius:4px;padding:6px 14px;cursor:pointer;font-size:13px;">Clear</button>
   </div>
 
   <script>
@@ -1414,6 +1433,94 @@ PAGE_TEMPLATE = """
     applySort();
     applyFilters();
     setTimeout(() => location.reload(), 300000);
+
+    // ─── Manual-selection refresh (2026-07-14) ────────────────────────────
+    // Rough per-question cost estimate, matching the same figure used
+    // elsewhere in this codebase's dry-run cost estimates (~1 research
+    // call + 1 forecast call, Haiku, system prompt cached where it clears
+    // the token floor). Deliberately approximate -- this is a sanity-check
+    // number for the confirm dialog, not a billing guarantee.
+    const EST_COST_PER_QUESTION_LOW = 0.025;
+    const EST_COST_PER_QUESTION_HIGH = 0.03;
+    const selectedIds = new Set();
+
+    function updateSelectionBar() {
+      const bar = document.getElementById('selectionBar');
+      const count = selectedIds.size;
+      if (count === 0) {
+        bar.style.display = 'none';
+        return;
+      }
+      bar.style.display = 'flex';
+      const lowCost = (count * EST_COST_PER_QUESTION_LOW).toFixed(2);
+      const highCost = (count * EST_COST_PER_QUESTION_HIGH).toFixed(2);
+      document.getElementById('selectionCount').textContent =
+        count + ' selected (est. $' + lowCost + '–$' + highCost + ')';
+    }
+
+    function toggleRowSelect(checkbox) {
+      const id = parseInt(checkbox.value, 10);
+      if (checkbox.checked) selectedIds.add(id); else selectedIds.delete(id);
+      updateSelectionBar();
+    }
+
+    document.getElementById('selectAllVisible').addEventListener('change', (e) => {
+      // Only affects currently-visible rows with a checkbox (i.e. non-group
+      // rows not hidden by the active filter/search/pagination) -- matches
+      // the same "act on what you can see" convention as the filter pills.
+      document.querySelectorAll('#rowsTable tbody tr:not([style*="display: none"]) .row-select')
+        .forEach(cb => {
+          cb.checked = e.target.checked;
+          toggleRowSelect(cb);
+        });
+    });
+
+    document.getElementById('clearSelection').addEventListener('click', () => {
+      selectedIds.clear();
+      document.querySelectorAll('.row-select').forEach(cb => cb.checked = false);
+      document.getElementById('selectAllVisible').checked = false;
+      updateSelectionBar();
+    });
+
+    document.getElementById('refreshSelected').addEventListener('click', () => {
+      const count = selectedIds.size;
+      if (count === 0) return;
+      const lowCost = (count * EST_COST_PER_QUESTION_LOW).toFixed(2);
+      const highCost = (count * EST_COST_PER_QUESTION_HIGH).toFixed(2);
+      const ok = confirm(
+        'Refresh ' + count + ' question(s)?\n\n' +
+        'Estimated cost: $' + lowCost + '–$' + highCost + '\n\n' +
+        'This will run tournament_forecast_v2.py in the background — ' +
+        'check the terminal or reload this dashboard in a few minutes to see results.'
+      );
+      if (!ok) return;
+
+      const btn = document.getElementById('refreshSelected');
+      btn.disabled = true;
+      btn.textContent = 'Launching…';
+      fetch('/refresh', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ids: Array.from(selectedIds)})
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok) {
+            alert('Launched — forecasting ' + data.count + ' question(s) in the background.');
+            selectedIds.clear();
+            document.querySelectorAll('.row-select').forEach(cb => cb.checked = false);
+            document.getElementById('selectAllVisible').checked = false;
+            updateSelectionBar();
+          } else {
+            alert('Failed to launch: ' + (data.error || 'unknown error'));
+          }
+        })
+        .catch(err => alert('Failed to launch: ' + err))
+        .finally(() => {
+          btn.disabled = false;
+          btn.textContent = 'Refresh Selected';
+        });
+    });
   </script>
 </body>
 </html>
@@ -1631,6 +1738,7 @@ GROUP_TEMPLATE = """
     <table class="members-table">
       <thead>
         <tr>
+          <th style="width:26px;"></th>
           <th>Period</th>
           <th>Status</th>
           <th>Submitted</th>
@@ -1642,6 +1750,8 @@ GROUP_TEMPLATE = """
       <tbody>
         {% for m in members %}
         <tr>
+          <td><input type="checkbox" class="member-select" value="{{ m.question_id }}"
+                     onclick="toggleMemberSelect(this)"></td>
           <td>{{ m.period_label }}</td>
           <td><span class="badge status-{{ m.status_class }}">{{ m.status_label }}</span></td>
           <td>{{ m.submitted_summary }}</td>
@@ -1655,6 +1765,95 @@ GROUP_TEMPLATE = """
       </tbody>
     </table>
   </section>
+
+  <div id="selectionBar" style="display:none;position:fixed;bottom:0;left:0;right:0;
+       background:#1a1a1a;color:white;padding:12px 24px;align-items:center;
+       gap:16px;box-shadow:0 -2px 8px rgba(0,0,0,.2);z-index:1000;">
+    <span id="selectionCount"></span>
+    <button id="refreshSelected" style="background:#2563eb;color:white;border:none;
+            border-radius:4px;padding:6px 14px;cursor:pointer;font-size:13px;">Refresh Selected</button>
+    <button id="clearSelection" style="background:transparent;color:#ccc;border:1px solid #555;
+            border-radius:4px;padding:6px 14px;cursor:pointer;font-size:13px;">Clear</button>
+  </div>
+
+  <script>
+    // Same manual-selection-refresh pattern as the main dashboard page
+    // (meta_dashboard.py's PAGE_TEMPLATE) — see that copy's comment for
+    // the full reasoning. Here every checkbox carries a sub-question's
+    // own question_id (not the shared post_id), since that's exactly the
+    // precision this page exists for — checking the group's post_id
+    // elsewhere would select every sub-question in it, which is why the
+    // main table's collapsed group rows deliberately have no checkbox at
+    // all and only this page's individual member rows do.
+    const EST_COST_PER_QUESTION_LOW = 0.025;
+    const EST_COST_PER_QUESTION_HIGH = 0.03;
+    const selectedIds = new Set();
+
+    function updateSelectionBar() {
+      const bar = document.getElementById('selectionBar');
+      const count = selectedIds.size;
+      if (count === 0) {
+        bar.style.display = 'none';
+        return;
+      }
+      bar.style.display = 'flex';
+      const lowCost = (count * EST_COST_PER_QUESTION_LOW).toFixed(2);
+      const highCost = (count * EST_COST_PER_QUESTION_HIGH).toFixed(2);
+      document.getElementById('selectionCount').textContent =
+        count + ' selected (est. $' + lowCost + '–$' + highCost + ')';
+    }
+
+    function toggleMemberSelect(checkbox) {
+      const id = parseInt(checkbox.value, 10);
+      if (checkbox.checked) selectedIds.add(id); else selectedIds.delete(id);
+      updateSelectionBar();
+    }
+
+    document.getElementById('clearSelection').addEventListener('click', () => {
+      selectedIds.clear();
+      document.querySelectorAll('.member-select').forEach(cb => cb.checked = false);
+      updateSelectionBar();
+    });
+
+    document.getElementById('refreshSelected').addEventListener('click', () => {
+      const count = selectedIds.size;
+      if (count === 0) return;
+      const lowCost = (count * EST_COST_PER_QUESTION_LOW).toFixed(2);
+      const highCost = (count * EST_COST_PER_QUESTION_HIGH).toFixed(2);
+      const ok = confirm(
+        'Refresh ' + count + ' sub-question(s)?\n\n' +
+        'Estimated cost: $' + lowCost + '–$' + highCost + '\n\n' +
+        'This will run tournament_forecast_v2.py in the background — ' +
+        'check the terminal or reload the dashboard in a few minutes to see results.'
+      );
+      if (!ok) return;
+
+      const btn = document.getElementById('refreshSelected');
+      btn.disabled = true;
+      btn.textContent = 'Launching…';
+      fetch('/refresh', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ids: Array.from(selectedIds)})
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok) {
+            alert('Launched — forecasting ' + data.count + ' question(s) in the background.');
+            selectedIds.clear();
+            document.querySelectorAll('.member-select').forEach(cb => cb.checked = false);
+            updateSelectionBar();
+          } else {
+            alert('Failed to launch: ' + (data.error || 'unknown error'));
+          }
+        })
+        .catch(err => alert('Failed to launch: ' + err))
+        .finally(() => {
+          btn.disabled = false;
+          btn.textContent = 'Refresh Selected';
+        });
+    });
+  </script>
 </body>
 </html>
 """
@@ -1824,6 +2023,59 @@ def raw_json(question_id):
     if raw:
         return jsonify(raw)
     return jsonify({"_error": f"Question {question_id} not found in either account's live data."})
+
+
+@app.route("/refresh", methods=["POST"])
+def refresh_selected():
+    """
+    Added 2026-07-14 for the dashboard manual-selection UI. Accepts a JSON
+    body {"ids": [44457, 44679, ...]} -- a mix of post_ids (from the main
+    table's standalone-question checkboxes) and question_ids (from a
+    group's /group/<post_id> detail page sub-question checkboxes) is fine,
+    since tournament_forecast_v2.py's --ids flag uses the exact same dual
+    post_id-or-question_id matching either way -- see that flag's own
+    comment for why checking a whole group's post_id would incorrectly
+    select every sub-question in it, which is why group rows on the main
+    table deliberately have no checkbox at all; only the group detail
+    page's individual member rows do.
+
+    Spawns tournament_forecast_v2.py --ids=... as a background subprocess
+    (Popen, not run/check_output -- this route must return immediately,
+    not block for however long the actual forecast run takes) and returns
+    right away. Uses sys.executable so the subprocess runs under the SAME
+    interpreter (and therefore the same venv312 environment) as this
+    dashboard process, not whatever "python" happens to resolve to on
+    PATH. There's no live streaming of that subprocess's output back to
+    the browser in this first pass -- check the dashboard's own 5-minute
+    cache refresh, or the terminal/log file, to see the result.
+
+    SAFETY: this endpoint does NOT itself gate on cost or confirm anything
+    -- that happens client-side (a confirm() dialog showing the selected
+    count and a rough cost estimate) before this is ever called. This
+    dashboard is assumed to run on localhost only; if it's ever exposed
+    beyond that, this client-side-only gate would need to move server-side
+    too -- flagging that assumption now rather than letting it go unstated.
+    """
+    payload = request.get_json(silent=True) or {}
+    ids = payload.get("ids", [])
+    if not ids or not isinstance(ids, list):
+        return jsonify({"ok": False, "error": "No ids provided"}), 400
+    try:
+        ids_str = ",".join(str(int(i)) for i in ids)
+    except (ValueError, TypeError):
+        return jsonify({"ok": False, "error": "ids must be a list of integers"}), 400
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    script_path = os.path.join(script_dir, "tournament_forecast_v2.py")
+    try:
+        subprocess.Popen(
+            [sys.executable, script_path, f"--ids={ids_str}"],
+            cwd=script_dir,
+        )
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"Failed to launch: {e}"}), 500
+
+    return jsonify({"ok": True, "launched_ids": ids, "count": len(ids)})
 
 
 if __name__ == "__main__":

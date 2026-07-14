@@ -1704,4 +1704,24 @@ if __name__ == "__main__":
             except Exception as _e:
                 raise SystemExit(f"Could not parse --simulate-now value {_iso!r}: {_e}\n"
                                   f"Expected ISO format, e.g. --simulate-now=2026-07-13T02:30:00Z")
+        elif _arg.startswith("--ids="):
+            # ADDED 2026-07-14 (dashboard manual-selection UI): promotes
+            # TEST_QUESTION_ID_LIMIT from an edit-the-file-and-redeploy
+            # constant to a real runtime flag. Same dual post_id-or-
+            # question_id matching as the constant always used (see that
+            # matching logic's own comment for why — post_id for
+            # standalone questions since that's what's visible on the
+            # site and what the dashboard's checkboxes naturally carry,
+            # question_id for precision within a group's sub-questions).
+            # This is what the dashboard's "Refresh Selected" action will
+            # actually invoke as a background subprocess — see
+            # meta_dashboard.py's /refresh route.
+            _ids_str = _arg.split("=", 1)[1]
+            try:
+                TEST_QUESTION_ID_LIMIT = {int(_id.strip()) for _id in _ids_str.split(",") if _id.strip()}
+            except ValueError as _e:
+                raise SystemExit(f"Could not parse --ids value {_ids_str!r} — expected comma-separated "
+                                  f"integers, e.g. --ids=44457,44679: {_e}")
+            if not TEST_QUESTION_ID_LIMIT:
+                raise SystemExit("--ids was given but parsed to an empty set — nothing to do.")
     asyncio.run(run(dry_run="--dry-run" in sys.argv, simulate_now=_simulate_now))
