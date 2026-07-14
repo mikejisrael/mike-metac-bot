@@ -1,12 +1,12 @@
 {
-  "checked_at": "2026-07-12T14:02:24.416354+00:00",
+  "checked_at": "2026-07-14T01:18:09.957284+00:00",
   "tournaments": {
     "FutureEval": {
       "tournament_id": 33022,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 0,
-      "forecasted_count": 0,
+      "open_count": 1,
+      "forecasted_count": 1,
       "missing_gated_ids": [],
       "missing_gated_reasons": {},
       "missing_real_ids": []
@@ -25,26 +25,89 @@
       "tournament_id": 1756,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 6,
+      "open_count": 62,
       "forecasted_count": 6,
-      "missing_gated_ids": [],
-      "missing_gated_reasons": {},
+      "missing_gated_ids": [
+        14733,
+        14734,
+        14735,
+        14736,
+        14739,
+        14740,
+        14747,
+        14748,
+        14752,
+        14753,
+        14755,
+        14756,
+        14760,
+        14761,
+        14763,
+        14764,
+        14767,
+        14769,
+        14771,
+        14773,
+        14776,
+        14777,
+        14780,
+        14781,
+        14783,
+        14785,
+        14788,
+        14789,
+        14791,
+        14792,
+        14793,
+        14794,
+        15473,
+        15474,
+        15476,
+        15477,
+        15479,
+        15480,
+        15482,
+        15483,
+        15485,
+        15486,
+        15497,
+        15498,
+        15500,
+        15501,
+        15799,
+        15801,
+        15805,
+        15806,
+        15809,
+        15810,
+        15812,
+        15813,
+        15832,
+        15833
+      ],
+      "missing_gated_reasons": {
+        "wrong_type": 56
+      },
       "missing_real_ids": []
     },
     "Metaculus Cup": {
       "tournament_id": 33021,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 26,
+      "open_count": 29,
       "forecasted_count": 24,
       "missing_gated_ids": [
         43345,
-        43492
+        43492,
+        44704,
+        44705
       ],
       "missing_gated_reasons": {
-        "wrong_type": 2
+        "wrong_type": 4
       },
-      "missing_real_ids": []
+      "missing_real_ids": [
+        44633
+      ]
     },
     "Nuclear Risk Horizons": {
       "tournament_id": 1173,
@@ -173,12 +236,22 @@
         "too_far_out": 6
       },
       "missing_real_ids": []
+    },
+    "Market Pulse Challenge 26Q3": {
+      "tournament_id": 33066,
+      "fetch_method": "allowed_tournaments",
+      "unverified_fetch_scope": false,
+      "open_count": 0,
+      "forecasted_count": 0,
+      "missing_gated_ids": [],
+      "missing_gated_reasons": {},
+      "missing_real_ids": []
     }
   },
-  "total_gaps": 0,
-  "total_gated": 68,
+  "total_gaps": 1,
+  "total_gated": 126,
   "total_gated_reasons": {
-    "wrong_type": 2,
+    "wrong_type": 60,
     "too_far_out": 66
   },
   "too_far_out_samples": [
