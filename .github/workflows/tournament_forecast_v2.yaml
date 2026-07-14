@@ -70,23 +70,24 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           METACULUS_TOKEN: ${{ secrets.METACULUS_TOKEN }}
           METAC_TOURNAMENT_TOKEN: ${{ secrets.METAC_TOURNAMENT_TOKEN }}
-          # DELIBERATE, TEMPORARY (2026-07-14, Mike's call): scoped to
-          # Market Pulse ONLY (33066) for this first automated-cron stage —
-          # FutureEval stays exclusively on tournament_forecast.yaml's (v1's)
-          # cron for now. Running v2's cron with FutureEval included WHILE
-          # v1's cron is also still live would mean two scripts
-          # independently submitting real forecasts to the same live
-          # FutureEval questions on overlapping schedules — the exact
-          # duplication risk that kept v2 manual-only through Stage 1/2 of
-          # the v1->v2 merge. Hardcoded directly here (not a repo variable)
-          # so anyone reading this workflow immediately sees the current
-          # scope and why, rather than needing to also check a separate
-          # Settings → Variables entry. Change this to
-          # "33022,33066" (or remove the override entirely, letting the
-          # script's own in-code default take over) only as part of a
-          # deliberate Stage 3 decision to retire v1's cron at the same time
-          # — not as an isolated tweak.
-          METAC_TOURNAMENT_IDS: "33066"
+          # CHANGED (2026-07-14): the Market-Pulse-only override that lived
+          # here (METAC_TOURNAMENT_IDS: "33066") is REMOVED — this now falls
+          # back to tournament_forecast_v2.py's own in-code default,
+          # [FUTUREEVAL_TOURNAMENT_ID, MARKET_PULSE_TOURNAMENT_ID], so this
+          # cron now genuinely forecasts and submits for FutureEval too.
+          #
+          # PARALLEL-TEST PERIOD: tournament_forecast.py (v1) is still
+          # running on its own cron at the same time, but with
+          # SUBMISSION_DISABLED_PARALLEL_TEST = True — it detects and
+          # alerts on new FutureEval questions same as always, but does NOT
+          # forecast or submit anything, leaving that entirely to v2 (this
+          # workflow). This lets v2 prove itself on real, live FutureEval
+          # questions with v1 still watching in a safe, non-submitting
+          # capacity, before v1's cron is disabled for good (Stage 3 of the
+          # v1->v2 merge). Expect 2 "new question detected" ntfy alerts per
+          # new FutureEval question during this period (v1's own detection
+          # + v2's own detection, independent timing) + 1 "forecast
+          # submitted" alert once v2 actually forecasts it.
           EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}

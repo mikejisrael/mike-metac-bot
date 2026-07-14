@@ -5,6 +5,14 @@ Handles binary, numeric, discrete, and multiple_choice question types.
 Calls Claude synchronously and submits to Metaculus immediately in the same run.
 This is essential for tournament questions that may only be open for 90 minutes.
 
+PARALLEL-TEST MODE (2026-07-14): SUBMISSION_DISABLED_PARALLEL_TEST is
+currently True — this script detects and alerts on new FutureEval
+questions as normal, but does NOT forecast or submit anything.
+tournament_forecast_v2.py's own cron is handling real forecasting/
+submission during this validation period. See that flag's definition
+below for the full reasoning. Flip to False once v2 is fully trusted on
+FutureEval (Stage 3 of the v1->v2 merge).
+
 Usage:
   python tournament_forecast.py          # forecast and submit all open questions
 
@@ -74,6 +82,37 @@ else:
 TOURNAMENT_BATCH_DIR = "tournament_batches"
 MODEL                = "claude-haiku-4-5"
 MAX_TOKENS           = 2000
+
+# PARALLEL-TEST MODE (2026-07-14, Mike's call while validating tournament_forecast_v2.py
+# against real FutureEval before fully retiring this script): when True,
+# this script's own forecast+submit step is skipped entirely for every
+# question — it still runs check_new_futureeval_questions() (new-question
+# detection/alerting) exactly as before, but stops there. v2's own cron
+# (tournament_forecast_v2.yaml) is responsible for actually forecasting
+# and submitting FutureEval questions during this period. Expected ntfy
+# pattern during this period: 2 "new question detected" alerts per new
+# FutureEval question (this script's own check_new_futureeval_questions()
+# call, AND v2's — they run independently, each with their own timing
+# against the shared watch_state file) + 1 "forecast submitted" alert once
+# v2 actually forecasts it.
+#
+# DELIBERATE: skipped questions are NOT written to results/tournament_batches
+# at all — no record, not even a "skipped" status. v1 and v2 share the same
+# TOURNAMENT_BATCH_DIR (since the Stage 2 v1->v2 merge), and v2's dedup
+# treats ANY local record matching a question's title as "already
+# forecast, skip forever" for non-Market-Pulse tournaments. If this script
+# wrote even a lightweight skip-marker record, it would silently and
+# permanently block v2 from ever forecasting that same question — exactly
+# the opposite of the intent. Leaving zero trace means v1 will keep
+# re-listing the same open question as "to forecast" (then skipping it)
+# on every run until v2 actually handles it for real — that's just log
+# noise, not a functional problem, and it naturally stops the moment v2's
+# own real result lands in the shared directory.
+#
+# Flip to False (or delete this block and the check below entirely) once
+# v2 has proven itself on FutureEval and this script is being retired for
+# real (Stage 3 of the v1->v2 merge).
+SUBMISSION_DISABLED_PARALLEL_TEST = True
 
 # ─── Clients ──────────────────────────────────────────────────────────────────
 client_anthropic = anthropic.Anthropic()
@@ -1027,7 +1066,8 @@ def summarize_forecast_for_alert(q_type: str, forecast) -> str:
 
 
 async def run():
-    print("METACULUS TOURNAMENT FORECASTER (synchronous)")
+    mode_label = " [PARALLEL-TEST MODE — detection/alerts only, v2 forecasts+submits]" if SUBMISSION_DISABLED_PARALLEL_TEST else ""
+    print(f"METACULUS TOURNAMENT FORECASTER (synchronous){mode_label}")
     print("=" * 50)
 
     questions = await fetch_tournament_questions()
@@ -1038,6 +1078,7 @@ async def run():
     results   = {}
     submitted = 0
     failed    = 0
+    skipped   = 0  # parallel-test mode only — see SUBMISSION_DISABLED_PARALLEL_TEST
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
     # FIXED 2026-06-30: previously only written once, at the very end —
     # confirmed live: a run was interrupted (terminal closed, exact cause
@@ -1057,6 +1098,15 @@ async def run():
 
     for i, q in enumerate(questions, 1):
         print(f"\n[{i}/{len(questions)}] Q{q.id_of_question} ({type(q).__name__}): {q.question_text[:70]}")
+
+        if SUBMISSION_DISABLED_PARALLEL_TEST:
+            # See the flag's definition above for the full reasoning — no
+            # Claude call, no submission, and deliberately NO local record
+            # written, so v2's dedup stays completely free to pick this
+            # question up and forecast it for real.
+            print(f"  🚫 Submission disabled (v2 parallel-test mode) — v2 will handle this")
+            skipped += 1
+            continue
 
         q_type, forecast, reasoning_text = forecast_question(q)
         cp = getattr(q, "community_prediction_at_access_time", None)
@@ -1116,7 +1166,7 @@ async def run():
         await asyncio.sleep(0.5)
 
     print(f"\n{'=' * 50}")
-    print(f"Submitted: {submitted} | Failed: {failed}")
+    print(f"Submitted: {submitted} | Failed: {failed} | Skipped (v2 parallel-test): {skipped}")
     print(f"Results saved to {results_file}")
 
 
