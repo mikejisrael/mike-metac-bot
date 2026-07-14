@@ -1,0 +1,21 @@
+{
+  "q_44558": {
+    "question_id": 44558,
+    "post_id": 44460,
+    "question_text": "How many \"Level 4 \u2013 Do Not Travel\" travel advisories will the US State Department issue in August 2026?",
+    "question_type": "multiple_choice",
+    "status": "failed",
+    "submitted_forecast": {
+      "Zero": 0.78,
+      "One": 0.17,
+      "Two": 0.04,
+      "Three": 0.01,
+      "Four or more": 0.0
+    },
+    "reasoning": "# Analysis\n\n## (a) Time left until resolution\nToday is July 14, 2026. August 2026 is approximately 2.5 weeks away. The resolution window is the entire month of August 2026 (31 days), after which we'll count how many NEW Level 4 advisories were issued during that specific month.\n\n## (b) Most likely outcome and why\n\n**Current baseline (as of July 14, 2026):**\n- Three countries have Level 4 advisories: Mali (issued June 8, 2026), Sudan, and Tunisia\n- These represent the highest category of travel warnings\n\n**Base rate analysis:**\nLevel 4 \"Do Not Travel\" advisories are extremely rare and reserved for the most severe circumstances (active conflicts, humanitarian crises, state collapse). Historically, the US maintains Level 4 advisories for only a handful of countries at any given time. New Level 4 advisories are issued infrequently\u2014typically triggered by:\n- Sudden armed conflict or major escalation\n- Terrorist activity or security collapse\n- Humanitarian crises requiring evacuation\n- Natural disasters of extraordinary scale\n\n**Expected frequency in a single month:**\nGiven that:\n1. There are ~195 countries in the world\n2. Only 3 currently have Level 4 status\n3. These advisories are changed infrequently (Mali's was issued June 8, suggesting months between updates)\n4. Most countries with Level 4 status remain stable at that level (they don't flip in/out monthly)\n\nThe probability of NEW Level 4 advisories being issued in any given month is quite low. Historical precedent suggests that in a typical month, 0-1 new Level 4 advisories might be issued globally. August 2026 is not preceded by any information about imminent crises that would trigger additional Level 4 designations.\n\n**Most likely outcome: Zero new Level 4 advisories**\n\nThe status quo bias here is strong\u2014countries typically don't suddenly qualify for Level 4 status without warning signals, and the current research shows no emerging crises that would precipitate such advisories in August.\n\n## (c) Key uncertainties\n\n1. **Unforeseen geopolitical crises:** A sudden major conflict, terrorist attack, or coup in an unstable region (Syria already likely Level 4; potential escalation in other Middle East/Africa locations)\n2. **Natural disasters:** Major earthquakes, hurricanes, or pandemics could theoretically trigger Level 4 status\n3. **Criteria changes:** The State Department could theoretically change how it applies Level 4 criteria (unlikely but possible)\n4. **Regional contagion:** If Sudan or Mali situations deteriorate further, neighboring countries might be downgraded/upgraded\n\nHowever, these are speculative and lack concrete evidence from the research provided.\n\n---\n\n## Option probabilities:\n\nZero: 78%\nOne: 17%\nTwo: 4%\nThree: 1%\nFour or more: 0%",
+    "community_prediction": null,
+    "research_source": "openrouter",
+    "research_text": "I have checked the summary for internal contradictions regarding the same metric, index, or count attributed to different values, dates, or time periods.\n\n**Finding:** No contradictions detected.\n\nThe summary consistently identifies three countries with Level 4 advisories as of July 14, 2026 (Mali, Sudan, and Tunisia), provides specific dates for when advisories were issued or updated, and describes the review process without conflicting claims about counts or timelines.\n\n**Result:** The summary is returned UNCHANGED, word-for-word.",
+    "submitted_at": "2026-07-14T21:04:43.976781+00:00"
+  }
+}
