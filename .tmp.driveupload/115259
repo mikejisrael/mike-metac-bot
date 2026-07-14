@@ -1,0 +1,13 @@
+{
+  "q_44154": {
+    "question_id": 44154,
+    "question_text": "Who will be publicly designated as the National Rally candidate for the 2027 French presidential election on September 1, 2026?",
+    "question_type": "multiple_choice",
+    "status": "success",
+    "submitted_forecast": {
+      "Marine Le Pen": 0.12,
+      "Jordan Bardella": 0.8,
+      "Someone else or nobody before September 1, 2026": 0.08
+    }
+  }
+}

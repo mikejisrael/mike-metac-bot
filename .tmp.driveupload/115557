@@ -1,0 +1,125 @@
+"""
+regime_analysis.py
+-------------------
+Breaks down closed-trade performance by macro regime at the time each
+trade was opened (regime_at_open), so Fear vs Neutral vs Greed performance
+can be compared once there's enough data in each bucket.
+
+Usage:
+    python regime_analysis.py
+    python regime_analysis.py "C:/Users/mikej/metac-bot-template/bybit_sim_data/closed_trades.csv"
+
+Reads CLOSED_TRADE_LOG from bybit_sim_data\\ by default (same relative path
+convention as bybit_sim.py). Produces no output files - read-only analysis,
+prints straight to console.
+"""
+
+import csv
+import os
+import sys
+from collections import defaultdict
+from datetime import datetime
+
+DEFAULT_PATH = os.path.join("bybit_sim_data", "closed_trades.csv")
+DATE_FORMATS = ("%d/%m/%Y %H:%M:%S", "%Y-%m-%d %H:%M:%S")
+
+
+def _parse_dt(date_str, time_str):
+    combined = f"{date_str} {time_str}"
+    for fmt in DATE_FORMATS:
+        try:
+            return datetime.strptime(combined, fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def _simplify_regime(regime_label):
+    """regime_at_close/open store full strings like
+    'FEAR — market oversold, slight long bias but follow technicals'.
+    Bucket down to FEAR / NEUTRAL / GREED / UNKNOWN for grouping."""
+    if not regime_label:
+        return "UNKNOWN (pre-logging)"
+    label = regime_label.upper()
+    if "FEAR" in label:
+        return "FEAR"
+    if "GREED" in label:
+        return "GREED"
+    if "NEUTRAL" in label:
+        return "NEUTRAL"
+    return "UNKNOWN"
+
+
+def load_closed_trades(path):
+    with open(path, "r", newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+def analyse(path):
+    rows = load_closed_trades(path)
+    print(f"Total closed trades in file: {len(rows)}\n")
+
+    # Bucket by regime_at_open (falls back to regime_at_close if open is
+    # missing - shouldn't normally happen but covers older/edge rows)
+    buckets = defaultdict(list)
+    for r in rows:
+        regime_raw = r.get("regime_at_open") or r.get("regime_at_close") or ""
+        regime = _simplify_regime(regime_raw)
+        buckets[regime].append(r)
+
+    print(f"{'REGIME':<24}{'N':<6}{'W':<5}{'L':<5}{'WR%':<8}{'AVG WIN':<10}{'AVG LOSS':<10}{'NET PNL':<10}")
+    print("-" * 80)
+
+    order = ["FEAR", "NEUTRAL", "GREED", "UNKNOWN", "UNKNOWN (pre-logging)"]
+    seen = set()
+    for regime in order:
+        if regime not in buckets:
+            continue
+        seen.add(regime)
+        _print_bucket(regime, buckets[regime])
+
+    for regime in buckets:
+        if regime not in seen:
+            _print_bucket(regime, buckets[regime])
+
+    print()
+
+    # Direction breakdown within each known regime - useful for the
+    # "do longs/shorts behave differently by regime" question
+    print("\nDirection breakdown by regime:")
+    print(f"{'REGIME':<12}{'DIR':<8}{'N':<6}{'WR%':<8}{'NET PNL':<10}{'AVG DUR(h)':<12}")
+    print("-" * 60)
+    for regime in ["FEAR", "NEUTRAL", "GREED"]:
+        if regime not in buckets:
+            continue
+        for direction in ["long", "short"]:
+            sub = [r for r in buckets[regime] if r.get("direction") == direction]
+            if not sub:
+                continue
+            wins = sum(1 for r in sub if r["outcome"] == "WIN")
+            wr = wins / len(sub) * 100
+            net = sum(float(r["pnl"]) for r in sub)
+            print(f"{regime:<12}{direction:<8}{len(sub):<6}{wr:<8.1f}{net:<10.2f}{'n/a':<12}")
+
+    print("\nNote: sample sizes need to be reasonably large (rule of thumb: "
+          "20+ per bucket) before drawing conclusions. Small buckets are "
+          "shown for visibility only, not for decision-making yet.")
+
+
+def _print_bucket(regime, trades):
+    wins = [r for r in trades if r["outcome"] == "WIN"]
+    losses = [r for r in trades if r["outcome"] == "LOSS"]
+    n = len(trades)
+    wr = len(wins) / n * 100 if n else 0
+    avg_win = sum(float(r["pnl"]) for r in wins) / len(wins) if wins else 0
+    avg_loss = sum(float(r["pnl"]) for r in losses) / len(losses) if losses else 0
+    net = sum(float(r["pnl"]) for r in trades)
+    print(f"{regime:<24}{n:<6}{len(wins):<5}{len(losses):<5}{wr:<8.1f}{avg_win:<10.2f}{avg_loss:<10.2f}{net:<10.2f}")
+
+
+if __name__ == "__main__":
+    path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_PATH
+    if not os.path.exists(path):
+        print(f"File not found: {path}")
+        sys.exit(1)
+    analyse(path)

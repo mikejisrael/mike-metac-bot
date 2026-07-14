@@ -1,0 +1,6 @@
+{
+  "window_trades": 4,
+  "min_trades_before_active": 7,
+  "win_rate_threshold_pct": 20.0,
+  "cooldown_days": 7
+}

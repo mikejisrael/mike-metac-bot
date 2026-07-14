@@ -1,0 +1,15 @@
+import json
+
+with open('batch_results.json') as f:
+    data = json.load(f)
+
+count = 0
+for custom_id, item in data.items():
+    if item.get('reasoning'):
+        print(f"Question: {item['question_text'][:60]}")
+        print(f"Last 300 chars of reasoning:")
+        print(item['reasoning'][-300:])
+        print("="*70)
+        count += 1
+        if count >= 3:
+            break

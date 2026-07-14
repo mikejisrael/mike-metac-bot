@@ -1,0 +1,257 @@
+{
+  "checked_at": "2026-07-05T10:26:16.660736+00:00",
+  "tournaments": {
+    "FutureEval": {
+      "tournament_id": 33022,
+      "fetch_method": "allowed_tournaments",
+      "unverified_fetch_scope": false,
+      "open_count": 0,
+      "forecasted_count": 0,
+      "missing_gated_ids": [],
+      "missing_gated_reasons": {},
+      "missing_real_ids": []
+    },
+    "ACX2026": {
+      "tournament_id": 32880,
+      "fetch_method": "allowed_tournaments",
+      "unverified_fetch_scope": false,
+      "open_count": 28,
+      "forecasted_count": 28,
+      "missing_gated_ids": [],
+      "missing_gated_reasons": {},
+      "missing_real_ids": []
+    },
+    "Climate Tipping Points": {
+      "tournament_id": 1756,
+      "fetch_method": "allowed_tournaments",
+      "unverified_fetch_scope": false,
+      "open_count": 6,
+      "forecasted_count": 6,
+      "missing_gated_ids": [],
+      "missing_gated_reasons": {},
+      "missing_real_ids": []
+    },
+    "Metaculus Cup": {
+      "tournament_id": 33021,
+      "fetch_method": "allowed_tournaments",
+      "unverified_fetch_scope": false,
+      "open_count": 23,
+      "forecasted_count": 23,
+      "missing_gated_ids": [],
+      "missing_gated_reasons": {},
+      "missing_real_ids": []
+    },
+    "Nuclear Risk Horizons": {
+      "tournament_id": 1173,
+      "fetch_method": "project_param",
+      "unverified_fetch_scope": false,
+      "open_count": 37,
+      "forecasted_count": 0,
+      "missing_gated_ids": [
+        7405,
+        7406,
+        7408,
+        7452,
+        7453,
+        8362,
+        8363,
+        8370,
+        8377,
+        8378,
+        8379,
+        8380,
+        8381,
+        8382,
+        8383,
+        8391,
+        8392,
+        8394,
+        8395,
+        8396,
+        8397,
+        8398,
+        8399,
+        8608,
+        8609,
+        8611,
+        8612,
+        8613,
+        8614,
+        8629,
+        8632,
+        8635,
+        8636,
+        8638,
+        8644,
+        8645,
+        8646
+      ],
+      "missing_gated_reasons": {
+        "too_far_out": 37
+      },
+      "missing_real_ids": []
+    },
+    "Current Events": {
+      "tournament_id": 32774,
+      "fetch_method": "project_param",
+      "unverified_fetch_scope": false,
+      "open_count": 6,
+      "forecasted_count": 4,
+      "missing_gated_ids": [
+        44177
+      ],
+      "missing_gated_reasons": {
+        "too_far_out": 1
+      },
+      "missing_real_ids": [
+        43472
+      ]
+    },
+    "Taiwan Tinderbox": {
+      "tournament_id": 3048,
+      "fetch_method": "project_param",
+      "unverified_fetch_scope": false,
+      "open_count": 22,
+      "forecasted_count": 0,
+      "missing_gated_ids": [
+        3620,
+        5320,
+        7512,
+        7812,
+        8362,
+        8470,
+        8533,
+        8662,
+        11112,
+        11127,
+        11401,
+        12795,
+        18444,
+        21491,
+        21804,
+        21805,
+        21869,
+        21870,
+        21871,
+        21874,
+        21875,
+        21879
+      ],
+      "missing_gated_reasons": {
+        "too_far_out": 22
+      },
+      "missing_real_ids": []
+    },
+    "Economic Indicators": {
+      "tournament_id": 2018,
+      "fetch_method": "project_param",
+      "unverified_fetch_scope": false,
+      "open_count": 0,
+      "forecasted_count": 0,
+      "missing_gated_ids": [],
+      "missing_gated_reasons": {},
+      "missing_real_ids": []
+    },
+    "Animal Welfare": {
+      "tournament_id": 2995,
+      "fetch_method": "project_param",
+      "unverified_fetch_scope": false,
+      "open_count": 6,
+      "forecasted_count": 0,
+      "missing_gated_ids": [
+        3359,
+        3360,
+        3371,
+        3777,
+        7314,
+        7547
+      ],
+      "missing_gated_reasons": {
+        "too_far_out": 6
+      },
+      "missing_real_ids": []
+    }
+  },
+  "total_gaps": 1,
+  "total_gated": 66,
+  "total_gated_reasons": {
+    "too_far_out": 66
+  },
+  "too_far_out_samples": [
+    {
+      "question_id": 7405,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2049-12-31T21:45:00+00:00"
+    },
+    {
+      "question_id": 7406,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2029-12-31T21:49:00+00:00"
+    },
+    {
+      "question_id": 7408,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2049-12-31T22:54:00+00:00"
+    },
+    {
+      "question_id": 7452,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2049-12-31T23:58:00+00:00"
+    },
+    {
+      "question_id": 7453,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2050-01-01T00:01:00+00:00"
+    },
+    {
+      "question_id": 8362,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2035-01-01T04:00:00+00:00"
+    },
+    {
+      "question_id": 8363,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2034-12-31T22:59:00+00:00"
+    },
+    {
+      "question_id": 8370,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2029-12-31T22:59:00+00:00"
+    },
+    {
+      "question_id": 8377,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2029-12-31T22:59:00+00:00"
+    },
+    {
+      "question_id": 8378,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2029-12-31T22:59:00+00:00"
+    },
+    {
+      "question_id": 8379,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2029-12-31T22:59:00+00:00"
+    },
+    {
+      "question_id": 8380,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2029-12-31T22:59:00+00:00"
+    },
+    {
+      "question_id": 8381,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2100-01-01T22:59:00+00:00"
+    },
+    {
+      "question_id": 8382,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2100-01-01T22:59:00+00:00"
+    },
+    {
+      "question_id": 8383,
+      "tournament": "Nuclear Risk Horizons",
+      "close_time": "2029-12-31T22:59:00+00:00"
+    }
+  ]
+}

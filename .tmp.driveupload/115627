@@ -1,0 +1,439 @@
+============================================================ 
+Run started: Sat 13/06/2026  1:23:23.16 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-13 01:23:26
+Balance:       8578.00 USDT
+Open positions:14
+Scan #:        23
+=========================================================
+
+Checking open positions for TP/SL...
+  >> DOGEUSDT TAKE_PROFIT: WIN  PnL +20.0024 USDT  (+20.0% of margin)
+  >> ADAUSDT TAKE_PROFIT: WIN  PnL +20.0000 USDT  (+20.0% of margin)
+
+Fetching macro context...
+  Fear & Greed:  12 — Extreme Fear
+  BTC Dominance: 56.4%
+  Regime:        FEAR — caution on shorts, favour longs
+
+Available slots: 8
+
+Skipping BTCUSDT — position open
+Skipping ETHUSDT — position open
+Skipping BNBUSDT — position open
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Analysing DOGEUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0086%
+  Strong uptrend with +9.67% 7d momentum, elevated volume (+124.7%), and price 15.21% above 7d low confirms buyi
+Analysing ADAUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0050%
+  ADA shows strong uptrend signals: +10.06% 7d momentum, +4.16% 24h momentum, price near 7d high (-0.80%), and e
+Skipping TRXUSDT — position open
+Analysing AVAXUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0032%
+  Mixed signals prevent conviction: 24h momentum is positive (+1.82%) but 7d momentum is negative (-3.47%), and 
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Analysing DOTUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: +0.0037%
+  Positive 24h and 7d momentum with price near middle of 24h range and well above 7d lows (9.33%) aligns with ma
+Skipping LTCUSDT — position open
+Skipping NEARUSDT — position open
+Analysing BCHUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: +0.0018%
+  Extreme fear macro environment favours longs; BCH shows positive 24h momentum (+4.26%) and RSI at 59.4 (neutra
+Analysing APTUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: +0.0063%
+  Strong 24h momentum (+4.68%) with elevated volume (+74.4% vs 7d avg) and price in upper half of 7d range suppo
+Analysing ICPUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: LOW | Funding: -0.0054%
+  Positive momentum (+3.10% 24h, +3.70% 7d) with RSI at neutral 53.3 and negative funding rate (-0.0054%) sugges
+Analysing HBARUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: LOW | Funding: +0.0060%
+  24h momentum is positive (+2.64%) with volume confirming trend (+4.1% vs 7d avg), and funding rate is benign a
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Analysing HYPEUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0005%
+  Positive momentum (+7.66% 24h, +5.66% 7d) with price near 7d high supports uptrend setup; macro environment in
+
+=========================================================
+Candidates: 8
+
+Opening LONG — DOGEUSDT:
+  >> FILLED LONG DOGEUSDT @ 0.08937  TP: 0.092945  SL: 0.087583  Lev: 6x  Margin: $100.0
+
+Opening LONG — ADAUSDT:
+  >> FILLED LONG ADAUSDT @ 0.1729  TP: 0.179816  SL: 0.169442  Lev: 6x  Margin: $100.0
+
+Opening LONG — HYPEUSDT:
+  >> FILLED LONG HYPEUSDT @ 61.066  TP: 63.50864  SL: 59.84468  Lev: 6x  Margin: $100.0
+
+Opening LONG — DOTUSDT:
+  >> FILLED LONG DOTUSDT @ 0.9656  TP: 1.004224  SL: 0.946288  Lev: 5x  Margin: $100.0
+
+Opening LONG — BCHUSDT:
+  >> FILLED LONG BCHUSDT @ 207.9  TP: 216.216  SL: 203.742  Lev: 5x  Margin: $100.0
+
+Opening LONG — APTUSDT:
+  >> FILLED LONG APTUSDT @ 0.6602  TP: 0.686608  SL: 0.646996  Lev: 5x  Margin: $100.0
+
+Opening LONG — ICPUSDT:
+  >> FILLED LONG ICPUSDT @ 2.297  TP: 2.38888  SL: 2.25106  Lev: 5x  Margin: $100.0
+
+Opening LONG — HBARUSDT:
+  >> FILLED LONG HBARUSDT @ 0.07936  TP: 0.082534  SL: 0.077773  Lev: 5x  Margin: $100.0
+
+=========================================================
+Scan #23 complete
+Equity:        10094.60 USDT  (+94.60 USDT overall)
+Trades:        7 closed  (3W / 4L  43% win rate)
+Open positions:20
+New trades:    8
+Done.
+============================================================ 
+Run finished: Sat 13/06/2026  1:24:39.42 
+============================================================ 
+============================================================ 
+Run started: Sat 13/06/2026  5:00:00.64 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-13 05:00:01
+Balance:       8018.00 USDT
+Open positions:20
+Scan #:        24
+=========================================================
+
+Checking open positions for TP/SL...
+  >> NEARUSDT STOP_LOSS: LOSS  PnL -10.0000 USDT  (-10.0% of margin)
+  >> DOGEUSDT STOP_LOSS: LOSS  PnL -11.9973 USDT  (-12.0% of margin)
+  >> BCHUSDT STOP_LOSS: LOSS  PnL -10.0000 USDT  (-10.0% of margin)
+  >> APTUSDT STOP_LOSS: LOSS  PnL -10.0000 USDT  (-10.0% of margin)
+
+Fetching macro context...
+  Fear & Greed:  12 — Extreme Fear
+  BTC Dominance: 56.4%
+  Regime:        FEAR — caution on shorts, favour longs
+
+Available slots: 4
+
+Skipping BTCUSDT — position open
+Skipping ETHUSDT — position open
+Skipping BNBUSDT — position open
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Analysing DOGEUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0022%
+  Strong uptrend confirmed by +8.10% 7d momentum, exceptional +225% volume surge, and price trading 12.85% above
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Analysing AVAXUSDT...
+  Data error for AVAXUSDT: Bybit 10006: Too many visits. Exceeded the API Rate Limit.
+  Insufficient data — skipping
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Skipping LTCUSDT — position open
+Analysing NEARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0163%
+  Mixed signals prevent high-conviction entry: 7d momentum is positive (+2.32%) but 24h momentum is negative (-0
+Analysing BCHUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100%
+  Mixed signals prevent high-conviction entry. Negative 7d momentum (-5.92%) and distance from 7d high (-13.30%)
+Analysing APTUSDT...
+  HOLD       | Conf: 45% | Lev: 5x | Risk: MEDIUM | Funding: -0.0019%
+  Mixed signals prevent high-conviction entry. While macro regime favours longs and negative funding supports lo
+Skipping ICPUSDT — position open
+Skipping HBARUSDT — position open
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Skipping HYPEUSDT — position open
+
+=========================================================
+Candidates: 1
+
+Opening LONG — DOGEUSDT:
+  >> FILLED LONG DOGEUSDT @ 0.08754  TP: 0.091042  SL: 0.085789  Lev: 6x  Margin: $100.0
+
+=========================================================
+Scan #24 complete
+Equity:        9941.52 USDT  (-58.48 USDT overall)
+Trades:        11 closed  (3W / 8L  27% win rate)
+Open positions:17
+New trades:    1
+Done.
+============================================================ 
+Run finished: Sat 13/06/2026  5:00:41.81 
+============================================================ 
+============================================================ 
+Run started: Sat 13/06/2026 11:01:44.54 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-13 11:01:55
+Balance:       8276.01 USDT
+Open positions:17
+Scan #:        25
+=========================================================
+
+Checking open positions for TP/SL...
+  >> HYPEUSDT STOP_LOSS: LOSS  PnL -12.0000 USDT  (-12.0% of margin)
+
+Fetching macro context...
+  Fear & Greed:  13 — Extreme Fear
+  BTC Dominance: 56.4%
+  Regime:        FEAR — caution on shorts, favour longs
+
+Available slots: 4
+
+Skipping BTCUSDT — position open
+Skipping ETHUSDT — position open
+Skipping BNBUSDT — position open
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Analysing AVAXUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0112%
+  Mixed signals prevent conviction: macro fear regime favours longs, but 24h momentum is negative (-1.08%), volu
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Skipping LTCUSDT — position open
+Analysing NEARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0134%
+  Mixed signals prevent conviction: 7d momentum is positive (+3.16%) and macro environment favours longs (extrem
+Analysing BCHUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0074%
+  Mixed signals prevent high-conviction trading: macro environment favours longs (extreme fear, low BTC dominanc
+Analysing APTUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0121%
+  Mixed signals prevent conviction despite favourable macro regime (Extreme Fear, negative funding). Volume coll
+Skipping ICPUSDT — position open
+Skipping HBARUSDT — position open
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Analysing HYPEUSDT...
+  HOLD       | Conf: 45% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100%
+  While macro conditions favour longs (extreme fear, 56.4% BTC dominance) and funding is benign at +0.01%, techn
+
+=========================================================
+Candidates: 0
+
+=========================================================
+Scan #25 complete
+Equity:        9947.71 USDT  (-52.29 USDT overall)
+Trades:        12 closed  (3W / 9L  25% win rate)
+Open positions:16
+New trades:    0
+Done.
+============================================================ 
+Run finished: Sat 13/06/2026 11:02:37.29 
+============================================================ 
+============================================================ 
+Run started: Sat 13/06/2026 13:00:00.51 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-13 13:00:01
+Balance:       8164.01 USDT
+Open positions:18
+Scan #:        27
+=========================================================
+
+Checking open positions for TP/SL...
+
+Fetching macro context...
+  Fear & Greed:  13 — Extreme Fear
+  BTC Dominance: 56.4%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Available slots: 2
+
+Skipping BTCUSDT — position open
+Skipping ETHUSDT — position open
+Skipping BNBUSDT — position open
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Analysing AVAXUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0051%
+  Mixed signals prevent conviction: 24h momentum is negative (-0.75%), failing the BUY rule despite positive 7d 
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Skipping LTCUSDT — position open
+Analysing NEARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0101%
+  Mixed signals prevent conviction: 24h momentum is negative (-2.96%), disqualifying a BUY, while 7d momentum (+
+Skipping BCHUSDT — position open
+Analysing APTUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0042%
+  Mixed signals prevent high-conviction entry. 24h momentum is slightly negative (-0.12%) failing BUY criteria, 
+Skipping ICPUSDT — position open
+Skipping HBARUSDT — position open
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Skipping HYPEUSDT — position open
+
+=========================================================
+Candidates: 0
+
+=========================================================
+Scan #27 complete
+Equity:        9960.16 USDT  (-39.84 USDT overall)
+Trades:        12 closed  (3W / 9L  25% win rate)
+Open positions:18
+New trades:    0
+Done.
+============================================================ 
+Run finished: Sat 13/06/2026 13:01:07.41 
+============================================================ 
+============================================================ 
+Run started: Sat 13/06/2026 17:00:00.55 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-13 17:00:01
+Balance:       8164.01 USDT
+Open positions:18
+Scan #:        28
+=========================================================
+
+Checking open positions for TP/SL...
+  >> HBARUSDT STOP_LOSS: LOSS  PnL -9.9987 USDT  (-10.0% of margin)
+
+Fetching macro context...
+  Fear & Greed:  13 — Extreme Fear
+  BTC Dominance: 56.5%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Available slots: 3
+
+Skipping BTCUSDT — position open
+Skipping ETHUSDT — position open
+Skipping BNBUSDT — position open
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Analysing AVAXUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: -0.0052%
+  24h momentum is positive (+1.02%) and 7d momentum (-0.61%) is well above the -10% threshold, with RSI at 66 no
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Skipping LTCUSDT — position open
+Analysing NEARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0067%
+  Mixed signals prevent conviction: 24h momentum is negative (-2.87%) failing BUY criteria, while 7d momentum (+
+Skipping BCHUSDT — position open
+Analysing APTUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0017%
+  24h momentum +4.34% and 7d momentum +1.28% both positive with RSI 65.2 (below overbought threshold of 70) meet
+Skipping ICPUSDT — position open
+Analysing HBARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0137%
+  HBAR shows mixed signals with neutral RSI (50.4) and negative momentum across both timeframes (-1.18% 24h, -2.
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Skipping HYPEUSDT — position open
+
+=========================================================
+Candidates: 2
+
+Opening LONG — APTUSDT:
+  >> FILLED LONG APTUSDT @ 0.6631  TP: 0.689624  SL: 0.649838  Lev: 6x  Margin: $100.0
+
+Opening LONG — AVAXUSDT:
+  >> FILLED LONG AVAXUSDT @ 6.632  TP: 6.89728  SL: 6.49936  Lev: 5x  Margin: $100.0
+
+=========================================================
+Scan #28 complete
+Equity:        9971.12 USDT  (-28.88 USDT overall)
+Trades:        13 closed  (3W / 10L  23% win rate)
+Open positions:19
+New trades:    2
+Done.
+============================================================ 
+Run finished: Sat 13/06/2026 17:00:40.27 
+============================================================ 
+============================================================ 
+Run started: Sat 13/06/2026 21:00:00.58 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-13 21:00:02
+Balance:       8054.01 USDT
+Open positions:19
+Scan #:        29
+=========================================================
+
+Checking open positions for TP/SL...
+  >> ICPUSDT TAKE_PROFIT: WIN  PnL +20.0000 USDT  (+20.0% of margin)
+  >> HYPEUSDT STOP_LOSS: LOSS  PnL -10.0000 USDT  (-10.0% of margin)
+
+Fetching macro context...
+  Fear & Greed:  13 — Extreme Fear
+  BTC Dominance: 56.4%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Available slots: 3
+
+Skipping BTCUSDT — position open
+Skipping ETHUSDT — position open
+Skipping BNBUSDT — position open
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Skipping AVAXUSDT — position open
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Skipping LTCUSDT — position open
+Analysing NEARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0029%
+  Mixed signals prevent conviction: 24h momentum is negative (-3.30%), failing BUY criteria despite positive 7d 
+Skipping BCHUSDT — position open
+Skipping APTUSDT — position open
+Analysing ICPUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0100%
+  24h momentum +7.60% and 7d momentum +6.34% both positive, volume confirmation strong (+90.3%), and funding rat
+Analysing HBARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0227%
+  7d momentum of -0.59% fails both BUY (needs >-10%) and SELL (needs <-10%) criteria, creating mixed signals. Wh
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Analysing HYPEUSDT...
+  SELL SHORT | Conf: 72% | Lev: 5x | Risk: MEDIUM | Funding: +0.0065%
+  7d momentum is -2.71% (approaching -10% threshold) and price is -11.77% from 7d high, meeting SELL criteria. R
+
+=========================================================
+Candidates: 2
+
+Opening LONG — ICPUSDT:
+  >> FILLED LONG ICPUSDT @ 2.449  TP: 2.54696  SL: 2.40002  Lev: 6x  Margin: $100.0
+
+Opening SHORT — HYPEUSDT:
+  >> FILLED SHORT HYPEUSDT @ 58.025  TP: 55.704  SL: 59.1855  Lev: 5x  Margin: $100.0
+
+=========================================================
+Scan #29 complete
+Equity:        10007.58 USDT  (+7.58 USDT overall)
+Trades:        15 closed  (4W / 11L  27% win rate)
+Open positions:19
+New trades:    2
+Done.
+============================================================ 
+Run finished: Sat 13/06/2026 21:00:43.03 
+============================================================ 

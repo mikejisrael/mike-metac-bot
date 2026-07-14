@@ -1,0 +1,130 @@
+# ===========================================================================
+# bench_dashboard_integration.py
+#
+# Snippet to merge into your existing bybit_dashboard.py. This adds a
+# "Coin Benching" panel with 4 editable input fields (window_trades,
+# min_trades_before_active, win_rate_threshold_pct, cooldown_days) plus a
+# live table of currently benched coins.
+#
+# Integration steps:
+#   1. At the top of bybit_dashboard.py, add:
+#        import bybit_coin_bench as bench
+#
+#   2. Add the route below anywhere with your other @app.route definitions.
+#
+#   3. Add the HTML block (further down) into your dashboard template,
+#      wherever you want the panel to appear.
+# ===========================================================================
+
+from flask import request, jsonify
+# (assumes `app` = your existing Flask app instance, and `bench` is imported
+#  as shown above)
+
+
+@app.route("/bench-config", methods=["GET", "POST"])
+def bench_config():
+    if request.method == "POST":
+        data = request.get_json()
+        cfg = bench.load_config()
+        # Only accept the 4 known keys, with basic type coercion/validation
+        try:
+            cfg["window_trades"] = int(data["window_trades"])
+            cfg["min_trades_before_active"] = int(data["min_trades_before_active"])
+            cfg["win_rate_threshold_pct"] = float(data["win_rate_threshold_pct"])
+            cfg["cooldown_days"] = int(data["cooldown_days"])
+        except (KeyError, ValueError, TypeError) as e:
+            return jsonify({"error": f"Invalid input: {e}"}), 400
+
+        bench.save_config(cfg)
+        return jsonify({"status": "saved", "config": cfg})
+
+    # GET - return current config + benched coins for the dashboard to render
+    return jsonify({
+        "config": bench.load_config(),
+        "benched": bench.load_benched()
+    })
+
+
+@app.route("/bench-unbench/<symbol>", methods=["POST"])
+def bench_unbench_route(symbol):
+    """Manual override button - immediately unbench a coin early."""
+    bench.manually_unbench(symbol)
+    return jsonify({"status": "unbenched", "symbol": symbol})
+
+
+# ===========================================================================
+# HTML/JS snippet - paste into your dashboard template where you want the
+# panel to render. Uses plain fetch() calls against the routes above.
+# Styled to roughly match a dark-card dashboard aesthetic; adjust classes
+# to match your existing CSS.
+# ===========================================================================
+
+BENCH_PANEL_HTML = """
+<div class="card" style="margin-top: 20px;">
+  <div class="card-header">COIN BENCHING</div>
+  <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px;">
+    <label>Window (last N trades)
+      <input type="number" id="bench_window" style="width:70px;">
+    </label>
+    <label>Min trades before active
+      <input type="number" id="bench_min_trades" style="width:70px;">
+    </label>
+    <label>Win rate threshold (%)
+      <input type="number" id="bench_threshold" style="width:70px;" step="0.1">
+    </label>
+    <label>Cooldown (days)
+      <input type="number" id="bench_cooldown" style="width:70px;">
+    </label>
+    <button onclick="saveBenchConfig()">Save</button>
+  </div>
+  <table id="benched_table">
+    <thead>
+      <tr><th>Coin</th><th>Benched At</th><th>Retest At</th><th>Reason</th><th></th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+async function loadBenchConfig() {
+  const res = await fetch('/bench-config');
+  const data = await res.json();
+  document.getElementById('bench_window').value = data.config.window_trades;
+  document.getElementById('bench_min_trades').value = data.config.min_trades_before_active;
+  document.getElementById('bench_threshold').value = data.config.win_rate_threshold_pct;
+  document.getElementById('bench_cooldown').value = data.config.cooldown_days;
+
+  const tbody = document.querySelector('#benched_table tbody');
+  tbody.innerHTML = '';
+  for (const [symbol, info] of Object.entries(data.benched)) {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${symbol}</td><td>${info.benched_at}</td><td>${info.unbench_at}</td>` +
+                    `<td>${info.reason}</td><td><button onclick="unbenchCoin('${symbol}')">Unbench</button></td>`;
+    tbody.appendChild(row);
+  }
+}
+
+async function saveBenchConfig() {
+  const payload = {
+    window_trades: document.getElementById('bench_window').value,
+    min_trades_before_active: document.getElementById('bench_min_trades').value,
+    win_rate_threshold_pct: document.getElementById('bench_threshold').value,
+    cooldown_days: document.getElementById('bench_cooldown').value
+  };
+  const res = await fetch('/bench-config', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if (res.ok) { loadBenchConfig(); } else { alert('Failed to save - check values'); }
+}
+
+async function unbenchCoin(symbol) {
+  await fetch(`/bench-unbench/${symbol}`, { method: 'POST' });
+  loadBenchConfig();
+}
+
+loadBenchConfig();
+setInterval(loadBenchConfig, 30000); // refresh every 30s like the rest of your dashboard
+</script>
+"""

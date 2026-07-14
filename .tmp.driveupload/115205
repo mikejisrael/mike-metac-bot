@@ -1,0 +1,47 @@
+import json
+
+with open('reports/Forecasts-for-2026-05-27-23-04-21--5-questions.json') as f:
+    data = json.load(f)
+
+print(f"Total questions: {len(data)}")
+print("=" * 70)
+
+for i, item in enumerate(data):
+    q = item['question']
+    prev = q.get('previous_forecasts', [])
+    
+    if prev and isinstance(prev[-1], dict):
+        pred = prev[-1].get('prediction_in_decimal')
+        submitted = f"{pred:.0%}" if pred is not None else "N/A"
+    else:
+        submitted = "N/A"
+
+    explanation = item.get('explanation', '') or ''
+    final_pred = ''
+    for line in explanation.split('\n'):
+        if 'Final Prediction' in line:
+            final_pred = line.replace('*Final Prediction*:','').replace('*','').strip()
+            break
+
+    cost = item.get('price_estimate', 0) or 0
+    errors = item.get('errors', []) or []
+    close = q.get('close_time','')[:10]
+    cats = [c['name'] for c in q.get('api_json',{}).get('projects',{}).get('category',[])]
+
+    print(f"Q{i+1:02d}: {q['question_text'][:65]}")
+    print(f"      Submitted: {submitted:6s} | Internal: {final_pred[:25]:25s} | Closes: {close}")
+    print(f"      Categories: {cats}")
+    print(f"      Cost: ${cost:.4f} | Errors: {len(errors)}")
+    print()
+
+total_cost = sum(item.get('price_estimate',0) or 0 for item in data)
+total_mins = sum(item.get('minutes_taken',0) or 0 for item in data)
+submitted_count = sum(1 for item in data 
+    if item['question'].get('previous_forecasts') 
+    and item['question']['previous_forecasts'][-1].get('prediction_in_decimal') is not None)
+
+print("=" * 70)
+print(f"Submitted:  {submitted_count}/{len(data)}")
+print(f"Total cost: ${total_cost:.4f}")
+print(f"Total time: {total_mins:.1f} mins")
+print(f"Cost/question: ${total_cost/len(data):.4f}")

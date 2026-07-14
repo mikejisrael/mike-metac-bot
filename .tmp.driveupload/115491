@@ -1,0 +1,102 @@
+name: Tournament Forecast (tournament_forecast.py)
+
+on:
+  workflow_dispatch:  # manual trigger from GitHub UI
+  #schedule:
+    #- cron: "7,37 * * * *"  # every 30 minutes — questions can close in 90 min
+
+# Prevent overlapping runs (queue rather than cancel, since submissions are stateful)
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  forecast:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed to push batch_results back for dedup
+
+    steps:
+      - name: Check out repository
+        # FIXED 2026-07-02: previously had no explicit `ref`, so this
+        # defaulted to github.sha — the exact commit that was on `main` at
+        # the MOMENT THIS RUN WAS DISPATCHED, not when it actually starts
+        # executing. Because concurrency.cancel-in-progress is false, a
+        # dispatch can sit queued behind other runs for a while; when it
+        # finally executes, the default behavior still checks out that old,
+        # now-stale commit. Confirmed live: run #212 executed at 10:17 AM
+        # but was still pinned to commit 9b22a5b, several commits behind
+        # main by then — causing it to re-process resolution_state.json as
+        # if the .gitignore/merge fixes had never happened, re-alerting on
+        # 5 already-resolved questions. Run #211 hit the other half of the
+        # same problem: it tried to push its (stale-derived) changes and
+        # got rejected as non-fast-forward, since main had moved on.
+        # Setting ref: main explicitly (a literal branch name, not
+        # github.sha) makes checkout do a live fetch of whatever's actually
+        # on main right now, no matter how long the dispatch sat queued.
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Run tournament_forecast.py
+        run: poetry run python tournament_forecast.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          METACULUS_TOKEN: ${{ secrets.METACULUS_TOKEN }}
+          # Optional: set this to your dedicated bot account token (mike_iz_-bot).
+          # Falls back to METACULUS_TOKEN if not set.
+          METAC_TOURNAMENT_TOKEN: ${{ secrets.METAC_TOURNAMENT_TOKEN }}
+          # Optional: override the tournament ID without editing the script.
+          # Set as a Repository variable (not secret) under Settings → Variables → Actions.
+          METAC_TOURNAMENT_ID: ${{ vars.METAC_TOURNAMENT_ID }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # Added 2026-06-30: was missing entirely — send_alert() reads this
+          # from the environment, and GitHub Actions runners don't have
+          # local .env, only what's explicitly passed here. Without this,
+          # every ntfy alert (including today's new ones in meta_watch.py —
+          # new FutureEval question, resolved forecast, dropped tournament
+          # fetch) would silently never fire on scheduled runs, only when
+          # tested locally. Confirm ALERT_NTFY_TOPIC exists under
+          # Settings -> Secrets and variables -> Actions before relying on
+          # any of these alerts.
+          ALERT_NTFY_TOPIC: ${{ secrets.ALERT_NTFY_TOPIC }}
+
+      - name: Commit forecast results for dedup
+        # FIXED 2026-07-02: previously had no `if:`, so GitHub Actions'
+        # default behavior applied — this step is skipped entirely if the
+        # prior "Run tournament_forecast.py" step fails. That meant any
+        # watch_state/ changes written to disk before a mid-run crash
+        # (e.g. a single tournament's fetch or submission erroring out
+        # after meta_watch.py's alerts had already fired and written their
+        # state files) were thrown away when the runner was torn down,
+        # never pushed. Next run started from stale state and re-detected
+        # the same "new" questions / refresh candidates as if nothing had
+        # been seen — this is why repeat notifications kept firing.
+        # `if: always()` makes this step run regardless of the previous
+        # step's outcome, so partial progress is always saved.
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tournament_batches/ watch_state/ 2>/dev/null || true
+          git diff --cached --quiet && echo "No new results to commit." || (
+            git commit -m "chore: tournament forecast results [skip ci]" &&
+            git push
+          )

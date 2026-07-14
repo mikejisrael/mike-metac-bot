@@ -1,0 +1,338 @@
+============================================================ 
+Run started: Fri 05/06/2026  5:00:01.21 
+============================================================ 
+API connection failed: ConnectionRefusedError(22, 'The remote computer refused the network connection', None, 1225, None)
+Make sure API port on TWS/IBG is open
+Traceback (most recent call last):
+  File "C:\Users\mikej\metac-bot-template\ibkr_claude_bot.py", line 13, in <module>
+    ib.connect('127.0.0.1', 7497, clientId=1)
+  File "C:\Users\mikej\metac-bot-template\venv312\Lib\site-packages\ib_insync\ib.py", line 279, in connect
+    return self._run(self.connectAsync(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\metac-bot-template\venv312\Lib\site-packages\ib_insync\ib.py", line 318, in _run
+    return util.run(*awaitables, timeout=self.RequestTimeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\metac-bot-template\venv312\Lib\site-packages\ib_insync\util.py", line 341, in run
+    result = loop.run_until_complete(task)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 686, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\metac-bot-template\venv312\Lib\site-packages\ib_insync\ib.py", line 1748, in connectAsync
+    await self.client.connectAsync(host, port, clientId, timeout)
+  File "C:\Users\mikej\metac-bot-template\venv312\Lib\site-packages\ib_insync\client.py", line 211, in connectAsync
+    await asyncio.wait_for(self.conn.connectAsync(host, port), timeout)
+  File "C:\Users\mikej\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\mikej\metac-bot-template\venv312\Lib\site-packages\ib_insync\connection.py", line 39, in connectAsync
+    self.transport, _ = await loop.create_connection(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 1127, in create_connection
+    raise exceptions[0]
+  File "C:\Users\mikej\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 1102, in create_connection
+    sock = await self._connect_sock(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 1005, in _connect_sock
+    await self.sock_connect(sock, address)
+  File "C:\Users\mikej\AppData\Local\Programs\Python\Python312\Lib\asyncio\proactor_events.py", line 729, in sock_connect
+    return await self._proactor.connect(sock, address)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\AppData\Local\Programs\Python\Python312\Lib\asyncio\windows_events.py", line 803, in _poll
+    value = callback(transferred, key, ov)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\AppData\Local\Programs\Python\Python312\Lib\asyncio\windows_events.py", line 599, in finish_connect
+    ov.getresult()
+ConnectionRefusedError: [WinError 1225] The remote computer refused the network connection
+============================================================ 
+Run finished: Fri 05/06/2026  5:00:06.40 
+============================================================ 
+============================================================ 
+Run started: Fri 05/06/2026 17:00:00.39 
+============================================================ 
+$^VIX: possibly delisted; no price data found  (period=30d)
+IBKR CLAUDE TRADING BOT
+=======================================================
+Scan: 2026-06-05 17:00:03
+Watchlist: 72 stocks
+Max positions: 20
+Position size: $10,000 per trade
+Confidence threshold: 65%
+Stop loss: 3% | Take profit: 6%
+Logs: ibkr_logs\
+=======================================================
+
+Current positions: ['WOW', 'CRM', 'MS', 'GMG', 'WES', 'CPU', 'AAPL', 'XRO', 'ALX', 'BAC', 'BHP']
+Pending BUY orders (will skip): ['PME']
+Available slots: 8
+
+Fetching macro context...
+
+MACRO ENVIRONMENT (live data):
+- VIX (Fear Index):  N/A (30d change: N/A%)
+- S&P 500:           7,584.31 (30d change: 6.7%)
+- ASX 200:           8,625.1 (30d change: -1.61%)
+- Federal Funds Rate:3.63% (trend: down)
+- Market regime:     NORMAL — standard sizing
+
+Skipping AAPL — already in portfolio
+Analysing MSFT...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +24.8%
+  MSFT shows mixed momentum signals: strong 5-day pullback of -4.9% after a powerful ru
+Analysing GOOGL...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: +36.6%
+  GOOGL shows a sharp V-shaped recovery from 358.08 low (June 3) to 372.19 (June 4), su
+Analysing NVDA...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +5.9%
+  NVDA shows conflicting signals: positive 5d/20d momentum (+3.4-3.6%) with volume conf
+Analysing AMZN...
+  SELL | Confidence: 75% | Risk: MEDIUM | Vol: +15.1%
+  AMZN is in a clear downtrend with -6.2% 5-day and -6.4% 20-day momentum, currently -8
+Analysing META...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +38.1%
+  META exhibits mixed signals: strong 5-day volume surge (+38%) supports recent recover
+Analysing TSLA...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -18.2%
+  TSLA shows mixed signals with conflicting momentum (5d: -4.0% vs 20d: +1.6%) and volu
+Analysing AMD...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -20.1%
+  AMD shows strong 20-day momentum (+28.1%) and is near 20-day highs, but volume is dec
+Analysing INTC...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -16.3%
+  INTC shows conflicting signals: strong short-term downtrend (-2.5% in 5 days, -15.8% 
+Analysing QCOM...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -36.4%
+  QCOM shows strong 20-day uptrend (+19.8%) with price near 20-day highs, but criticall
+Analysing AVGO...
+  SELL | Confidence: 85% | Risk: HIGH | Vol: +80.7%
+  AVGO has experienced a catastrophic reversal on 2026-06-04 with a -15.4% gap down (fr
+Analysing MU...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -14.8%
+  MU shows strong 20-day momentum (+54%) and recovered 56.7% from 20-day lows, but crit
+Skipping CRM — already in portfolio
+Analysing ORCL...
+  HOLD | Confidence: 62% | Risk: MEDIUM | Vol: +49.9%
+  ORCL shows a strong 21.5% uptrend with volume confirmation, but the stock is now 5.6%
+Analysing ADBE...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +28.3%
+  ADBE shows mixed signals: strong volume-confirmed rally from May 29-Jun 1 (+7.4%), bu
+Analysing NOW...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: +36.4%
+  Stock exhibits strong 20-day uptrend (+27.5%) but is caught in sharp -4.0% 5-day pull
+Analysing SNOW...
+  HOLD | Confidence: 55% | Risk: HIGH | Vol: +29.4%
+  SNOW exhibits a strong 20-day uptrend (+58.8%) but is showing critical weakness: shar
+Analysing JPM...
+  BUY  | Confidence: 72% | Risk: MEDIUM | Vol: +5.8%
+  JPM exhibits a strong reversal setup with a +10.3% rally from the May 27 low (295.75)
+Analysing GS...
+  BUY  | Confidence: 78% | Risk: MEDIUM | Vol: +6.5%
+  GS exhibits a strong uptrend with +6.5% 5-day and +18.0% 20-day momentum, supported b
+Skipping MS — already in portfolio
+Skipping BAC — already in portfolio
+Analysing V...
+  HOLD | Confidence: 45% | Risk: HIGH | Vol: +28.7%
+  V shows mixed signals: sharp 5-day decline (-1.9%) from a 20-day high of 335.17, curr
+Analysing MA...
+  HOLD | Confidence: 35% | Risk: HIGH | Vol: +30.6%
+  MA is in a clear downtrend (-2.5% 5d, -3.8% 20d) with elevated volume confirming sell
+Analysing JNJ...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +12.2%
+  JNJ shows recovery momentum (+1.3% 5d, +2.5% 20d) with volume confirmation, but the p
+Analysing UNH...
+  BUY  | Confidence: 72% | Risk: MEDIUM | Vol: +2.3%
+  UNH shows strong uptrend with +4.2% 5-day and +7.2% 20-day momentum, capped by except
+Analysing PFE...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -9.1%
+  PFE shows a clear downtrend (-1.9% 5d, -3.0% 20d) with price 3.9% below the 20-day hi
+Analysing ABBV...
+  BUY  | Confidence: 75% | Risk: MEDIUM | Vol: +9.1%
+  ABBV shows a strong uptrend with +11.0% 20-day momentum and is trading at 20-day high
+Analysing MRK...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +14.3%
+  MRK shows a strong intraday bounce (+4.3% on 2026-06-04) with volume confirmation, bu
+Analysing NFLX...
+  SELL | Confidence: 75% | Risk: MEDIUM | Vol: +17.5%
+  NFLX exhibits a clear downtrend with -5.2% (5d) and -7.6% (20d) momentum, currently n
+Analysing DIS...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: +7.2%
+  DIS exhibits a clear downtrend with -8.6% momentum over 20 days, currently trading ne
+Analysing NKE...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: +3.0%
+  NKE exhibits a clear downtrend with -5.6% momentum over 5 days following a sharp reve
+Analysing MCD...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: +1.7%
+  MCD exhibits a clear downtrend with -2.3% 5-day and -3.9% 20-day momentum, currently 
+Analysing SBUX...
+  SELL | Confidence: 82% | Risk: MEDIUM | Vol: +11.2%
+  SBUX exhibits a strong downtrend with -5.1% (5d) and -9.7% (20d) momentum, reinforced
+Analysing XOM...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -14.6%
+  XOM shows short-term momentum (+4.7% 5-day) from a low of 143.92, but volume is decli
+Analysing CVX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -22.4%
+  CVX shows modest uptrend recovery (+3.2% over 5 and 20 days) from a significant May 2
+Analysing CBA.AX...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: -28.3%
+  CBA exhibits a clear downtrend with -7.5% 20-day momentum and is -8.4% from its 20-da
+Analysing NAB.AX...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: -17.2%
+  NAB.AX exhibits a clear downtrend with -2.1% (5d) and -4.3% (20d) momentum, currently
+Analysing WBC.AX...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: -11.6%
+  WBC.AX exhibits a clear downtrend with -6.2% momentum over 20 days and -3.7% over 5 d
+Analysing ANZ.AX...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: -17.4%
+  ANZ shows a clear downtrend with -5.0% 20-day momentum and -2.7% 5-day momentum, curr
+Analysing MQG.AX...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -21.9%
+  MQG shows mixed technical signals with negative 5/20-day momentum and declining volum
+Skipping BHP.AX — already in portfolio
+Analysing RIO.AX...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: -5.8%
+  RIO.AX shows a clear downtrend over the last 5 days (-2.1% momentum) after peaking at
+Analysing FMG.AX...
+  SELL | Confidence: 78% | Risk: MEDIUM | Vol: -1.6%
+  FMG.AX exhibits a sharp downtrend with -8.8% 5-day momentum and -4.2% 20-day momentum
+Analysing MIN.AX...
+  SELL | Confidence: 75% | Risk: HIGH | Vol: -11.3%
+  Clear downtrend with -9.1% 5-day momentum and -9.8% from 20-day high, now trading nea
+Analysing S32.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -21.6%
+  Stock shows strong 20-day uptrend (+10.2%) but is currently in pullback mode with -2.
+Analysing NST.AX...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: +29.4%
+  NST.AX shows conflicting signals: strong 5-day momentum (+7.4%) with increasing volum
+Analysing EVN.AX...
+  SELL | Confidence: 72% | Risk: HIGH | Vol: -19.8%
+  EVN.AX exhibits a clear downtrend with -5.6% 5-day and -9.5% 20-day momentum, current
+Analysing CSL.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -13.8%
+  Stock shows +3.9% short-term recovery after -10.2% drawdown from 20-day highs, but vo
+Analysing RMD.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +73.8%
+  RMD.AX shows strong recent recovery (+4.0% 5-day momentum) from a sharp selloff, with
+Analysing COH.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +2.3%
+  COH.AX shows recovery momentum with a strong close today (+5.6% from open), but both 
+Skipping PME.AX — order already working
+Analysing PNV.AX...
+  SELL | Confidence: 75% | Risk: MEDIUM | Vol: -55.3%
+  PNV.AX is in a clear downtrend (-10.3% over 5 days, -18.6% from 20d high) with volume
+Analysing WTC.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +12.1%
+  Stock shows strong recent recovery (+8.7% from 20d low, +12.1% volume increase) but i
+Skipping XRO.AX — already in portfolio
+Analysing TLX.AX...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: +11.7%
+  TLX.AX shows conflicting signals: strong 5-day bounce (+2.2%) from 20-day low with in
+Skipping CPU.AX — already in portfolio
+Analysing MP1.AX...
+  HOLD | Confidence: 45% | Risk: HIGH | Vol: +4.8%
+  While the stock shows strong 20-day momentum (+89.3%), the massive gap up on 2026-06-
+Skipping WOW.AX — already in portfolio
+Skipping WES.AX — already in portfolio
+Analysing JBH.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +27.5%
+  JBH shows a sharp reversal with -4.1% 5-day momentum after a 5.8% drop from 20-day hi
+Analysing HVN.AX...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: +6.5%
+  Stock shows a clear downtrend over the last 5 days (-3.3%) after a peak at 4.63, with
+Analysing SUL.AX...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -5.2%
+  Stock is in a clear downtrend (-2.2% over 5 days) after a recent peak, currently 4.6%
+Analysing WDS.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -17.8%
+  Stock shows weak positive momentum (+0.8% 5d, +1.3% 20d) but is declining from recent
+Analysing STO.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -30.0%
+  Stock shows modest uptrend (20d: +4.0%) but lacks conviction due to significantly dec
+Analysing BPT.AX...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -6.2%
+  BPT.AX shows weak uptrend (20d: +2.8%, 5d: flat) with deteriorating volume confirmati
+Analysing TCL.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -10.2%
+  TCL shows positive short-term momentum (+2.5% 5d, +4.1% 20d) and is trading near 20-d
+Skipping ALX.AX — already in portfolio
+Skipping GMG.AX — already in portfolio
+Analysing SCG.AX...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: +6.9%
+  SCG.AX is in a clear downtrend with -2.9% 5-day momentum after a failed rally at 3.83
+Analysing QAN.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -21.2%
+  QAN shows conflicting signals: positive 20-day momentum (+5.1%) and recovery from low
+Analysing SEK.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +5.0%
+  SEK.AX shows a strong 5-day uptrend (+5.2%) but is undermined by negative 20-day mome
+Analysing REA.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -14.0%
+  REA shows a strong 5-day rally (+5.0%) within a deteriorating 20-day trend (-10.6%), 
+
+=======================================================
+BUY candidates: 4
+
+Placing bracket order - GS:
+  Shares:      9
+  Entry:       USD 1098.07
+  Take profit: USD 1158.17 (+6%)
+  Stop loss:   USD 1059.83 (-3%)
+  Est. cost:   USD 9,883
+  Key risk:    Overextension risk: stock is 18.7% off 20-day lows with momentum potentially exhausted near all-time highs. Reversal or consolidation likely if broader market stalls or if GS fails to hold above 1080 support. Volume on 2026-06-03 showed profit-taking pullback despite higher price, signaling potential resistance ahead.
+  Confidence:  78%
+  Volume trend:+6.5% vs 20d avg
+  BUY  9.0 @ 1098.07 - PreSubmitted
+  SELL 9.0 @ 1158.17 - PreSubmitted
+  SELL 9.0 @ 1059.83 - PreSubmitted
+  Logged to ibkr_logs\trade_log.csv
+
+Placing bracket order - ABBV:
+  Shares:      44
+  Entry:       USD 226.06
+  Take profit: USD 238.44 (+6%)
+  Stop loss:   USD 218.19 (-3%)
+  Est. cost:   USD 9,947
+  Key risk:    Stock is at 20-day resistance (224.99); breakout failure or profit-taking after 12.5% run from lows could trigger reversal. Healthcare sector sensitivity to rate changes and potential mean reversion after strong momentum run pose additional downside risks.
+  Confidence:  75%
+  Volume trend:+9.1% vs 20d avg
+  BUY  44.0 @ 226.06 - PreSubmitted
+  SELL 44.0 @ 238.44 - PreSubmitted
+  SELL 44.0 @ 218.19 - PreSubmitted
+  Logged to ibkr_logs\trade_log.csv
+
+Placing bracket order - JPM:
+  Shares:      32
+  Entry:       USD 312.44
+  Take profit: USD 329.54 (+6%)
+  Stop loss:   USD 301.56 (-3%)
+  Est. cost:   USD 9,998
+  Key risk:    Recent price action shows a sharp V-shaped recovery from oversold conditions (May 27 dip). Mean reversion risk exists if the May 27 selloff was justified by deteriorating fundamentals rather than technical oversold bounce. Additionally, current position is within 1.7% of 20-day high with limited upside room before resistance, creating a poor risk/reward if momentum stalls.
+  Confidence:  72%
+  Volume trend:+5.8% vs 20d avg
+  BUY  32.0 @ 312.44 - PreSubmitted
+  SELL 32.0 @ 329.54 - PreSubmitted
+  SELL 32.0 @ 301.56 - PreSubmitted
+  Logged to ibkr_logs\trade_log.csv
+
+Placing bracket order - UNH:
+  Shares:      25
+  Entry:       USD 398.45
+  Take profit: USD 420.26 (+6%)
+  Stop loss:   USD 384.58 (-3%)
+  Est. cost:   USD 9,961
+  Key risk:    Volume spike on breakout day may indicate exhaustion rather than continuation; healthcare sector faces regulatory/political headwinds, and position sits near 20-day highs with limited room for confirmation—mean reversion to 388-392 support zone is plausible if broader market corrects or momentum fades.
+  Confidence:  72%
+  Volume trend:+2.3% vs 20d avg
+  BUY  25.0 @ 398.45 - PreSubmitted
+  SELL 25.0 @ 420.26 - PreSubmitted
+  SELL 25.0 @ 384.58 - PreSubmitted
+  Logged to ibkr_logs\trade_log.csv
+
+=======================================================
+Scan complete: 72 stocks analysed
+Signals: 4 BUY | 56 HOLD/SELL
+Trades placed: 4
+Logs saved to: ibkr_logs\
+Done.
+============================================================ 
+Run finished: Fri 05/06/2026 17:06:11.89 
+============================================================ 

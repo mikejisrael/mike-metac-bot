@@ -1,0 +1,438 @@
+============================================================ 
+Run started: Mon 22/06/2026  1:00:00.29 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-22 01:00:02
+Balance:       8040.00 USDT
+Open positions:20
+Scan #:        62
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  23 — Extreme Fear
+  BTC Dominance: 56.2%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Checking open positions for TP/SL...
+  >> NEARUSDT STOP_LOSS: LOSS  PnL -10.0000 USDT  (-10.0% of margin)
+Available slots: 1
+
+Analysing BTCUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: -0.0041%
+  RSI at 74.9 signals overbought conditions (>75 threshold), violating BUY criteria despite positive 7d momentum
+Skipping ETHUSDT — position open
+Skipping BNBUSDT — position open
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Skipping AVAXUSDT — position open
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Analysing LTCUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0048%
+  RSI at 76.5 is overbought (>75), triggering HIGH risk flag and disqualifying a BUY signal despite positive mom
+Analysing NEARUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 5x | Risk: MEDIUM | Funding: -0.0073%
+  24h momentum positive (+0.86%) and 7d momentum strong (+5.44%) well above -10% threshold. RSI at 57.7 is neutr
+Skipping BCHUSDT — position open
+Analysing APTUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: -0.0049%
+  RSI at 70.4 is at the overbought threshold, disqualifying a BUY despite positive 24h momentum (+2.63%) and acc
+Skipping ICPUSDT — position open
+Skipping HBARUSDT — position open
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Skipping HYPEUSDT — position open
+Skipping AAVEUSDT — position open
+Analysing ALGOUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0132%
+  Mixed signals prevent a clear directional bias. While 7d momentum is positive (+2.06%) and RSI is neutral (47.
+Skipping ENAUSDT — position open
+Analysing TAOUSDT...
+  SELL SHORT | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0043%
+  7d momentum at -9.99% is at decision boundary (marginally above -10% threshold), but price is -18.93% from 7d 
+
+=========================================================
+Candidates: 2
+
+Opening LONG — NEARUSDT:
+  >> FILLED LONG NEARUSDT @ 2.1814  TP: 2.268656  SL: 2.137772  Lev: 5x  Margin: $100.0
+
+=========================================================
+Scan #62 complete
+Equity:        10043.89 USDT  (+43.89 USDT overall)
+Trades:        79 closed  (28W / 51L  35% win rate)
+Open positions:20
+New trades:    1
+Done.
+============================================================ 
+Run finished: Mon 22/06/2026  1:00:59.11 
+============================================================ 
+============================================================ 
+Run started: Mon 22/06/2026  5:00:00.29 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-22 05:00:01
+Balance:       8030.00 USDT
+Open positions:20
+Scan #:        63
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  23 — Extreme Fear
+  BTC Dominance: 56.2%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Checking open positions for TP/SL...
+  >> BNBUSDT STOP_LOSS: LOSS  PnL -12.0000 USDT  (-12.0% of margin)
+  >> ENAUSDT STOP_LOSS: LOSS  PnL -10.0011 USDT  (-10.0% of margin)
+Available slots: 2
+
+Analysing BTCUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: -0.0032%
+  RSI at 75.6 is overbought (>70), triggering HIGH risk despite positive momentum. Volume is significantly depre
+Skipping ETHUSDT — position open
+Analysing BNBUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0100%
+  RSI at 81.1 is deeply overbought (>75), triggering HIGH risk designation and disqualifying BUY signal despite 
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Skipping AVAXUSDT — position open
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Analysing LTCUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0068%
+  24h momentum is positive (+2.22%) and 7d momentum is above -10% threshold (+2.08%), with RSI at 66.4 (below ov
+Skipping NEARUSDT — position open
+Skipping BCHUSDT — position open
+Analysing APTUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100%
+  24h momentum is positive (+3.70%) and 7d momentum is above -10% threshold (+1.33%), with funding rate benign a
+Skipping ICPUSDT — position open
+Skipping HBARUSDT — position open
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Skipping HYPEUSDT — position open
+Skipping AAVEUSDT — position open
+Analysing ALGOUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0015%
+  Mixed signals prevent conviction: 24h momentum is negative (-1.59%), violating BUY criteria despite positive 7
+Analysing ENAUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 5x | Risk: MEDIUM | Funding: +0.0050%
+  24h momentum is positive (+3.37%) and 7d momentum is strong (+13.03%), both well above -10% threshold. RSI at 
+Analysing TAOUSDT...
+  SELL SHORT | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: +0.0050%
+  7d momentum is -10.51% (meets threshold) and price is -18.99% from 7d high (exceeds 8% requirement), signaling
+
+=========================================================
+Candidates: 4
+
+Opening LONG — LTCUSDT:
+  >> FILLED LONG LTCUSDT @ 45.09  TP: 46.8936  SL: 44.1882  Lev: 6x  Margin: $100.0
+
+Opening LONG — APTUSDT:
+  >> FILLED LONG APTUSDT @ 0.6566  TP: 0.682864  SL: 0.643468  Lev: 5x  Margin: $100.0
+
+=========================================================
+Scan #63 complete
+Equity:        10046.64 USDT  (+46.64 USDT overall)
+Trades:        81 closed  (28W / 53L  35% win rate)
+Open positions:20
+New trades:    2
+Done.
+============================================================ 
+Run finished: Mon 22/06/2026  5:00:59.39 
+============================================================ 
+============================================================ 
+Run started: Mon 22/06/2026  9:00:00.33 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-22 09:00:02
+Balance:       8008.00 USDT
+Open positions:20
+Scan #:        64
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  23 — Extreme Fear
+  BTC Dominance: 56.2%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Checking open positions for TP/SL...
+  >> HBARUSDT STOP_LOSS: LOSS  PnL -11.9985 USDT  (-12.0% of margin)
+  >> NEARUSDT STOP_LOSS: LOSS  PnL -10.0000 USDT  (-10.0% of margin)
+Available slots: 2
+
+Analysing BTCUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0015%
+  7d momentum of -3.04% fails both BUY (needs > -10%) and SELL (needs < -10%) thresholds, creating mixed signals
+Skipping ETHUSDT — position open
+Analysing BNBUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100%
+  Mixed signals prevent conviction: 24h momentum is negative (-0.19%), disqualifying a BUY despite 7d momentum b
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Skipping AVAXUSDT — position open
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Skipping LTCUSDT — position open
+Analysing NEARUSDT...
+  SELL SHORT | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: -0.0003%
+  7d momentum of -4.75% approaches -10% threshold, price is 17.60% below 7d high, and RSI at 43.4 is neutral (no
+Skipping BCHUSDT — position open
+Skipping APTUSDT — position open
+Skipping ICPUSDT — position open
+Analysing HBARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: -0.0005%
+  RSI at 30.3 is at oversold threshold (rule requires > 30 for SHORT), blocking short entry despite -3.07% 7d mo
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Skipping HYPEUSDT — position open
+Skipping AAVEUSDT — position open
+Analysing ALGOUSDT...
+  SELL SHORT | Conf: 72% | Lev: 6x | Risk: HIGH | Funding: +0.0086%
+  7d momentum at -3.22% approaches threshold, but price is -13.72% below 7d high (well beyond 8% requirement) wi
+  Skipping HIGH risk (conf 72% < 82%)
+Analysing ENAUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0013%
+  Mixed signals prevent conviction: 24h momentum is negative (-1.60%), failing the primary BUY condition, while 
+Analysing TAOUSDT...
+  SELL SHORT | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: +0.0050%
+  7d momentum is -14.82% (< -10% threshold) and price is -20.90% from 7d high (> 8% requirement), meeting primar
+
+=========================================================
+Candidates: 2
+
+Opening SHORT — NEARUSDT:
+  >> FILLED SHORT NEARUSDT @ 2.1109  TP: 2.026464  SL: 2.153118  Lev: 5x  Margin: $100.0
+
+Opening SHORT — TAOUSDT:
+  >> FILLED SHORT TAOUSDT @ 230.7  TP: 221.472  SL: 235.314  Lev: 5x  Margin: $100.0
+
+=========================================================
+Scan #64 complete
+Equity:        10037.35 USDT  (+37.35 USDT overall)
+Trades:        83 closed  (28W / 55L  34% win rate)
+Open positions:20
+New trades:    2
+Done.
+============================================================ 
+Run finished: Mon 22/06/2026  9:00:53.22 
+============================================================ 
+============================================================ 
+Run started: Mon 22/06/2026 13:00:01.02 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-22 13:00:02
+Balance:       7986.00 USDT
+Open positions:20
+Scan #:        65
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  20 — Extreme Fear
+  BTC Dominance: 56.3%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Checking open positions for TP/SL...
+  >> NEARUSDT STOP_LOSS: LOSS  PnL -10.0000 USDT  (-10.0% of margin)
+Available slots: 1
+
+Analysing BTCUSDT...
+  HOLD       | Conf: 45% | Lev: 5x | Risk: MEDIUM | Funding: +0.0050%
+  Mixed signals prevent conviction: 24h momentum is negative (-0.32%), failing the BUY rule despite 7d momentum 
+Skipping ETHUSDT — position open
+Analysing BNBUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100%
+  Mixed signals prevent conviction: 24h momentum is positive (+0.14%) and RSI (65.0) is not overbought, satisfyi
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Skipping AVAXUSDT — position open
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Skipping LTCUSDT — position open
+Analysing NEARUSDT...
+  SELL SHORT | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: +0.0037%
+  7d momentum is -6.74% (approaching -10% threshold) and price is -15.71% from 7d high, meeting SELL criteria. R
+Skipping BCHUSDT — position open
+Skipping APTUSDT — position open
+Skipping ICPUSDT — position open
+Analysing HBARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100%
+  HBAR fails both buy and sell criteria: 24h momentum is negative (-1.94%), ruling out long entry; 7d momentum o
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Skipping HYPEUSDT — position open
+Skipping AAVEUSDT — position open
+Analysing ALGOUSDT...
+  SELL SHORT | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: +0.0075%
+  7d momentum at -2.60% is above the -10% threshold, but price is -13.10% below 7d high, exceeding the 8% rule a
+Analysing ENAUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 5x | Risk: LOW | Funding: +0.0050%
+  24h momentum is positive (+2.33%) and 7d momentum is strong (+9.41%), both well above the -10% threshold. RSI 
+Skipping TAOUSDT — position open
+
+=========================================================
+Candidates: 3
+
+Opening LONG — ENAUSDT:
+  >> FILLED LONG ENAUSDT @ 0.09184  TP: 0.095514  SL: 0.090003  Lev: 5x  Margin: $100.0
+
+=========================================================
+Scan #65 complete
+Equity:        10039.93 USDT  (+39.93 USDT overall)
+Trades:        84 closed  (28W / 56L  33% win rate)
+Open positions:20
+New trades:    1
+Done.
+============================================================ 
+Run finished: Mon 22/06/2026 13:01:14.40 
+============================================================ 
+============================================================ 
+Run started: Mon 22/06/2026 17:00:01.06 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-22 17:00:02
+Balance:       8066.00 USDT
+Open positions:19
+Scan #:        67
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  20 — Extreme Fear
+  BTC Dominance: 56.2%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Checking open positions for TP/SL...
+Available slots: 1
+
+Analysing BTCUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0010%
+  Mixed signals prevent conviction: 24h momentum is negative (-0.31%), disqualifying BUY setup despite favorable
+Skipping ETHUSDT — position open
+Analysing BNBUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0029%
+  Mixed signals prevent conviction: 24h momentum is flat (-0.05%) failing BUY requirement, while 7d momentum (-4
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Skipping AVAXUSDT — position open
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Skipping LTCUSDT — position open
+Skipping BCHUSDT — position open
+Skipping APTUSDT — position open
+Skipping ICPUSDT — position open
+Analysing HBARUSDT...
+  Data error for HBARUSDT: HTTPSConnectionPool(host='api.bybit.com', port=443): Max retries exceeded with url: /v5/market/kline?category=linear&symbol=HBARUSDT&interval=240&limit=50 (Caused by NameResolutionError("HTTPSConnection(host='api.bybit.com', port=443): Failed to resolve 'api.bybit.com' ([Errno 11001] getaddrinfo failed)"))
+  Insufficient data — skipping
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Skipping AAVEUSDT — position open
+Analysing ALGOUSDT...
+  SELL SHORT | Conf: 68% | Lev: 5x | Risk: HIGH | Funding: +0.0100%
+  7d momentum at -3.79% is borderline weak but price is -13.78% below 7d high, exceeding the 8% threshold for sh
+  Skipping HIGH risk (conf 68% < 82%)
+Skipping ENAUSDT — position open
+Skipping TAOUSDT — position open
+
+=========================================================
+Candidates: 0
+
+=========================================================
+Scan #67 complete
+Equity:        10042.19 USDT  (+42.19 USDT overall)
+Trades:        85 closed  (28W / 57L  33% win rate)
+Open positions:19
+New trades:    0
+Done.
+============================================================ 
+Run finished: Mon 22/06/2026 17:01:23.18 
+============================================================ 
+============================================================ 
+Run started: Mon 22/06/2026 21:00:00.98 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-22 21:00:02
+Balance:       8066.00 USDT
+Open positions:19
+Scan #:        68
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  50 — Neutral
+  BTC Dominance: N/A%
+  Regime:        NEUTRAL — standard sizing
+
+Checking open positions for TP/SL...
+Available slots: 1
+
+Analysing BTCUSDT...
+  Data error for BTCUSDT: HTTPSConnectionPool(host='api.bybit.com', port=443): Max retries exceeded with url: /v5/market/kline?category=linear&symbol=BTCUSDT&interval=240&limit=50 (Caused by NameResolutionError("HTTPSConnection(host='api.bybit.com', port=443): Failed to resolve 'api.bybit.com' ([Errno 11001] getaddrinfo failed)"))
+  Insufficient data — skipping
+Skipping ETHUSDT — position open
+Analysing BNBUSDT...
+  Data error for BNBUSDT: HTTPSConnectionPool(host='api.bybit.com', port=443): Read timed out. (read timeout=15)
+  Insufficient data — skipping
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Skipping AVAXUSDT — position open
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Skipping LTCUSDT — position open
+Skipping BCHUSDT — position open
+Skipping APTUSDT — position open
+Skipping ICPUSDT — position open
+Analysing HBARUSDT...
+  Data error for HBARUSDT: HTTPSConnectionPool(host='api.bybit.com', port=443): Max retries exceeded with url: /v5/market/kline?category=linear&symbol=HBARUSDT&interval=240&limit=50 (Caused by NameResolutionError("HTTPSConnection(host='api.bybit.com', port=443): Failed to resolve 'api.bybit.com' ([Errno 11001] getaddrinfo failed)"))
+  Insufficient data — skipping
+Skipping UNIUSDT — position open
+Skipping SUIUSDT — position open
+Skipping AAVEUSDT — position open
+Analysing ALGOUSDT...
+  Data error for ALGOUSDT: HTTPSConnectionPool(host='api.bybit.com', port=443): Max retries exceeded with url: /v5/market/kline?category=linear&symbol=ALGOUSDT&interval=240&limit=50 (Caused by NameResolutionError("HTTPSConnection(host='api.bybit.com', port=443): Failed to resolve 'api.bybit.com' ([Errno 11001] getaddrinfo failed)"))
+  Insufficient data — skipping
+Skipping ENAUSDT — position open
+Skipping TAOUSDT — position open
+
+=========================================================
+Candidates: 0
+
+=========================================================
+Scan #68 complete
+Equity:        10042.19 USDT  (+42.19 USDT overall)
+Trades:        85 closed  (28W / 57L  33% win rate)
+Open positions:19
+New trades:    0
+Done.
+============================================================ 
+Run finished: Mon 22/06/2026 21:16:04.49 
+============================================================ 

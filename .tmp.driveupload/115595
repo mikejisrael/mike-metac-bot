@@ -1,0 +1,192 @@
+============================================================ 
+Run started: Tue 16/06/2026 10:21:03.21 
+============================================================ 
+============================================================ 
+Run started: Tue 16/06/2026 10:21:03.24 
+============================================================ 
+============================================================ 
+Run started: Tue 16/06/2026 10:21:07.02 
+============================================================ 
+============================================================ 
+Run started: Tue 16/06/2026 10:21:07.13 
+============================================================ 
+============================================================ 
+Run started: Tue 16/06/2026 10:21:07.26 
+============================================================ 
+============================================================ 
+Run started: Tue 16/06/2026 13:00:01.53 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-16 13:00:03
+Balance:       9018.01 USDT
+Open positions:12
+Scan #:        34
+=========================================================
+
+Checking open positions for TP/SL...
+
+Fetching macro context...
+  Fear & Greed:  23 — Extreme Fear
+  BTC Dominance: 56.4%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Available slots: 8
+
+Skipping BTCUSDT — position open
+Analysing ETHUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: -0.0018%
+  24h momentum positive (+2.85%) and 7d momentum strong (+6.03%) satisfy entry criteria. RSI at 65.4 is healthy 
+Skipping BNBUSDT — position open
+Analysing SOLUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0004%
+  24h momentum is positive (+2.50%) and 7d momentum is strong (+10.61%), well above the -10% threshold. RSI at 6
+Analysing XRPUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0066%
+  24h momentum +2.58% and 7d momentum +5.47% both positive, well above -10% threshold. RSI at 64.8 is strong but
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Skipping AVAXUSDT — position open
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Analysing LTCUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0100%
+  24h momentum positive (+0.42%) and 7d momentum strong (+7.04%) both exceed thresholds; RSI at 69.2 is elevated
+Analysing NEARUSDT...
+  Data error for NEARUSDT: Bybit 10006: Too many visits. Exceeded the API Rate Limit.
+  Insufficient data — skipping
+Skipping BCHUSDT — position open
+Skipping APTUSDT — position open
+Analysing ICPUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0039%
+  24h momentum is negative (-6.19%), failing the primary BUY rule despite positive 7d momentum (+4.16%) and acce
+Analysing HBARUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0098%
+  24h momentum positive (+0.73%) and 7d momentum strong (+1.79%) well above -10% threshold; RSI at 67.1 approach
+Analysing UNIUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0039%
+  RSI at 70.0 is at the overbought threshold, failing the BUY rule requirement of RSI < 70. While 24h and 7d mom
+Skipping SUIUSDT — position open
+Analysing HYPEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0100%
+  RSI at 79.8 is severely overbought (>75), triggering HIGH risk flag and violating BUY criteria (RSI must be <7
+
+=========================================================
+Candidates: 5
+
+Opening LONG — ETHUSDT:
+  >> FILLED LONG ETHUSDT @ 1769.15  TP: 1839.916  SL: 1733.767  Lev: 6x  Margin: $100.0
+
+Opening LONG — SOLUSDT:
+  >> FILLED LONG SOLUSDT @ 72.99  TP: 75.9096  SL: 71.5302  Lev: 6x  Margin: $100.0
+
+Opening LONG — XRPUSDT:
+  >> FILLED LONG XRPUSDT @ 1.2172  TP: 1.265888  SL: 1.192856  Lev: 6x  Margin: $100.0
+
+Opening LONG — LTCUSDT:
+  >> FILLED LONG LTCUSDT @ 45.48  TP: 47.2992  SL: 44.5704  Lev: 6x  Margin: $100.0
+
+Opening LONG — HBARUSDT:
+  >> FILLED LONG HBARUSDT @ 0.08173  TP: 0.084999  SL: 0.080095  Lev: 6x  Margin: $100.0
+
+=========================================================
+Scan #34 complete
+Equity:        10210.08 USDT  (+210.08 USDT overall)
+Trades:        30 closed  (17W / 13L  57% win rate)
+Open positions:17
+New trades:    5
+Done.
+============================================================ 
+Run finished: Tue 16/06/2026 13:00:53.32 
+============================================================ 
+============================================================ 
+Run started: Tue 16/06/2026 18:07:24.86 
+============================================================ 
+============================================================ 
+Run started: Tue 16/06/2026 21:00:00.65 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-16 21:00:02
+Balance:       8638.01 USDT
+Open positions:16
+Scan #:        36
+=========================================================
+
+Checking open positions for TP/SL...
+
+Fetching macro context...
+  Fear & Greed:  23 — Extreme Fear
+  BTC Dominance: 56.4%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Available slots: 4
+
+Skipping BTCUSDT — position open
+Skipping ETHUSDT — position open
+Skipping BNBUSDT — position open
+Skipping SOLUSDT — position open
+Skipping XRPUSDT — position open
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Skipping TRXUSDT — position open
+Analysing AVAXUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: LOW | Funding: -0.0113%
+  24h momentum is positive (+0.68%) and 7d momentum is strong (+3.67%), well above the -10% threshold. RSI at 59
+Skipping TONUSDT — position open
+Skipping LINKUSDT — position open
+Skipping DOTUSDT — position open
+Skipping LTCUSDT — position open
+Analysing NEARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: -0.0104%
+  RSI at 73.8 is overbought and near the 75 threshold, triggering HIGH risk status and disqualifying both BUY an
+Skipping BCHUSDT — position open
+Skipping APTUSDT — position open
+Analysing ICPUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0060%
+  Mixed signals prevent a high-conviction trade. 24h momentum is negative (-4.95%), failing the BUY rule, while 
+Skipping HBARUSDT — position open
+Analysing UNIUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0100%
+  RSI at 82.2 is significantly overbought (>75), violating buy rule threshold of <70 and triggering HIGH risk cl
+Skipping SUIUSDT — position open
+Analysing HYPEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0100%
+  RSI at 87.6 is deeply overbought (>75), triggering HIGH risk and violating BUY criteria which requires RSI < 7
+Analysing AAVEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: -0.0098%
+  RSI at 70.2 is at overbought threshold, violating BUY rule requirement of RSI < 70. While 24h momentum (+1.54%
+Analysing ALGOUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0072%
+  24h momentum positive (+0.27%) and 7d momentum strong (+4.17%), both well above threshold. RSI at 63.9 is heal
+Analysing ENAUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: -0.0028%
+  ENA meets BUY criteria: positive 24h momentum (+1.20%), strong 7d momentum (+9.16% >> -10%), RSI neutral at 58
+Analysing UNIUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0100%
+  RSI at 82.2 is severely overbought (>75), triggering HIGH risk status and violating the BUY condition (RSI < 7
+
+=========================================================
+Candidates: 3
+
+Opening LONG — AVAXUSDT:
+  >> FILLED LONG AVAXUSDT @ 6.95  TP: 7.228  SL: 6.811  Lev: 6x  Margin: $100.0
+
+Opening LONG — ALGOUSDT:
+  >> FILLED LONG ALGOUSDT @ 0.09577  TP: 0.099601  SL: 0.093855  Lev: 6x  Margin: $100.0
+
+Opening LONG — ENAUSDT:
+  >> FILLED LONG ENAUSDT @ 0.08779  TP: 0.091302  SL: 0.086034  Lev: 5x  Margin: $100.0
+
+=========================================================
+Scan #36 complete
+Equity:        10351.01 USDT  (+351.01 USDT overall)
+Trades:        31 closed  (18W / 13L  58% win rate)
+Open positions:19
+New trades:    3
+Done.
+============================================================ 
+Run finished: Tue 16/06/2026 21:01:05.47 
+============================================================ 

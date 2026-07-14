@@ -1,0 +1,18 @@
+import os
+import asyncio
+from dotenv import load_dotenv
+load_dotenv()
+
+from forecasting_tools import MetaculusClient, BinaryQuestion
+
+async def test_direct_submit():
+    client = MetaculusClient()
+    print(f"Token: {client.token[:8]}...")
+    
+    result = await client.post_binary_question_prediction(
+        question_id=43327,
+        prediction_in_decimal=0.04
+    )
+    print(f"Submit result: {result}")
+
+asyncio.run(test_direct_submit())

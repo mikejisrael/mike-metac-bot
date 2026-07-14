@@ -1,0 +1,27 @@
+@echo off
+:: ─── Bybit Claude Bot Runner ───────────────────────────────────────────────────
+:: Called by Windows Task Scheduler every 4 hours.
+:: Activates venv312 and runs bybit_sim.py.
+:: Output appended to bybit_logs\scheduler\bot_run_YYYY-MM-DD.log
+
+set PROJECT_DIR=C:\Users\mikej\metac-bot-template
+set VENV_ACTIVATE=%PROJECT_DIR%\venv312\Scripts\activate.bat
+set BOT_SCRIPT=%PROJECT_DIR%\bybit_sim.py
+set LOG_DIR=%PROJECT_DIR%\bybit_sim_data\scheduler
+
+if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
+
+:: Date-stamped log file
+set LOG_FILE=%LOG_DIR%\bot_run_%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%.log
+
+echo ============================================================ >> "%LOG_FILE%"
+echo Run started: %DATE% %TIME% >> "%LOG_FILE%"
+echo ============================================================ >> "%LOG_FILE%"
+
+cd /d "%PROJECT_DIR%"
+call "%VENV_ACTIVATE%"
+python "%BOT_SCRIPT%" >> "%LOG_FILE%" 2>&1
+
+echo ============================================================ >> "%LOG_FILE%"
+echo Run finished: %DATE% %TIME% >> "%LOG_FILE%"
+echo ============================================================ >> "%LOG_FILE%"

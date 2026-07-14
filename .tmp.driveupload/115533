@@ -1,0 +1,33 @@
+from ib_insync import IB, Contract
+
+ib = IB()
+ib.connect('127.0.0.1', 7497, clientId=1)
+
+print("Fetching DISSA contracts...\n")
+
+for month in ['202606', '202607']:
+    for right in ['Yes', 'No']:
+        contract = Contract()
+        contract.secType = 'OPT'
+        contract.symbol = 'DISSA'
+        contract.exchange = 'FORECASTEX'
+        contract.currency = 'USD'
+        contract.lastTradeDateOrContractMonth = month
+        contract.right = right
+        contract.multiplier = '1'
+        
+        try:
+            details = ib.reqContractDetails(contract)
+            if details:
+                d = details[0]
+                print(f"✅ Found: {month} {right}")
+                print(f"   ConId: {d.contract.conId}")
+                print(f"   Strike: {d.contract.strike}")
+                print(f"   Name: {d.longName}")
+            else:
+                print(f"❌ No result: {month} {right}")
+        except Exception as e:
+            print(f"❌ Error {month} {right}: {str(e)[:80]}")
+
+ib.disconnect()
+print("\nDone.")

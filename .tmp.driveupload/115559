@@ -1,0 +1,43 @@
+"""
+check_question_fields.py — one-off diagnostic.
+
+Run from C:\\Users\\mikej\\metac-bot-template with venv312 active:
+
+    python check_question_fields.py
+
+Fetches Q43897 live (a question we know closes 2026-07-01, i.e. ~4 days
+from now) via the same MetaculusClient setup as meta_refresh_forecast.py,
+then prints every attribute on the returned object whose name suggests a
+date/time, plus its value. This tells us which attribute actually holds
+the "closes 2026-07-01" date vs. which one is returning the bogus 2028
+placeholder, so we patch submit_refresh_batch() with the right field name.
+"""
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+from forecasting_tools import MetaculusClient
+
+token = os.getenv("METAC_TOURNAMENT_TOKEN") or os.getenv("METACULUS_TOKEN")
+client = MetaculusClient(token=token)
+
+Q_ID = 43897  # known to close 2026-07-01 per local batch data
+
+question = client.get_question_by_post_id(Q_ID)
+if isinstance(question, list):
+    question = question[0]
+
+print(f"Question text: {question.question_text}\n")
+print("All attributes containing 'time', 'date', 'close', or 'resolve':")
+for attr in dir(question):
+    if attr.startswith("_"):
+        continue
+    lower = attr.lower()
+    if any(k in lower for k in ("time", "date", "close", "resolve")):
+        try:
+            value = getattr(question, attr)
+        except Exception as e:
+            value = f"<error: {e}>"
+        if not callable(value):
+            print(f"  {attr} = {value!r}")

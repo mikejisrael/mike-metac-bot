@@ -1,0 +1,188 @@
+============================================================ 
+Run started: Tue 02/06/2026 17:01:48.94 
+============================================================ 
+Error 1102, reqId -1: Connectivity between IBKR and Trader Workstation has been restored - data maintained. All data farms are connected: hfarm; cashfarm; afarm; usfarm.nj; usfarm; euhmds; apachmds; fundfarm; ushmds; secdefsg.
+IBKR CLAUDE TRADING BOT
+=======================================================
+Scan: 2026-06-02 17:01:53
+Watchlist: 72 stocks
+Max positions: 20
+Position size: $10,000 per trade
+Confidence threshold: 65%
+Stop loss: 3% | Take profit: 6%
+Logs: ibkr_logs\
+=======================================================
+
+Current positions: ['WOW', 'WES', 'CPU', 'FMG', 'AAPL', 'ALX', 'GS', 'BHP', 'MS', 'GMG', 'HVN', 'AVGO']
+Pending BUY orders (will skip): ['CRM', 'XRO', 'PME', 'MSFT']
+Available slots: 4
+
+Fetching macro context...
+
+MACRO ENVIRONMENT (live data):
+- VIX (Fear Index):  16.05 (30d change: -15.17%)
+- S&P 500:           7,599.96 (30d change: 6.9%)
+- ASX 200:           8,724.4 (30d change: -1.35%)
+- Federal Funds Rate:3.63% (trend: down)
+- Market regime:     NORMAL — standard sizing
+
+Skipping AAPL — already in portfolio
+Skipping MSFT — order already working
+Analysing GOOGL...
+  SELL | Confidence: 75% | Risk: MEDIUM | Vol: -10.0%
+  GOOGL is in a clear downtrend with -3.2% 5-day and -1.8% 20-day momentum, currently 7
+Analysing NVDA...
+  BUY  | Confidence: 72% | Risk: MEDIUM | Vol: +1.0%
+  NVDA shows a strong recovery pattern with a +4.4% 5-day momentum after testing the 20
+Analysing AMZN...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: +8.9%
+  AMZN is in a clear downtrend with -1.5% 5-day and -4.0% 20-day momentum, currently -6
+Analysing META...
+  SELL | Confidence: 75% | Risk: MEDIUM | Vol: +33.1%
+  META shows a clear downtrend with -1.9% 5-day momentum after a sharp reversal from 64
+Analysing TSLA...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -18.8%
+  TSLA shows conflicting signals: 20-day uptrend (+6.0%) undermined by sharp 5-day pull
+Analysing AMD...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -21.4%
+  AMD shows strong 20-day momentum (+49.4%) and is in an established uptrend, but volum
+Analysing INTC...
+  SELL | Confidence: 75% | Risk: HIGH | Vol: -20.8%
+  INTC shows a sharp reversal from $126.64 highs (May 29) to $109.33 (-11.5% in 5 days)
+Analysing QCOM...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -24.1%
+  QCOM shows strong 20-day momentum (+36%) but is conflicted by weak recent 5-day momen
+Skipping AVGO — already in portfolio
+Analysing MU...
+  HOLD | Confidence: 62% | Risk: HIGH | Vol: +3.8%
+  MU displays a strong uptrend (+79.6% in 20 days) with price near 20-day highs (-1.1%)
+Skipping CRM — order already working
+Analysing ORCL...
+  HOLD | Confidence: 62% | Risk: HIGH | Vol: +20.6%
+  ORCL displays a powerful uptrend (+28.5% 5-day, +37.6% 20-day) with exceptional volum
+Analysing ADBE...
+  BUY  | Confidence: 78% | Risk: MEDIUM | Vol: +12.1%
+  ADBE exhibits a strong uptrend with +13.9% 5-day momentum, supported by increasing vo
+Analysing NOW...
+  HOLD | Confidence: 62% | Risk: HIGH | Vol: +33.1%
+  NOW displays exceptional short-term momentum (+36% in 5d, +47.7% in 20d) with volume 
+Analysing SNOW...
+  HOLD | Confidence: 55% | Risk: HIGH | Vol: +93.9%
+  While SNOW exhibits exceptional momentum (+94.3% in 20d) with volume confirmation, th
+Analysing JPM...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: +17.0%
+  JPM displays conflicting signals: negative 5-day (-3.3%) and 20-day (-3.6%) momentum 
+Skipping GS — already in portfolio
+Skipping MS — already in portfolio
+Analysing BAC...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +4.9%
+  BAC shows weak upward momentum (+1.3% from 20d low) but lacks conviction with flat 5/
+Analysing V...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: +14.0%
+  V shows a clear downtrend with negative 5-day (-1.1%) and 20-day (-1.2%) momentum, cu
+Analysing MA...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -7.3%
+  MA shows mixed signals with a weak short-term uptrend (+0.5% 5d) masked by negative 2
+Analysing JNJ...
+  SELL | Confidence: 75% | Risk: MEDIUM | Vol: +6.4%
+  JNJ is in a clear downtrend with -2.9% 5-day momentum and -5.1% from the 20-day high,
+Analysing UNH...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -17.6%
+  UNH shows weak uptrend with positive short-term momentum (+0.8% 5-day, +2.5% 20-day),
+Analysing PFE...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -9.4%
+  PFE shows mixed signals: recent price action is negative (-0.9% 5d, -2.5% 20d) with a
+Analysing ABBV...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -4.7%
+  ABBV shows mixed momentum with weak 5-day performance (-0.1%) despite stronger 20-day
+Analysing MRK...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: +12.2%
+  MRK is in a clear downtrend with -3.8% 5-day momentum despite positive 20-day momentu
+Analysing NFLX...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: -8.6%
+  NFLX exhibits a clear downtrend with -5.7% 20-day momentum and is trading near 20-day
+Analysing DIS...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -21.2%
+  DIS shows mixed signals: positive 20-day momentum (+1.5%) but negative 5-day momentum
+Analysing NKE...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +3.8%
+  NKE shows mixed momentum signals: strong 5-day and 20-day gains but is 3.6% below the
+Analysing MCD...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -8.2%
+  MCD exhibits weak downtrend (-1.1% 5d, -2.8% 20d) with negative volume confirmation (
+Analysing SBUX...
+  SELL | Confidence: 85% | Risk: MEDIUM | Vol: +6.4%
+  SBUX is in a clear downtrend with -4.8% (5d) and -8.1% (20d) momentum, down 11.4% fro
+Analysing XOM...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -9.4%
+  XOM shows a clear downtrend (-8.7% from 20d high) with negative 5-day and 20-day mome
+Analysing CVX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +4.1%
+  CVX shows mixed signals: while the macro environment is supportive (declining VIX, st
+Analysing CBA.AX...
+  HOLD | Confidence: 42% | Risk: MEDIUM | Vol: +23.7%
+  Mixed signals with conflicting momentum indicators: 5-day momentum is slightly negati
+Analysing NAB.AX...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: +12.3%
+  NAB exhibits a clear downtrend with -7.5% 20-day momentum, currently -8.3% below the 
+Analysing WBC.AX...
+  SELL | Confidence: 72% | Risk: MEDIUM | Vol: +12.1%
+  WBC is in a clear downtrend with -8.6% 20-day momentum and -10.7% from recent highs, 
+Analysing ANZ.AX...
+  SELL | Confidence: 78% | Risk: MEDIUM | Vol: +28.2%
+  ANZ exhibits a clear downtrend with -4.4% (5d) and -8.3% (20d) momentum, currently at
+Analysing MQG.AX...
+  HOLD | Confidence: 45% | Risk: MEDIUM | Vol: -2.1%
+  MQG.AX shows mixed signals with weak positive 5-day momentum (+0.7%) offset by negati
+Skipping BHP.AX — already in portfolio
+Analysing RIO.AX...
+  BUY  | Confidence: 72% | Risk: MEDIUM | Vol: +1.7%
+  RIO.AX exhibits a strong 20-day uptrend (+9.6%) with consistent higher lows and highe
+Skipping FMG.AX — already in portfolio
+Analysing MIN.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: -16.2%
+  MIN.AX shows strong uptrend (+5.0% in 20d) with price near 20-day highs, but this ral
+Analysing S32.AX...
+  HOLD | Confidence: 62% | Risk: MEDIUM | Vol: +35.7%
+  Stock shows strong 20-day uptrend (+16.4%) with volume confirmation, but is now 1.2% 
+Analysing NST.AX...
+  BUY  | Confidence: 72% | Risk: MEDIUM | Vol: +23.4%
+  Strong 5-day momentum (+6.9%) with explosive single-day recovery on 2026-06-02 (+13.6
+Analysing EVN.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +9.0%
+  Mixed signals present: price is 10.1% above 20-day low but 9.2% below 20-day high, in
+Analysing CSL.AX...
+  SELL | Confidence: 78% | Risk: MEDIUM | Vol: +10.5%
+  CSL exhibits a clear downtrend with -6.7% (5d) and -25.7% (20d) momentum, currently t
+Analysing RMD.AX...
+  SELL | Confidence: 85% | Risk: MEDIUM | Vol: +41.3%
+  RMD.AX is in a clear downtrend with -11.4% 5-day momentum and -9.6% 20-day momentum, 
+Analysing COH.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +8.0%
+  COH.AX shows a sharp reversal from near 20-day highs (102.50) with a -5.6% pullback i
+Skipping PME.AX — order already working
+Analysing PNV.AX...
+  HOLD | Confidence: 55% | Risk: MEDIUM | Vol: +63.0%
+  Stock shows conflicting signals: strong 20-day uptrend (+7.8%) but sharp 5-day pullba
+Analysing WTC.AX...
+  BUY  | Confidence: 72% | Risk: MEDIUM | Vol: +32.8%Error 1100, reqId -1: Connectivity between IBKR and Trader Workstation has been lost.
+Error 1102, reqId -1: Connectivity between IBKR and Trader Workstation has been restored - data maintained. The following farms are connected: hfarm; euhmds; apachmds; fundfarm; ushmds. The following farms are not connected: cashfarm; afarm; usfarm.nj; usfarm; secdefsg.
+Error 1100, reqId -1: Connectivity between IBKR and Trader Workstation has been lost.
+reqHistoricalData: Timeout for Stock(conId=30865337, symbol='JBH', exchange='ASX', primaryExchange='ASX', currency='AUD', localSymbol='JBH', tradingClass='JBH')
+Error 162, reqId 853: Historical Market Data Service error message:API historical data query cancelled: 853, contract: Stock(conId=30865337, symbol='JBH', exchange='ASX', primaryExchange='ASX', currency='AUD', localSymbol='JBH', tradingClass='JBH')
+Error 1102, reqId -1: Connectivity between IBKR and Trader Workstation has been restored - data maintained. The following farms are connected: afarm; ushmds; secdefsg. The following farms are not connected: hfarm; cashfarm; usfarm.nj; usfarm; euhmds; apachmds; fundfarm.
+Error 322, reqId 856: Error processing request.-'bX' : cause - Maximum number of account summary requests exceeded; desubscribe to previous request first
+Error 1100, reqId -1: Connectivity between IBKR and Trader Workstation has been lost.
+Error 1100, reqId -1: Connectivity between IBKR and Trader Workstation has been lost.
+Error 1100, reqId -1: Connectivity between IBKR and Trader Workstation has been lost.
+Error 322, reqId 856: Error processing request.-'bX' : cause - Maximum number of account summary requests exceeded; desubscribe to previous request first
+Error 1102, reqId -1: Connectivity between IBKR and Trader Workstation has been restored - data maintained. The following farms are connected: hfarm; afarm; usfarm; euhmds; apachmds; ushmds; secdefsg. The following farms are not connected: cashfarm; usfarm.nj; fundfarm.
+Error 1100, reqId -1: Connectivity between IBKR and Trader Workstation has been lost.
+Error 1100, reqId -1: Connectivity between IBKR and Trader Workstation has been lost.
+Error 10350, reqId 857: Connectivity with IBKR is temporarily unavailable. Please retry in 1 minute.
+Error 1102, reqId -1: Connectivity between IBKR and Trader Workstation has been restored - data maintained. The following farms are connected: hfarm; afarm; usfarm; euhmds; apachmds; fundfarm; secdefsg. The following farms are not connected: cashfarm; usfarm.nj; ushmds.
+Error 322, reqId 858: Error processing request.-'bX' : cause - Maximum number of account summary requests exceeded; desubscribe to previous request first
+Error 1102, reqId -1: Connectivity between IBKR and Trader Workstation has been restored - data maintained. The following farms are connected: usfuture; euhmds; apachmds. The following farms are not connected: hfarm; eufarmnj; cashfarm; afarm; jfarm; usfarm.nj; usfarm; fundfarm; ushmds; secdefsg.
+Error 322, reqId 859: Error processing request.-'bX' : cause - Maximum number of account summary requests exceeded; desubscribe to previous request first
+Error 1100, reqId -1: Connectivity between IBKR and Trader Workstation has been lost.
+Error 1100, reqId -1: Connectivity between IBKR and Trader Workstation has been lost.

@@ -1,0 +1,32 @@
+{
+  "44223": {
+    "alerted_at": "2026-07-02T00:20:03.969002+00:00",
+    "reasons": [
+      "closing in 3h"
+    ]
+  },
+  "44224": {
+    "alerted_at": "2026-07-02T03:02:49.635549+00:00",
+    "reasons": [
+      "closing in 3h"
+    ]
+  },
+  "43343": {
+    "alerted_at": "2026-07-03T06:04:11.062553+00:00",
+    "reasons": [
+      "closing in 11h, forecast 2.3d old"
+    ]
+  },
+  "43430": {
+    "alerted_at": "2026-07-14T01:23:54.214913+00:00",
+    "reasons": [
+      "closing in 22h, forecast 1.6d old"
+    ]
+  },
+  "43612": {
+    "alerted_at": "2026-07-14T01:23:54.214913+00:00",
+    "reasons": [
+      "closing in 23h, forecast 4.6d old"
+    ]
+  }
+}
