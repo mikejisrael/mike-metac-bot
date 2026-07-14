@@ -710,12 +710,32 @@ async def fetch_tournament_questions(simulate_now: datetime | None = None) -> li
                     # already_done_raw now correctly reflecting the LATEST
                     # attempt per question_id (see the sort+overwrite fix
                     # above), not an arbitrary earlier one.
-                    is_market_pulse = post.get("_source_tournament_id") == MARKET_PULSE_TOURNAMENT_ID
-                    if is_market_pulse:
-                        if prior.get("status") == "failed":
-                            print(f"  🔁 Post {post.get('id')} (Q{obj.id_of_question}): last attempt failed — retrying "
-                                  f"(no cooldown applied to failures)")
-                        else:
+                    #
+                    # FIXED (2026-07-15): this check previously lived
+                    # INSIDE the is_market_pulse branch below, so it only
+                    # ever actually applied to Market Pulse — despite the
+                    # comment above claiming it applied universally. Every
+                    # OTHER tournament (FutureEval included) fell straight
+                    # into the plain else-branch permanent-duplicate skip,
+                    # regardless of whether the prior attempt had actually
+                    # succeeded. Confirmed via a real, live incident: post
+                    # 44460 (Q44558, FutureEval) failed a real submission
+                    # (Metaculus rejected an out-of-bounds MC probability —
+                    # see parse_multiple_choice_response's own fix, same
+                    # day), and the FAILED record then silently and
+                    # permanently blocked every subsequent cron tick from
+                    # ever retrying it — exactly the bug this comment
+                    # already claimed was fixed, just never actually wired
+                    # up outside Market Pulse. Moved out of the
+                    # is_market_pulse branch so "failed always retries,
+                    # no cooldown" now genuinely applies to every
+                    # tournament, matching the stated intent above.
+                    if prior.get("status") == "failed":
+                        print(f"  🔁 Post {post.get('id')} (Q{obj.id_of_question}): last attempt failed — retrying "
+                              f"(no cooldown applied to failures)")
+                    else:
+                        is_market_pulse = post.get("_source_tournament_id") == MARKET_PULSE_TOURNAMENT_ID
+                        if is_market_pulse:
                             submitted_at_str = prior.get("submitted_at")
                             submitted_at = None
                             if submitted_at_str:
@@ -759,9 +779,9 @@ async def fetch_tournament_questions(simulate_now: datetime | None = None) -> li
                                 continue  # not in the final hour yet, or already refreshed within it
                             print(f"  🔄 Post {post.get('id')} (Q{obj.id_of_question}): within final hour before close "
                                   f"({close_time_str}) — final refresh")
-                    else:
-                        dedup_skipped += 1
-                        continue  # genuine duplicate — already forecast this question
+                        else:
+                            dedup_skipped += 1
+                            continue  # genuine duplicate — already forecast this question successfully
                 else:
                     print(f"  🛑 Post {post.get('id')} (Q{obj.id_of_question}): ID was previously forecast under a different "
                           f"title — treating as a NEW question (ID likely recycled).")
@@ -1323,7 +1343,39 @@ def parse_multiple_choice_response(text: str, question: MultipleChoiceQuestion) 
     total = sum(probs.values())
     if total <= 0:
         return None
-    return {opt: probs[opt] / total for opt in question.options}
+    normalized = {opt: probs[opt] / total for opt in question.options}
+
+    # FIXED (2026-07-15): clamp each option into Metaculus's required
+    # [0.001, 0.999] range before returning. Confirmed via a real
+    # submission failure (post 44460, Q44558, "How many Level 4 travel
+    # advisories...") — Metaculus's API rejects ANY option at exactly 0.0
+    # or 1.0 with HTTP 400 "Probabilities for current options must be
+    # between 0.001 and 0.999". Because this is a deterministic
+    # validation error (the computed probabilities never change), the
+    # existing 3-retry submission logic couldn't help at all — it just
+    # retried the exact same rejected values 3 times and gave up. Most
+    # common trigger: an option Claude never mentions gets defaulted to
+    # 0.0 just above (setdefault), or one very-dominant option normalizes
+    # to ~1.0 while the rest round down near 0.
+    #
+    # A SINGLE clamp-then-renormalize pass is NOT sufficient — confirmed
+    # by testing against the actual failure case: renormalizing after
+    # clamping can push a value that was exactly at the 0.001 floor back
+    # slightly BELOW it again (e.g. 0.001 / 1.002 = 0.000998...), which
+    # would still fail the same validation. This iterates clamp+renormalize
+    # until every value is genuinely within bounds — converges in a
+    # handful of iterations for any realistic option count, with a hard
+    # cap as a safety valve against a pathological case looping forever.
+    clamped = dict(normalized)
+    for _ in range(10):
+        clamped = {opt: min(max(v, 0.001), 0.999) for opt, v in clamped.items()}
+        clamped_total = sum(clamped.values())
+        if clamped_total <= 0:
+            break
+        clamped = {opt: v / clamped_total for opt, v in clamped.items()}
+        if all(0.001 <= v <= 0.999 for v in clamped.values()):
+            break
+    return clamped
 
 
 # ─── Step 3: Forecast a single question ───────────────────────────────────────
