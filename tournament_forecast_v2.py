@@ -158,16 +158,12 @@ from meta_watch import check_new_futureeval_questions, FUTUREEVAL_TOURNAMENT_ID
 # tournaments.
 MARKET_PULSE_TOURNAMENT_ID = 33066
 
-# TEMPORARY test limiter (2026-07-13, Stage 1 of the v1->v2 merge): scope
-# this first real run to exactly two questions — 44457 (the one currently-
-# open FutureEval question's post_id, from
-# https://www.metaculus.com/questions/44457/ — matched via post_id below,
-# NOT assumed equal to question_id; see the matching logic's comment for
-# why that assumption was wrong) and 44679 (VIX Jul13-24 sub-question's
-# actual question_id, needed for precision since its post_id, 44534,
-# covers the whole 6-sub-question group). Deliberately small first pass
-# before running against everything currently open in either tournament.
-# Set back to None once this looks right.
+# TEST_QUESTION_ID_LIMIT RESET (2026-07-14): the 5 Metaculus Cup ad-hoc
+# questions (Farage/Clacton, Brent crude, copper futures, Albania PM,
+# Australia CWG golds) all submitted successfully and confirmed on the
+# site — "5 questions not predicted" dropped to 0. Back to None (default,
+# unrestricted) state. Set to a real set again if a similar targeted
+# ad-hoc run is needed later.
 TEST_QUESTION_ID_LIMIT = None
 
 _env_override = os.getenv("METAC_TOURNAMENT_IDS")
