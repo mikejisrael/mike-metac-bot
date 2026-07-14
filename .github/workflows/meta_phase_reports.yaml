@@ -92,12 +92,38 @@ jobs:
         # was gitignored, so every run treated everything as brand new and
         # re-alerted repeatedly). Confirmed watch_state/ is NOT in
         # .gitignore before relying on this — see that earlier fix.
+        #
+        # FIXED (2026-07-14): this step's checkout happens at job START,
+        # but the push happens several minutes later (after coverage +
+        # calibration + watch all run) — if ANYTHING else pushes to main in
+        # that window (confirmed live: Mike's local "Tournament v2 bulk
+        # changes" push landed mid-run), the plain `git push` here got
+        # rejected with "fetch first" and the whole job failed, silently
+        # discarding that run's report/watch-state data (it existed in this
+        # runner's local commit, but since nothing landed on the remote, it
+        # was lost once the runner was torn down). Now retries with a
+        # rebase-and-push loop instead of failing outright on the first
+        # collision — this is exactly the same class of race that caused
+        # the watch_state/futureeval_seen_posts.json merge conflict Mike
+        # hit locally the same day, just automated here instead of manual.
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add reports/ watch_state/ 2>/dev/null || true
           git diff --cached --quiet && echo "No new reports/state to commit." || (
-            git commit -m "chore: phase 0 reports (coverage + calibration + watch) [skip ci]" &&
-            git push
+            git commit -m "chore: phase 0 reports (coverage + calibration + watch) [skip ci]"
+
+            attempt=1
+            max_attempts=5
+            until git push; do
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "Push failed after $max_attempts attempts — giving up."
+                exit 1
+              fi
+              echo "Push rejected (attempt $attempt/$max_attempts) — likely a concurrent push to main. Rebasing and retrying..."
+              git pull --rebase
+              attempt=$((attempt + 1))
+              sleep $((RANDOM % 10 + 5))  # small random backoff so two racing runs don't retry in lockstep
+            done
           )
