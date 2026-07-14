@@ -352,7 +352,7 @@ def _set_research_source(obj, source) -> None:
 
 
 # ─── Step 1: Fetch open tournament questions ───────────────────────────────────
-async def fetch_tournament_questions(simulate_now: datetime | None = None) -> list:
+async def fetch_tournament_questions(simulate_now: datetime | None = None, dry_run: bool = False) -> list:
     # already_done maps question_id -> the title we forecast it under, so a
     # recycled ID (genuinely a different question on Metaculus's side) can be
     # detected via _titles_match instead of being silently skipped as a dup.
@@ -562,7 +562,8 @@ async def fetch_tournament_questions(simulate_now: datetime | None = None) -> li
                     pid: post for pid, post in tid_posts_by_id.items()
                     if post.get("question") and _is_open_question(post["question"])
                 }
-                check_new_futureeval_questions(open_tid_posts_by_id)
+                if not dry_run:
+                    check_new_futureeval_questions(open_tid_posts_by_id)
         except Exception as e:
             print(f"  ⚠️  Could not fetch tournament {tid}: {e}", flush=True)
             # Same reasoning as the connection-error alert above: an
@@ -1535,7 +1536,7 @@ async def run(dry_run: bool = False, simulate_now: datetime | None = None):
     print("(Market Pulse refresh: final-hour-before-close trigger, no generic time gate)")
     print("=" * 50)
 
-    questions = await fetch_tournament_questions(simulate_now=simulate_now)
+    questions = await fetch_tournament_questions(simulate_now=simulate_now, dry_run=dry_run)
     if not questions:
         print("No questions found — either none are open right now, or all already forecast.")
         return
