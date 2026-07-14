@@ -1,9 +1,0 @@
-# pack-refs with: peeled fully-peeled sorted 
-b4e6247887cd04ec2b4c7179505b81c19d04ec6b refs/remotes/origin/dependabot/pip/transformers-4.48.0
-753e0f4fac21293f90800aac2d431ed458ed442d refs/remotes/origin/elisescu-patch-1
-f14a47526845f6ef0c235776a2c9f087b64d76fd refs/remotes/origin/feat/numeric-pchip-distribution
-ffbcc8d0ce429d644daa070312197ce58851ba7b refs/remotes/origin/feat/onboarding-friendliness
-4dc9142f662e2fb7d9fb8a2c4d50d52a33bb5b6e refs/remotes/origin/hickman-santini-patch-1
-03bdd7c1a3a72b408a3fbb9a60e6d94d9e7c826a refs/remotes/origin/main
-9dc9b73c354cbd1d9c605730a5844969df23425d refs/remotes/origin/nikosbosse-patch-1
-a15fcd617883d61574919cc80913875e4600fac2 refs/remotes/origin/template_updates

@@ -1,9 +1,0 @@
-{
-  "q_44213": {
-    "question_id": 44213,
-    "question_text": "Will Virgin Galactic fail to make any new blog posts in July 2026?",
-    "question_type": "binary",
-    "status": "success",
-    "submitted_forecast": 0.05
-  }
-}
