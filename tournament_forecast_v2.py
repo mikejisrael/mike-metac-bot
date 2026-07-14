@@ -1032,7 +1032,10 @@ Before answering write:
     the Background/Resolution criteria/Research above, otherwise say "No
     reliable base rate available" and proceed on priors.
 
-Then end with exactly these three lines:
+Then end with exactly these three lines. Write each number IN FULL, matching
+the scale of the range given above — do NOT abbreviate with "B", "M", "K",
+"billion", "million", etc. (e.g. if the range above is in the billions,
+write 89400000000, not 89.4 or 89.4B):
 Low (10th percentile): <number>
 Median (50th percentile): <number>
 High (90th percentile): <number>
@@ -1095,9 +1098,32 @@ def parse_numeric_response(text: str, question: NumericQuestion) -> list[float] 
     # rather than a rounding edge-case worth clamping.
     CLAMP_TOLERANCE = 0.20
     if median < lower * (1 - CLAMP_TOLERANCE) or median > upper * (1 + CLAMP_TOLERANCE):
-        print(f"  ⚠️  Parsed median {median} is >20% outside question bounds "
-              f"[{lower}, {upper}] — likely a unit error, rejecting")
-        return None
+        # RECOVERY (2026-07-15): before hard-rejecting, check whether this is
+        # the "89.4B" shorthand bug — confirmed live on Q44826 (Market Pulse
+        # revenue, bounds ~$87-92B): the model's raw answer ended "Median
+        # (50th percentile): 89.4B", but the number-extraction regex above
+        # only captures digits, so it silently dropped the "B" and passed
+        # along 89.4 — 1000x too small. build_numeric_prompt() above now
+        # tells the model not to abbreviate, but this is a defense-in-depth
+        # net for whenever it still happens. Only ever activates on a value
+        # that was ALREADY about to be rejected, and only ACCEPTS the
+        # recovered value if applying a single common magnitude multiplier
+        # (thousand/million/billion/trillion) to low, median, AND high
+        # together lands the median back inside bounds — so this can't
+        # silently corrupt an already-correct answer, only rescue one that
+        # would otherwise have been thrown away entirely.
+        for _mag_name, _mag in (("thousand", 1e3), ("million", 1e6), ("billion", 1e9), ("trillion", 1e12)):
+            _low, _median, _high = low * _mag, median * _mag, high * _mag
+            if lower * (1 - CLAMP_TOLERANCE) <= _median <= upper * (1 + CLAMP_TOLERANCE):
+                print(f"  ℹ️  Recovered likely '{_mag_name}'-shorthand answer: "
+                      f"median {median} -> {_median} (now within bounds "
+                      f"[{lower}, {upper}])")
+                low, median, high = _low, _median, _high
+                break
+        else:
+            print(f"  ⚠️  Parsed median {median} is >20% outside question bounds "
+                  f"[{lower}, {upper}] — likely a unit error, rejecting")
+            return None
     if low < lower or high > upper or median < lower or median > upper:
         old_low, old_median, old_high = low, median, high
         low    = max(low, lower)
