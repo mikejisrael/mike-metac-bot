@@ -437,18 +437,20 @@ def main():
     # FIXED 2026-07-03: was "submit new batch of 50" — NUM_QUESTIONS was
     # dropped from 50 to 20 on 2026-07-02 as a deliberate cost control
     # when meta_batch_forecast.py's tournament count expanded from 3 to 8.
-    print(f"  python meta_batch_forecast.py              # submit new batch (up to 20 questions)")
-    print(f"  python meta_batch_forecast.py --check      # retrieve completed batch")
-    print(f"  python meta_refresh_forecast.py           # dry run — see what needs refresh")
-    print(f"  python meta_refresh_forecast.py --submit  # submit refresh batch (closing-soon uncapped, stale capped at 10/run)")
-    print(f"  python meta_refresh_forecast.py --check   # retrieve refresh results")
-    print(f"  python meta_refresh_forecast.py --single  # refresh one question now, by URL/post ID (binary or MC)")
-    print(f"  python meta_coverage_check.py              # Phase 0: tournament coverage gaps (real vs. gated)")
-    print(f"  python meta_calibration_report.py          # Phase 0: calibration curve + peer scores")
-    print(f"  python meta_watch.py                       # push-notification check (new questions, resolutions, refresh candidates)")
-    print(f"  python meta_refresh_exclusions.py          # list questions permanently excluded from refresh, and why")
-    print(f"  python show_reasoning.py <id>         # show bot reasoning for question")
-    print(f"  python meta_status.py                 # this dashboard")
+    print(f"python meta_batch_forecast.py              # submit new batch (up to 20 questions)")
+    print(f"python meta_batch_forecast.py --check      # retrieve completed batch")
+    print(f"---------------------")
+    print(f"python meta_refresh_forecast.py            # dry run — see what needs refresh")
+    print(f"python meta_refresh_forecast.py --submit   # submit refresh batch (closing-soon uncapped, stale capped at 10/run)")
+    print(f"python meta_refresh_forecast.py --check    # retrieve refresh results")
+    print(f"python meta_refresh_forecast.py --single   # refresh one question now, by URL/post ID (binary or MC)")
+    print(f"---------------------")
+    print(f"python meta_coverage_check.py              # Phase 0: tournament coverage gaps (real vs. gated)")
+    print(f"python meta_calibration_report.py          # Phase 0: calibration curve + peer scores")
+    print(f"python meta_watch.py                       # push-notification check (new questions, resolutions, refresh candidates)")
+    print(f"python meta_refresh_exclusions.py          # list questions permanently excluded from refresh, and why")
+    print(f"python show_reasoning.py <id>         # show bot reasoning for question")
+    print(f"python meta_status.py                 # this dashboard")
     print(f"\n{'='*70}\n")
 
 
