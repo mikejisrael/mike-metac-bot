@@ -1,0 +1,117 @@
+{
+  "batch_id": "msgbatch_019CqBVj6FsCwCdo9czZHnTN",
+  "submitted_at": "2026-07-15T20:28:29.686974",
+  "batch_type": "refresh",
+  "num_requests": 9,
+  "question_ids": {
+    "refresh_44011_20260715": 44011,
+    "refresh_43892_20260715": 43892,
+    "refresh_43360_20260715": 43360,
+    "refresh_44017_20260715": 44017,
+    "refresh_43937_20260715": 43937,
+    "refresh_7861_20260715": 7861,
+    "refresh_7872_20260715": 7872,
+    "refresh_8050_20260715": 8050,
+    "refresh_43716_20260715": 43716
+  },
+  "question_texts": {
+    "refresh_44011_20260715": "Will the Liberal Party officially nominate Fl\u00e1vio Bolsonaro as its candidate for president of Brazil before August 15, 2026?",
+    "refresh_43892_20260715": "Will the U.S. Senate pass an Iran war powers resolution before August 1, 2026?",
+    "refresh_43360_20260715": "Will the UK National Threat Level reduce from SEVERE before September 2026?",
+    "refresh_44017_20260715": "Will July 2026 be the warmest July on record, according to Copernicus?",
+    "refresh_43937_20260715": "Will the US and India finalise a new bilateral trade agreement before August 2026?",
+    "refresh_7861_20260715": "Will China recognize the Islamic Emirate of Afghanistan before 2030?",
+    "refresh_7872_20260715": "Will the United States recognize the Islamic Emirate of Afghanistan before 2030?",
+    "refresh_8050_20260715": "Will Israel recognize the Islamic Emirate of Afghanistan before 2030?",
+    "refresh_43716_20260715": "Will the Federal Reserve raise the federal funds target range before July 30, 2026?"
+  },
+  "original_probabilities": {
+    "refresh_44011_20260715": 0.68,
+    "refresh_43892_20260715": 0.18,
+    "refresh_43360_20260715": 0.08,
+    "refresh_44017_20260715": 0.24,
+    "refresh_43937_20260715": 0.8,
+    "refresh_7861_20260715": 0.62,
+    "refresh_7872_20260715": 0.18,
+    "refresh_8050_20260715": 0.08,
+    "refresh_43716_20260715": 0.33
+  },
+  "question_types": {
+    "refresh_44011_20260715": "binary",
+    "refresh_43892_20260715": "binary",
+    "refresh_43360_20260715": "binary",
+    "refresh_44017_20260715": "binary",
+    "refresh_43937_20260715": "binary",
+    "refresh_7861_20260715": "binary",
+    "refresh_7872_20260715": "binary",
+    "refresh_8050_20260715": "binary",
+    "refresh_43716_20260715": "binary"
+  },
+  "options_by_question": {},
+  "refresh_reasons": {
+    "refresh_44011_20260715": "manual refresh via dashboard",
+    "refresh_43892_20260715": "manual refresh via dashboard",
+    "refresh_43360_20260715": "manual refresh via dashboard",
+    "refresh_44017_20260715": "manual refresh via dashboard",
+    "refresh_43937_20260715": "manual refresh via dashboard",
+    "refresh_7861_20260715": "manual refresh via dashboard",
+    "refresh_7872_20260715": "manual refresh via dashboard",
+    "refresh_8050_20260715": "manual refresh via dashboard",
+    "refresh_43716_20260715": "manual refresh via dashboard"
+  },
+  "community_predictions": {
+    "refresh_44011_20260715": null,
+    "refresh_43892_20260715": null,
+    "refresh_43360_20260715": null,
+    "refresh_44017_20260715": null,
+    "refresh_43937_20260715": null,
+    "refresh_7861_20260715": null,
+    "refresh_7872_20260715": null,
+    "refresh_8050_20260715": null,
+    "refresh_43716_20260715": null
+  },
+  "research_texts": {
+    "refresh_44011_20260715": "I have reviewed the summary for internal contradictions.\n\nThe summary states that \"This date falls within the electoral schedule for party conventions, which must occur between July 20 and August 5\" while also stating \"The deadline for registering candidacies with the Electoral Justice is August 15.\"\n\nThese are not contradictory\u2014they refer to two different deadlines (party convention window vs. electoral registration deadline), so this is consistent.\n\nAll other facts are internally consistent: the convention date (July 25, 2026), venue, purpose, and timeline are presented without contradiction.\n\n**The summary is returned UNCHANGED, word-for-word:**\n\nYes, the Liberal Party (PL) is set to officially nominate Senator Fl\u00e1vio Bolsonaro as its presidential candidate before August 15, 2026. The PL has scheduled its national convention for July 25, 2026, at the Mercado Livre Arena Pacaembu in S\u00e3o Paulo to formally confirm his candidacy [valorinternational.globo.com](https://valorinternational.globo.com/politics/news/2026/07/07/liberal-party-sets-july-25-convention-to-nominate-flavio-bolsonaro.ghtml), [exame.com](https://exame.com/brasil/pl-marca-convencao-paga-confirmar-candidatura-de-flavio-bolsonaro/). This date falls within the electoral schedule for party conventions, which must occur between July 20 and August 5 [valorinternational.globo.com](https://valorinternational.globo.com/politics/news/2026/07/07/liberal-party-sets-july-25-convention-to-nominate-flavio-bolsonaro.ghtml), [em.com.br](https://www.em.com.br/politica/2026/07/7456372-pl-marca-convencao-para-oficializar-candidatura-de-flavio-bolsonaro.html). The deadline for registering candidacies with the Electoral Justice is August 15 [em.com.br](https://www.em.com.br/politica/2026/07/7456372-pl-marca-convencao-para-oficializar-candidatura-de-flavio-bolsonaro.html), [revistaoeste.com](https://revistaoeste.com/politica/pl-marca-convencao-em-sp-para-lancar-flavio-a-presidencia/). The convention is expected to attract thousands of attendees and will also nominate candidates for other offices [valorinternational.globo.com](https://valorinternational.globo.com/politics/news/2026/07/07/liberal-party-sets-july-25-convention-to-nominate-flavio-bolsonaro.ghtml), [em.com.br](https://www.em.com.br/politica/2026/07/7456372-pl-marca-convencao-para-oficial",
+    "refresh_43892_20260715": "I found one internal contradiction in the summary:\n\nThe summary states \"The Senate previously approved a war powers resolution to halt military action in a 50-48 vote\" but earlier indicates that \"a resolution to limit Trump's military actions against Iran without congressional authorization passed both the House and Senate last month.\" These statements appear to reference the same event but use different language (\"previously approved\" vs. \"passed both the House and Senate last month\"), creating ambiguity about whether this vote has already occurred or is being proposed.\n\nHowever, upon careful review, this is not a contradiction of the type specified in your instructions\u2014it's not the same metric attributed to two different values, dates, or time periods. Both statements can coexist: a resolution could have already passed last month with a 50-48 vote count.\n\nReviewing for actual numerical or temporal contradictions: I find none. All dates and figures are internally consistent.\n\n**Return: The summary is UNCHANGED, word-for-word, as no contradictions meeting the specified criteria were found.**",
+    "refresh_43360_20260715": "I have reviewed the summary for internal contradictions.\n\nThe summary is internally consistent. All dates, threat levels, and attributions align coherently:\n- April 30, 2026: threat level raised to SEVERE (following April 29 attack)\n- July 15, 2026: threat level remains SEVERE\n- November 2021 to February 2022: previous SEVERE period\n- The gradual increase in threats and multiple threat types (Islamist, Extreme Right-Wing, antisemitic) are consistently described\n\nNo contradictions found.\n\n**SUMMARY UNCHANGED:**\n\nAs of July 15, 2026, the UK national threat level from terrorism is \"SEVERE,\" meaning an attack is highly likely [mi5.gov.uk](https://www.mi5.gov.uk/threats-and-advice/threat-levels). This level was reinstated on April 30, 2026, following an antisemitic stabbing in Golders Green, North London, on April 29, 2026 [gov.uk](https://www.gov.uk/government/news/threat-level-increase-following-antisemitic-terror-attack), [mi5.gov.uk](https://www.mi5.gov.uk/uk-national-terrorism-threat-level-raised-to-severe).\n\nThe move from \"SUBSTANTIAL\" (attack likely) to \"SEVERE\" on April 30, 2026, was not solely a result of the Golders Green attack but also reflects \"a gradual increase in terrorist threats for some time,\" driven by a rise in both Islamist and Extreme Right-Wing terrorism from individuals and small groups in the UK [mi5.gov.uk](https://www.mi5.gov.uk/uk-national-terrorism-threat-level-raised-to-severe), [gov.uk](https://www.gov.uk/government/news/threat-level-increase-following-antisemitic-terror-attack). The current threat is also characterized by an elevated threat to Jewish and Israeli individuals and institutions, linked to the Middle East conflict [mi5.gov.uk](https://www.mi5.gov.uk/uk-national-terrorism-threat-level-raised-to-severe).\n\nThe UK was last at \"SEVERE\" from November 2021 to February 2022 [gov.uk](https://www.gov.uk/government/news/threat-level-increase-following-antisemitic-terror-attack). Historically, threat-level reductions \"usually require a sustained quiet period\" [metaculus.com](https://www.metaculus.com/questions/43360/uk-threat-level-reduce-from-severe-before-sept-2026/). The threat level related to Northern Ireland-related terrorism in Northern Ireland is currently \"SUBSTANTIAL\" and is assessed independently [mi5.gov.uk](https://www.mi5.gov.uk/threats-and-advice/threat-levels), [metaculus.com](https://www.metaculus.com/questions/43360/uk-threat-level-reduce-from-severe-before-sept-2026/).",
+    "refresh_44017_20260715": "I found no internal contradictions in this summary. All metrics are consistently attributed to their respective time periods, and the temperature records cited for different months (June 2026, July 2025, July 2024, July 2023) do not conflict with one another.\n\nResearch summary to check:\nAs of July 15, 2026, Copernicus scientists anticipate new global temperature records, both in the ocean and surface atmosphere, in the coming months due to a likely strong El Ni\u00f1o [marine.copernicus.eu]. Seasonal forecasts indicate a likely further strengthening of El Ni\u00f1o conditions, with the median of the C3S forecast grand ensemble for SST-based Ni\u00f1o indices near or above the highest values observed in recent decades [climate.copernicus.eu].\n\nGlobal sea surface temperatures (SST) already exceeded record levels for this time of year on June 21, 2026, reaching 20.86\u00baC (C3S ERA5) and 21.0\u00b0C (Copernicus Marine GLO12), surpassing previous records from 2023 and 2024 [marine.copernicus.eu]. June 2026 was the second-warmest June on record globally at 16.54\u00b0C, and the average SST over the extra-polar ocean for June 2026 was the highest on record for the month at 20.86\u00b0C [climate.copernicus.eu]. This marks the first time in 2026 that daily and monthly SSTs have exceeded 2024 levels [climate.copernicus.eu]. While July 2025 was the third-warmest July on record (16.68\u00b0C), it was cooler than July 2023 and July 2024 [climate.copernicus.eu]. July 2024 was the second-warmest July globally at 16.91\u00b0C, just 0.04\u00b0C cooler than the record set in July 2023 [climate.copernicus.eu].",
+    "refresh_43937_20260715": "I've reviewed the summary carefully for internal contradictions regarding metrics, indices, counts, dates, or time periods.\n\nI found no contradictions. All figures and dates are internally consistent:\n- The 12.5% tariff on India is mentioned once\n- The 10% global tariffs under Section 122 are mentioned once with a specific expiration date (July 24)\n- The 4-6 weeks timeline for the excess capacity investigation report is stated once\n- July 15, 2026 is cited as a single date for the Commerce Secretary's statement\n- August 2026 appears only in the forecast question itself, not in the summary\n\n**The summary is returned UNCHANGED, word-for-word.**",
+    "refresh_7861_20260715": "I have reviewed the summary carefully for internal contradictions regarding metrics, indices, counts, dates, and time periods.\n\nI found no contradictions. All dates are consistent (September 2022 for Zhao Xing's appointment, December 2023 for Bilal Ahmad Karimi's acceptance, October 2023 for Belt and Road Forum invitation, April 2024 for Russia's recognition), and there are no conflicting figures or counts attributed to different values or time periods.\n\nThe summary is returned unchanged, word-for-word:\n\nChina has significantly deepened its engagement with the Taliban in Afghanistan, making it a frontrunner in normalizing relations, though it has stopped short of formal recognition. In September 2022, China appointed Zhao Xing as its ambassador to Afghanistan, the first country to do so under Taliban rule [carnegieendowment.org](https://carnegieendowment.org/research/2025/11/chinas-accommodation-of-taliban-20). Reciprocally, in December 2023, China became the first country to formally accept a Taliban-appointed ambassador, Bilal Ahmad Karimi, to Beijing [carnegieendowment.org](https://carnegieendowment.org/research/2025/11/chinas-accommodation-of-taliban-20). While the Chinese Foreign Ministry clarified that accepting credentials does not signal official recognition, this move has been seen as a major diplomatic win for the Taliban [aljazeera.com](https://www.aljazeera.com/news/2024/2/14/is-chinas-recognition-of-afghanistan-envoy-a-diplomatic-win-for-taliban).\n\nChina, prioritizing border stability, containing Uyghur militant threats, and integrating Afghanistan into its Belt and Road framework, has maintained an active embassy in Kabul since the 2021 Taliban takeover [carnegieendowment.org](https://carnegieendowment.org/research/2025/11/chinas-accommodation-of-taliban-20). In October 2023, China invited the Taliban to the Third Belt and Road Forum, signaling increased acceptance [carnegieendowment.org](https://carnegieendowment.org/research/2025/11/chinas-accommodation-of-taliban-20). China insists Afghanistan should not be excluded from the international community, stating \"diplomatic recognition... will come naturally as the concerns of various parties are effectively addressed\" [thediplomat.com](https://thediplomat.com/2024/02/china-welcomes-a-taliban-ambassador-to-beijing/). Russia officially recognized the Taliban in April 2024, prompting speculation that China might soon follow suit [independent.co.uk](https://www.independent.co.uk/asia/south-asia/russia-recognise-taliban-afghanistan-kabul-b2782598.html).",
+    "refresh_7872_20260715": "I found no internal contradictions in this summary. All dates, figures, and attributions are consistent throughout:\n\n- H.R.9163 is consistently dated to July 25, 2024\n- The March 2025 Taliban talks are consistently referenced for prisoner release and office proposal discussions\n- Russia's recognition is consistently dated to July 2025\n- The Metaculus estimate of 10% is stated once\n- Trump's second term is referenced consistently\n\nThe summary is logically coherent and contains no conflicting data points.\n\n**Return: UNCHANGED**",
+    "refresh_8050_20260715": "I found no internal contradictions in this summary. All dates, figures, and attributions are internally consistent:\n\n- Russia's recognition is consistently dated July 4, 2025\n- China's diplomatic engagement is consistently referenced as accepting a Taliban envoy in 2024 (without formal recognition)\n- India's phone call between Foreign Minister S Jaishankar and Afghan Foreign Minister Amir Khan Muttaqi is consistently dated May 2025\n- Amit Halevi's interview is consistently dated February 2026\n- Israel's stance against recognition is consistently presented throughout\n\nThe summary is returned UNCHANGED, word-for-word.",
+    "refresh_43716_20260715": "I found one internal contradiction in the summary:\n\nThe summary states that on July 13, CME's FedWatch tool indicated a 46.5% chance of a rate hike, and separately states that traders \"significantly pared back the probability of a quarter-point hike in July to approximately 10%, down from about 35% before the CPI release\" on July 14. However, it then references Fed Governor Waller's previous statement about wanting \"several months of cooler inflation readings\" without clarifying the timeline of his comments relative to the July 13 optimism about rate hikes.\n\nMore critically, there is an inconsistency regarding market expectations: the summary indicates Kalshi showed 36% chance on July 13 (up from under 20% on July 12), but then states traders pared back odds to \"approximately 10%\" after the July 14 CPI report. The intermediate value of \"about 35%\" mentioned as the pre-CPI baseline doesn't align clearly with the 46.5% CME figure from July 13.\n\nHowever, upon closer inspection, these are not strict contradictions of the same metric assigned two different values at the same time period\u2014rather, they represent a sequence of changing market expectations across different dates (July 12, 13, and post-July 14). The figures are consistent with rapid market repricing following new data.\n\n**Return: UNCHANGED**\n\nThe summary contains no internal contradictions. All differing figures are properly attributed to different dates or different prediction markets, and the sequence of events (rising odds, then falling odds after CPI data) is internally coherent."
+  },
+  "research_sources": {
+    "refresh_44011_20260715": "openrouter",
+    "refresh_43892_20260715": "openrouter",
+    "refresh_43360_20260715": "openrouter",
+    "refresh_44017_20260715": "openrouter",
+    "refresh_43937_20260715": "openrouter",
+    "refresh_7861_20260715": "openrouter",
+    "refresh_7872_20260715": "openrouter",
+    "refresh_8050_20260715": "openrouter",
+    "refresh_43716_20260715": "openrouter"
+  },
+  "resolve_times": {
+    "refresh_44011_20260715": "2026-08-15T09:00:00+00:00",
+    "refresh_43892_20260715": "2026-08-01T09:00:00+00:00",
+    "refresh_43360_20260715": "2026-09-01T11:00:00+00:00",
+    "refresh_44017_20260715": "2026-08-15T12:00:00+00:00",
+    "refresh_43937_20260715": "2026-07-12T10:27:18+00:00",
+    "refresh_7861_20260715": "2030-01-01T05:00:00+00:00",
+    "refresh_7872_20260715": "2030-01-01T05:00:00+00:00",
+    "refresh_8050_20260715": "2030-01-01T05:00:00+00:00",
+    "refresh_43716_20260715": "2026-07-30T00:00:00+00:00"
+  },
+  "close_times": {
+    "refresh_44011_20260715": null,
+    "refresh_43892_20260715": null,
+    "refresh_43360_20260715": null,
+    "refresh_44017_20260715": null,
+    "refresh_43937_20260715": null,
+    "refresh_7861_20260715": null,
+    "refresh_7872_20260715": null,
+    "refresh_8050_20260715": null,
+    "refresh_43716_20260715": null
+  }
+}

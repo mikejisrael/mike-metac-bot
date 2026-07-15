@@ -231,136 +231,31 @@ REFRESH_BATCH_CHECKED_DIR = os.path.join(BATCH_DIR, "checked_refresh")
 # conflating the two would make it look like nothing was lost.
 REFRESH_BATCH_EXPIRED_DIR = os.path.join(BATCH_DIR, "expired_refresh")
 
-# ADDED 2026-07-15: manual, dashboard-driven refresh scheduling for the
-# batch-path tournaments (ACX2026, Climate, Metaculus Cup, the 5
-# question_series), replacing the old automatic STALE_DAYS/
-# STALE_REFRESH_CAP auto-submit — Mike's call, mirroring how Market Pulse
-# moved to manual dashboard selection via tournament_forecast_v2.py's
-# --ids= flag. Two independent triggers decide whether a question is "due"
-# (see is_due_for_refresh below); either one is sufficient:
-#   A) routine  — now >= refresh_after, where refresh_after defaults to
-#      (last forecast time + REFRESH_AFTER_DEFAULT_DAYS) and can be
-#      overridden per-question via the dashboard (see
-#      load_refresh_overrides / watch_state/refresh_overrides.json).
-#   B) final safety net — within FINAL_REFRESH_WINDOW_HOURS hours of close,
-#      mirroring tournament_forecast_v2.py's Market Pulse "final hour
-#      before close" trigger — just with a much longer window, since these
-#      tournaments' questions run for weeks/months rather than Market
-#      Pulse's 59-155-hour sub-question lifespans, so a flat 60-minute
-#      window would rarely fire in time to matter here. 48h chosen as a
-#      reasonable default (Mike's call, 2026-07-15) — trigger B exists so
-#      a question whose close date arrives BEFORE its 30-day timer matures
-#      (e.g. forecast 5 days ago, closes in 10 days) still gets one last
-#      refresh rather than locking in a month-old forecast.
 # STALE_DAYS/CLOSING_SOON_DAYS/STALE_REFRESH_CAP above are left in place
 # (find_questions_to_refresh and the old automatic --submit path still use
 # them) but --submit is no longer run on a cron per Mike's 2026-07-15
 # decision — --ids= (manual, dashboard-driven) and --check (still
 # automated) are the live path now.
-REFRESH_AFTER_DEFAULT_DAYS = 30
-FINAL_REFRESH_WINDOW_HOURS = 48
+#
+# MOVED 2026-07-15, REDESIGNED same day: the refresh-scheduling constants
+# and compute_refresh_after/is_due_for_refresh/load_refresh_overrides
+# functions live in meta_refresh_schedule.py (imported below), not here —
+# that module has zero side effects (no client instantiation) so
+# meta_dashboard.py can import it safely, unlike this file, which
+# instantiates the Anthropic/Metaculus clients at module level. The
+# original flat "30 days after last forecast" default was replaced same
+# day with a checkpoint ladder keyed off close_time instead (Mike's call —
+# the flat default was refreshing multi-year questions, e.g. one closing
+# in 2034, after just a month). See that module's docstring for the full
+# design.
+from meta_refresh_schedule import (
+    REFRESH_LADDER, FINAL_REFRESH_WINDOW_HOURS, NO_SCHEDULE_THRESHOLD_DAYS,
+    load_refresh_overrides, compute_refresh_after, is_due_for_refresh,
+)
 
 
 def ensure_batch_dir():
     os.makedirs(BATCH_DIR, exist_ok=True)
-
-
-# ─── Refresh scheduling (added 2026-07-15) ─────────────────────────────────
-def load_refresh_overrides() -> dict:
-    """watch_state/refresh_overrides.json — optional per-question manual
-    overrides for refresh_after, keyed by question_id (string):
-        {"44667": {"refresh_after": "2026-08-20T00:00:00Z", "set_at": "...", "note": "..."}}
-    Written by the dashboard when Mike edits a question's refresh date via
-    the UI (Step 2); read here to compute each question's EFFECTIVE
-    refresh_after. Deliberately a thin standalone file rather than a field
-    on the batch_jobs/batch_results history — those are an append-only
-    forecast record, and a mutable "when should this run again" scheduling
-    field doesn't belong mixed into that. Same None-safe-default pattern as
-    load_excluded_ids/load_refresh_candidate_state elsewhere — the
-    scheduling layer should never break other things if this file doesn't
-    exist yet."""
-    try:
-        with open(os.path.join("watch_state", "refresh_overrides.json")) as f:
-            return json.load(f)
-    except Exception:
-        return {}
-
-
-def compute_refresh_after(forecast: dict, overrides: dict | None = None) -> datetime | None:
-    """Effective refresh_after for one forecast record (see
-    REFRESH_AFTER_DEFAULT_DAYS docstring above for the two-trigger design):
-    a manual override from refresh_overrides.json if one is set for this
-    question_id, else (last forecast time + REFRESH_AFTER_DEFAULT_DAYS).
-    Returns None only if there's no override AND submitted_at is missing/
-    unparseable — callers should treat that as "unknown, don't auto-flag
-    via trigger A" rather than crashing (trigger B, the close-time safety
-    net, doesn't depend on this and can still fire independently)."""
-    overrides = overrides if overrides is not None else load_refresh_overrides()
-    q_id = str(forecast.get("question_id"))
-    override = overrides.get(q_id, {}).get("refresh_after")
-    if override:
-        try:
-            return datetime.fromisoformat(override.replace("Z", "+00:00"))
-        except Exception:
-            pass  # bad/unparseable override value — fall through to the default
-
-    submitted_at_str = forecast.get("submitted_at")
-    if not submitted_at_str:
-        return None
-    try:
-        submitted_at = datetime.fromisoformat(submitted_at_str)
-        if submitted_at.tzinfo is None:
-            submitted_at = submitted_at.replace(tzinfo=timezone.utc)
-    except Exception:
-        return None
-    return submitted_at + timedelta(days=REFRESH_AFTER_DEFAULT_DAYS)
-
-
-def is_due_for_refresh(forecast: dict, now: datetime | None = None,
-                        overrides: dict | None = None) -> tuple[bool, str]:
-    """Whether one forecast record is due for a refresh right now, and why.
-    Either trigger below is sufficient — see the REFRESH_AFTER_DEFAULT_DAYS/
-    FINAL_REFRESH_WINDOW_HOURS docstring above for the full design
-    rationale. This is the function Step 2's dashboard will call per-row to
-    decide what to surface/highlight as refresh-eligible; kept here rather
-    than duplicated in meta_dashboard.py so both agree on the definition of
-    "due" by construction, not by convention.
-
-    Returns (is_due, reason) — reason is a short human-readable string for
-    display/logging, "" if not due."""
-    now = now or datetime.now(timezone.utc)
-
-    refresh_after = compute_refresh_after(forecast, overrides=overrides)
-    if refresh_after is not None and now >= refresh_after:
-        return True, f"routine refresh due (refresh_after {refresh_after.date().isoformat()} has passed)"
-
-    close_time_str = forecast.get("close_time")
-    if close_time_str:
-        try:
-            close_time = datetime.fromisoformat(close_time_str.replace("Z", "+00:00"))
-        except Exception:
-            close_time = None
-        if close_time is not None:
-            hours_to_close = (close_time - now).total_seconds() / 3600
-            if 0 <= hours_to_close <= FINAL_REFRESH_WINDOW_HOURS:
-                submitted_at = None
-                submitted_at_str = forecast.get("submitted_at")
-                if submitted_at_str:
-                    try:
-                        submitted_at = datetime.fromisoformat(submitted_at_str)
-                        if submitted_at.tzinfo is None:
-                            submitted_at = submitted_at.replace(tzinfo=timezone.utc)
-                    except Exception:
-                        submitted_at = None
-                already_did_final_refresh = (
-                    submitted_at is not None
-                    and submitted_at >= (close_time - timedelta(hours=FINAL_REFRESH_WINDOW_HOURS))
-                )
-                if not already_did_final_refresh:
-                    return True, (f"closing within {FINAL_REFRESH_WINDOW_HOURS}h "
-                                   f"({close_time.date().isoformat()}) — final refresh")
-
-    return False, ""
 
 
 # ─── Pydantic-safe attribute setter ────────────────────────────────────────
@@ -713,6 +608,34 @@ def build_manual_refresh_list(all_forecasts: list[dict], ids: list[int]) -> tupl
     return to_refresh, not_found
 
 
+def _pending_refresh_question_ids() -> set[int]:
+    """question_ids covered by any refresh batch job that's been submitted
+    but not yet --check'd (i.e. still sitting in the top-level BATCH_DIR,
+    not yet archived into REFRESH_BATCH_CHECKED_DIR/REFRESH_BATCH_EXPIRED_DIR
+    by check_refresh_batch). Used by run_manual_refresh to block a question
+    from being submitted again while it's already in flight.
+
+    ADDED 2026-07-15 after a real incident: the same 9 questions got
+    submitted via --ids= twice, ~24 minutes apart, before either batch had
+    been checked — the second batch's results silently overwrote the
+    first's on Metaculus once submitted, so the first batch's entire cache
+    spend (16,720 read + 20,900 written tokens) was wasted for nothing.
+    This can't happen again: submitting the same question while it's
+    already pending is now refused outright rather than silently
+    double-spent."""
+    pending_ids: set[int] = set()
+    for batch_file in glob.glob(f"{REFRESH_BATCH_PREFIX}_*.json"):
+        try:
+            with open(batch_file) as f:
+                batch_info = json.load(f)
+        except Exception:
+            continue
+        for q_id in batch_info.get("question_ids", {}).values():
+            if q_id is not None:
+                pending_ids.add(q_id)
+    return pending_ids
+
+
 async def run_manual_refresh(ids: list[int]):
     """Entry point for `--ids=44667,44668,...`. Submits ONE refresh batch
     covering all requested questions together — this is deliberately a
@@ -725,6 +648,20 @@ async def run_manual_refresh(ids: list[int]):
     if not_found:
         print(f"  ⚠️  No forecast on file matching (as post_id or question_id): "
               f"{', '.join(str(i) for i in not_found)} — skipping those.")
+
+    # ADDED 2026-07-15: refuse to re-submit anything already in flight —
+    # see _pending_refresh_question_ids for the incident that prompted
+    # this. Filters out overlapping questions rather than blocking the
+    # whole request, so the rest of a mixed selection still goes through.
+    pending = _pending_refresh_question_ids()
+    already_pending = [f for f in to_refresh if f["question_id"] in pending]
+    if already_pending:
+        print(f"  ⚠️  Already has a pending (not yet --check'd) batch, skipping to avoid "
+              f"a duplicate submission: "
+              f"{', '.join('Q' + str(f['question_id']) for f in already_pending)}")
+        print(f"      Run --check first if you want to refresh these again sooner.")
+        to_refresh = [f for f in to_refresh if f["question_id"] not in pending]
+
     if not to_refresh:
         print("Nothing to refresh.")
         return
@@ -1458,12 +1395,13 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
             )
             for custom_id, info in question_map.items()
         },
-        # ADDED 2026-07-15: needed by is_due_for_refresh's trigger B
-        # (final-window-before-close check). Without this, close_time
-        # would only ever be known from the ORIGINAL meta_batch_forecast.py
-        # submission — the first time a question passes through THIS
-        # script's refresh path, that data would otherwise be lost for any
-        # subsequent refresh cycle. Mirrors meta_batch_forecast.py's own
+        # ADDED 2026-07-15: needed by is_due_for_refresh's checkpoint
+        # ladder (every rung is keyed off close_time, including the final
+        # 48h-before-close one). Without this, close_time would only ever
+        # be known from the ORIGINAL meta_batch_forecast.py submission —
+        # the first time a question passes through THIS script's refresh
+        # path, that data would otherwise be lost for any subsequent
+        # refresh cycle. Mirrors meta_batch_forecast.py's own
         # "close_times" key exactly (see that file for the attribute-name
         # verification note — scheduled_close_time, confirmed live there).
         "close_times": {

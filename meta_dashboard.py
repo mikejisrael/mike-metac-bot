@@ -55,6 +55,7 @@ from dotenv import load_dotenv
 from forecasting_tools import MetaculusClient, ApiFilter
 from meta_cp_extract import extract_live_cp
 from meta_refresh_exclusions import load_excluded_ids
+import meta_refresh_schedule
 
 load_dotenv()
 
@@ -70,7 +71,7 @@ personal_client = MetaculusClient(token=PERSONAL_TOKEN) if PERSONAL_TOKEN else N
 print(f"Bot client:      {'ready' if bot_client      else '⚠️  METAC_TOURNAMENT_TOKEN not set'}")
 print(f"Personal client: {'ready' if personal_client else '⚠️  METACULUS_TOKEN not set'}")
 
-LOCAL_RESULT_DIRS = ["tournament_batches", "tournament_batches_v2", "Meta batches"]
+LOCAL_RESULT_DIRS = ["tournament_batches", "tournament_batches_v2", "meta batches"]
 
 TOURNAMENT_LABELS = {
     33022: "FutureEval",
@@ -486,7 +487,7 @@ def classify_status(row: dict) -> str:
 
 
 def _make_row(qid, local_r, post, is_personal_only=False, refresh_state: dict | None = None,
-              excluded_ids: dict | None = None) -> dict:
+              excluded_ids: dict | None = None, refresh_overrides: dict | None = None) -> dict:
     score  = extract_score_info(post) if post else extract_score_info(None)
     q_type = (local_r or {}).get("question_type") or (post.get("question") or {}).get("type") if post else None
     cp_val = extract_live_cp(post, q_type) if post else None
@@ -584,6 +585,69 @@ def _make_row(qid, local_r, post, is_personal_only=False, refresh_state: dict | 
         except Exception:
             resolve_time_ts = None
 
+    # ADDED 2026-07-15: same epoch-ms sorting fix as resolve_time_ts above,
+    # applied to close_time — needed now that it's a real visible/sortable
+    # column (Step 2 of the batch-path refresh scheduling work), not just
+    # internal data used for badges/chart tooltips.
+    close_time_ts = None
+    if score["close_time"]:
+        try:
+            close_time_ts = int(
+                datetime.fromisoformat(score["close_time"].replace("Z", "+00:00")).timestamp() * 1000
+            )
+        except Exception:
+            close_time_ts = None
+
+    # ADDED 2026-07-15, FIXED same day: batch-path refresh scheduling
+    # (meta_refresh_schedule — see that module for the checkpoint-ladder
+    # design). "Batch-path" is now determined by LIVE tournament
+    # membership: tournament_forecast_v2.py only ever knows about exactly
+    # two tournaments (FutureEval, Market Pulse) — anything else is, by
+    # definition, on the batch path, whether or not meta_batch_forecast.py
+    # has explicitly been told about it yet. This still satisfies Mike's
+    # "work as standard as we add more tournaments" requirement (a new
+    # tournament is batch-path automatically, just by not being one of the
+    # two named exceptions) — it does NOT need dashboard code changes
+    # either, same as the original design intent.
+    #
+    # ORIGINALLY this checked local-file provenance instead (where the
+    # WINNING local result's _source_file actually lived) — replaced after
+    # a real live failure: Q43347 (Metaculus Cup) had no local result file
+    # in ANY directory (its forecast history predates/bypassed local
+    # tracking), so there was nothing to detect provenance FROM, and it
+    # silently fell back to "not batch-path" — routing it to
+    # tournament_forecast_v2.py, which correctly found 0 matching
+    # questions, since that script has never heard of Metaculus Cup. Live
+    # tournament membership doesn't have this gap: it's always known from
+    # the live Metaculus fetch, regardless of whether local history exists.
+    _V2_SCOPE_TOURNAMENTS = {"FutureEval", "Market Pulse Challenge 26Q3"}
+    is_batch_path = not any(t in _V2_SCOPE_TOURNAMENTS for t in tournaments)
+    # source_file is kept as an informational/debugging field (added
+    # 2026-07-15 for the routing diagnostic — see _classify_refresh_ids)
+    # even though it's no longer what decides is_batch_path.
+    source_file = (local_r or {}).get("_source_file") or ""
+
+    refresh_after = None
+    refresh_after_ts = None
+    is_due_for_batch_refresh = False
+    batch_refresh_due_reason = ""
+    has_refresh_override = str(qid) in (refresh_overrides or {})
+    if is_batch_path:
+        _forecast_for_schedule = {
+            "question_id": qid,
+            "submitted_at": predicted_at,
+            "close_time": score["close_time"],
+        }
+        _refresh_after_dt = meta_refresh_schedule.compute_refresh_after(
+            _forecast_for_schedule, overrides=refresh_overrides
+        )
+        if _refresh_after_dt is not None:
+            refresh_after = _refresh_after_dt.isoformat()
+            refresh_after_ts = int(_refresh_after_dt.timestamp() * 1000)
+        is_due_for_batch_refresh, batch_refresh_due_reason = meta_refresh_schedule.is_due_for_refresh(
+            _forecast_for_schedule, overrides=refresh_overrides
+        )
+
     return {
         "question_id":       qid,
         "post_id":           post_id,
@@ -600,6 +664,7 @@ def _make_row(qid, local_r, post, is_personal_only=False, refresh_state: dict | 
         "peer_score":        score["peer_score"],
         "baseline_score":    score["baseline_score"],
         "close_time":        score["close_time"],
+        "close_time_ts":     close_time_ts,
         "api_status":        score["api_status"],
         "live_match_found":  post is not None,
         "tournaments":       tournaments,
@@ -620,6 +685,22 @@ def _make_row(qid, local_r, post, is_personal_only=False, refresh_state: dict | 
         "refresh_alert_reasons": refresh_alert_reasons,
         "is_refresh_excluded": is_refresh_excluded,
         "refresh_exclusion_reason": refresh_exclusion_reason,
+        # ADDED 2026-07-15: batch-path refresh scheduling (Step 2) — see
+        # meta_refresh_schedule.py for the checkpoint-ladder design. Only
+        # meaningful when is_batch_path is True; FutureEval/Market Pulse
+        # rows carry these as False/None/"" since they're on a separate,
+        # already-automatic refresh path.
+        "is_batch_path":     is_batch_path,
+        # ADDED 2026-07-15: was computed but never actually exposed —
+        # needed for the /refresh routing diagnostic (_classify_refresh_ids)
+        # so a "why was this classified this way" question can be answered
+        # directly from the row instead of re-deriving it separately.
+        "source_file":       source_file or None,
+        "refresh_after":     refresh_after,
+        "refresh_after_ts":  refresh_after_ts,
+        "is_due_for_batch_refresh": is_due_for_batch_refresh,
+        "batch_refresh_due_reason": batch_refresh_due_reason,
+        "has_refresh_override": has_refresh_override,
     }
 
 
@@ -717,6 +798,7 @@ def _make_group_row(post_id: int, members: list[dict]) -> dict:
         "peer_score":        avg_peer,
         "baseline_score":    None,
         "close_time":        None,
+        "close_time_ts":     None,
         "api_status":        None,
         "live_match_found":  any(m["live_match_found"] for m in members),
         "tournaments":       members[0]["tournaments"] if members else [],
@@ -729,6 +811,17 @@ def _make_group_row(post_id: int, members: list[dict]) -> dict:
         "refresh_alert_reasons": sorted({reason for m in members for reason in m["refresh_alert_reasons"]}),
         "is_refresh_excluded": bool(members) and all(m["is_refresh_excluded"] for m in members),
         "refresh_exclusion_reason": "; ".join(exclusion_reasons),
+        # ADDED 2026-07-15: group rows are Market Pulse only in practice
+        # (the only group_of_questions tournament today), which is never
+        # batch-path — defaulted off rather than aggregated from members,
+        # same convention as close_time/resolve_time above.
+        "is_batch_path":     False,
+        "source_file":       None,
+        "refresh_after":     None,
+        "refresh_after_ts":  None,
+        "is_due_for_batch_refresh": False,
+        "batch_refresh_due_reason": "",
+        "has_refresh_override": False,
         "status_bucket":     overall_bucket,
         "status_label":      status_agg or STATUS_LABELS[overall_bucket],
         "member_question_ids": [m["question_id"] for m in members_sorted],
@@ -783,6 +876,9 @@ def build_dashboard_data():
     personal_live  = fetch_predicted_questions(personal_client, "personal")
     refresh_state  = load_refresh_candidate_state()
     excluded_ids   = load_excluded_ids()
+    # ADDED 2026-07-15: loaded once per cache cycle, same pattern as
+    # excluded_ids/refresh_state above — see meta_refresh_schedule.py.
+    refresh_overrides = meta_refresh_schedule.load_refresh_overrides()
 
     rows = []
     seen = set()
@@ -796,14 +892,16 @@ def build_dashboard_data():
         if post is None and qid in personal_live:
             post = personal_live[qid]
             is_personal_only = True
-        rows.append(_make_row(qid, r, post, is_personal_only=is_personal_only, refresh_state=refresh_state, excluded_ids=excluded_ids))
+        rows.append(_make_row(qid, r, post, is_personal_only=is_personal_only, refresh_state=refresh_state,
+                               excluded_ids=excluded_ids, refresh_overrides=refresh_overrides))
         seen.add(qid)
 
     # Bot-live-only rows (no local result — manual predictions etc.)
     for qid, post in bot_live.items():
         if qid in seen:
             continue
-        rows.append(_make_row(qid, None, post, is_personal_only=False, refresh_state=refresh_state, excluded_ids=excluded_ids))
+        rows.append(_make_row(qid, None, post, is_personal_only=False, refresh_state=refresh_state,
+                               excluded_ids=excluded_ids, refresh_overrides=refresh_overrides))
         seen.add(qid)
 
     # Personal-only rows (not predicted by bot)
@@ -811,7 +909,8 @@ def build_dashboard_data():
         if qid in seen:
             continue
         local_r = local.get(qid)
-        rows.append(_make_row(qid, local_r, post, is_personal_only=True, refresh_state=refresh_state, excluded_ids=excluded_ids))
+        rows.append(_make_row(qid, local_r, post, is_personal_only=True, refresh_state=refresh_state,
+                               excluded_ids=excluded_ids, refresh_overrides=refresh_overrides))
         seen.add(qid)
 
     for row in rows:
@@ -831,6 +930,11 @@ def build_dashboard_data():
         if row["status_bucket"] != "open":
             row["is_refresh_candidate"] = False
             row["refresh_alert_reasons"] = []
+            # ADDED 2026-07-15: same reasoning as is_refresh_candidate above,
+            # applied to the new batch-path due-for-refresh signal — a
+            # closed question can't actually be refreshed either way.
+            row["is_due_for_batch_refresh"] = False
+            row["batch_refresh_due_reason"] = ""
 
     # Drop withdrawn rows with nothing useful — no peer score, no resolution, no CP.
     # Keep withdrawn rows that have a peer score (resolved+scored before leaving the feed).
@@ -877,6 +981,10 @@ def build_dashboard_data():
     phase0 = load_phase0_reports()
     openrouter_balance = load_openrouter_balance()
     refresh_candidate_count = sum(1 for r in rows if r["is_refresh_candidate"])
+    # ADDED 2026-07-15: mirrors refresh_candidate_count above, for the new
+    # batch-path due-for-refresh signal (age/close-time based, distinct
+    # from the CP-shift-based one).
+    batch_refresh_due_count = sum(1 for r in rows if r["is_due_for_batch_refresh"])
 
     # Finish-line flag (added 2026-07-06): Mike's plan is to let the
     # existing refresh pipeline naturally re-forecast (under the bot
@@ -908,6 +1016,7 @@ def build_dashboard_data():
         "phase0":              phase0,
         "openrouter_balance":  openrouter_balance,
         "refresh_candidate_count": refresh_candidate_count,
+        "batch_refresh_due_count": batch_refresh_due_count,
         "personal_total_count": len(personal_rows),
         "personal_open_count":  personal_open_count,
         "personal_finish_line": personal_finish_line,
@@ -990,6 +1099,17 @@ PAGE_TEMPLATE = """
     tr.refresh-candidate { box-shadow: inset 3px 0 0 #f59e0b; }
     tr.refresh-candidate td:first-child { background: #fffbeb; }
     .refresh-badge { display: inline-block; font-size: 11px; margin-left: 4px; cursor: help; }
+    /* ADDED 2026-07-15: distinct from refresh-candidate (CP-shift based,
+       amber) — this is the age/close-time based batch-path signal, given
+       its own color so the two are never visually confused. Uses
+       border-left instead of refresh-candidate's box-shadow so a row that
+       happens to match BOTH signals shows both indicators rather than one
+       overwriting the other. */
+    tr.batch-refresh-due { border-left: 3px solid #7c3aed; }
+    tr.batch-refresh-due td:nth-child(2) { background: #f5f3ff; }
+    .refresh-cell { white-space: nowrap; }
+    .edit-refresh-btn { cursor: pointer; color: #2563eb; font-size: 11px; margin-left: 5px; }
+    .edit-refresh-btn:hover { text-decoration: underline; }
     .pos { color: #16a34a; font-weight: 600; }
     .neg { color: #dc2626; font-weight: 600; }
     .muted { color: #999; }
@@ -1113,6 +1233,7 @@ PAGE_TEMPLATE = """
     <div class="filter-group-label">Signals</div>
     <div class="pills" id="signalPills">
       <div class="pill" data-value="refresh_candidate">🔄 Refresh candidates only ({{ data.refresh_candidate_count }})</div>
+      <div class="pill" data-value="batch_refresh_due">⏰ Due for refresh (batch-path) ({{ data.batch_refresh_due_count }})</div>
     </div>
     <div class="filter-footer">
       <span class="clear-btn" id="clearFilters">Clear all filters</span>
@@ -1136,33 +1257,39 @@ PAGE_TEMPLATE = """
         <th class="sortable" data-key="type" data-type="str">Type <span class="arrow"></span></th>
         <th class="sortable" data-key="submitted" data-type="num">Submitted <span class="arrow"></span></th>
         <th class="sortable" data-key="predicted" data-type="num">Last predicted <span class="arrow"></span></th>
+        <th class="sortable" data-key="close" data-type="num">Close date <span class="arrow"></span></th>
         <th class="sortable" data-key="status" data-type="str">Status <span class="arrow"></span></th>
         <th class="sortable" data-key="resolution" data-type="str">Resolution <span class="arrow"></span></th>
         <th class="sortable" data-key="resolved" data-type="num">Resolved at <span class="arrow"></span></th>
         <th class="sortable" data-key="peer" data-type="num">Peer score <span class="arrow"></span></th>
         <th class="sortable" data-key="tournament" data-type="str">Tournament(s) <span class="arrow"></span></th>
+        <th class="sortable" data-key="refresh" data-type="num" title="Batch-path tournaments only">Refresh <span class="arrow"></span></th>
         <th></th>
       </tr>
     </thead>
     <tbody>
       {% for row in data.rows %}
       <tr id="row-{{ row.question_id }}"
-          class="{{ 'refresh-candidate' if row.is_refresh_candidate else '' }}"
+          class="{{ 'refresh-candidate' if row.is_refresh_candidate else '' }} {{ 'batch-refresh-due' if row.is_due_for_batch_refresh else '' }}"
           data-tournaments="{{ row.tournaments|join(',') }}" data-status="{{ row.status_bucket }}"
           data-refresh="{{ 'true' if row.is_refresh_candidate else 'false' }}"
+          data-batch-refresh-due="{{ 'true' if row.is_due_for_batch_refresh else 'false' }}"
+          data-batch-path="{{ 'true' if row.is_batch_path else 'false' }}"
           data-search="{{ (row.search_blob if row.is_group else (row.question_text ~ ' ' ~ row.question_id ~ ' ' ~ (row.post_id or '')))|lower|e }}"
           data-sort-id="{{ row.question_id }}"
           data-sort-question="{{ row.question_text|lower|e }}"
           data-sort-type="{{ row.question_type or '' }}"
           data-sort-submitted="{{ row.submitted_sort if row.submitted_sort is not none else '' }}"
           data-sort-predicted="{{ row.predicted_at_ts if row.predicted_at_ts is not none else '' }}"
+          data-sort-close="{{ row.close_time_ts if row.close_time_ts is not none else '' }}"
           data-sort-status="{{ row.status_label }}"
           data-sort-resolution="{{ row.resolution if row.resolution is not none else '' }}"
           data-sort-resolved="{{ row.resolve_time_ts if row.resolve_time_ts is not none else '' }}"
           data-sort-peer="{{ row.peer_score if row.peer_score is not none else '' }}"
-          data-sort-tournament="{{ row.tournaments|join(',') }}">
+          data-sort-tournament="{{ row.tournaments|join(',') }}"
+          data-sort-refresh="{{ row.refresh_after_ts if row.refresh_after_ts is not none else '' }}">
         <td>
-          {% if not row.is_group and row.post_id %}
+          {% if not row.is_group and row.post_id and row.status_bucket == 'open' and not row.is_refresh_excluded %}
             <input type="checkbox" class="row-select" value="{{ row.post_id }}"
                    onclick="toggleRowSelect(this)">
           {% endif %}
@@ -1188,6 +1315,7 @@ PAGE_TEMPLATE = """
         <td>{{ row.question_type or '—' }}</td>
         <td class="truncate" title="{{ row.submitted_summary }}">{{ row.submitted_summary }}</td>
         <td>{{ row.predicted_at[:10] if row.predicted_at else '—' }}</td>
+        <td>{{ row.close_time[:10] if row.close_time else '—' }}</td>
         <td>{{ row.status_label }}</td>
         <td>{{ row.resolution if row.resolution is not none else '—' }}</td>
         <td>{{ row.resolve_time[:10] if row.resolve_time else '—' }}</td>
@@ -1195,6 +1323,15 @@ PAGE_TEMPLATE = """
           {{ '%.2f'|format(row.peer_score) if row.peer_score is not none else (row.resolved and '?' or '—') }}
         </td>
         <td>{% for t in row.tournaments %}<span class="tag {{ 'personal' if t == 'Personal' else '' }}">{{ t }}</span>{% endfor %}</td>
+        <td class="refresh-cell">
+          {% if row.is_batch_path %}
+            <span class="refresh-date-display" id="refresh-display-{{ row.question_id }}">{% if row.is_due_for_batch_refresh %}<span class="refresh-badge" title="{{ row.batch_refresh_due_reason }}">⏰</span> {% endif %}{{ row.refresh_after[:10] if row.refresh_after else '—' }}{% if row.has_refresh_override %} <span class="muted" style="font-size:10px;">(manual)</span>{% endif %}</span>
+            <span class="edit-refresh-btn" title="Edit refresh date"
+                  onclick="editRefreshAfter({{ row.question_id }}, '{{ row.refresh_after[:10] if row.refresh_after else '' }}')">✎</span>
+          {% else %}
+            <span class="muted" title="FutureEval/Market Pulse questions refresh automatically — not scheduled here">—</span>
+          {% endif %}
+        </td>
         <td>
           {% if row.is_group %}
             <a class="detail-link" href="/group/{{ row.post_id }}" target="_blank">detail</a>
@@ -1380,13 +1517,15 @@ PAGE_TEMPLATE = """
       const selS = getSelected('statusPills');
       const selG = getSelected('signalPills');
       const onlyRefreshCandidates = selG.has('refresh_candidate');
+      const onlyBatchRefreshDue = selG.has('batch_refresh_due');
       const searchTerm = document.getElementById('searchBox').value.trim().toLowerCase();
       const matched = [];
       document.querySelectorAll('#rowsTable tbody tr').forEach(tr => {
         const tours = tr.dataset.tournaments.split(',');
         const tMatch = selT.size === 0 || tours.some(t => selT.has(t));
         const sMatch = selS.size === 0 || selS.has(tr.dataset.status);
-        const gMatch = !onlyRefreshCandidates || tr.dataset.refresh === 'true';
+        const gMatch = (!onlyRefreshCandidates || tr.dataset.refresh === 'true') &&
+                       (!onlyBatchRefreshDue || tr.dataset.batchRefreshDue === 'true');
         // data-search is pre-lowercased at render time (Jinja |lower filter) —
         // for a group row it's the search_blob (every member's own text/id
         // concatenated), so searching a specific sub-question's date range or
@@ -1442,6 +1581,10 @@ PAGE_TEMPLATE = """
     // number for the confirm dialog, not a billing guarantee.
     const EST_COST_PER_QUESTION_LOW = 0.025;
     const EST_COST_PER_QUESTION_HIGH = 0.03;
+    // ADDED 2026-07-15 (Step 3): for questions routed to
+    // meta_refresh_forecast.py instead — matches that file's own --submit
+    // dry-run estimate exactly (already includes its 50% batch discount).
+    const EST_COST_PER_QUESTION_BATCH = 0.05;
     const selectedIds = new Set();
 
     function updateSelectionBar() {
@@ -1462,6 +1605,44 @@ PAGE_TEMPLATE = """
       const id = parseInt(checkbox.value, 10);
       if (checkbox.checked) selectedIds.add(id); else selectedIds.delete(id);
       updateSelectionBar();
+    }
+
+    // ADDED 2026-07-15: inline editor for a batch-path question's
+    // refresh_after date. Swaps the display span + edit button for a date
+    // input with Save/Clear/Cancel, mirroring the pattern this codebase
+    // already uses elsewhere (see /refresh route's own docstring):
+    // no live in-place recompute of the due-status/badge — on success this
+    // just reloads the page, same "eventually consistent, refresh to see
+    // it" philosophy as the 5-minute cache cycle. Simpler and more robust
+    // than trying to replicate is_due_for_refresh's logic in JS too.
+    function editRefreshAfter(questionId, currentDateStr) {
+      const cell = document.getElementById('refresh-display-' + questionId).closest('td');
+      const editBtn = cell.querySelector('.edit-refresh-btn');
+      cell.innerHTML =
+        '<input type="date" id="refresh-input-' + questionId + '" value="' + (currentDateStr || '') + '" style="font-size:12px;padding:2px;">' +
+        '<button onclick="saveRefreshAfter(' + questionId + ')" style="font-size:11px;margin-left:4px;cursor:pointer;">Save</button>' +
+        '<button onclick="clearRefreshOverride(' + questionId + ')" style="font-size:11px;margin-left:2px;cursor:pointer;" title="Reset to default (last forecast + 30 days)">Reset</button>' +
+        '<button onclick="location.reload()" style="font-size:11px;margin-left:2px;cursor:pointer;">Cancel</button>';
+    }
+    function saveRefreshAfter(questionId) {
+      const input = document.getElementById('refresh-input-' + questionId);
+      if (!input.value) { alert('Pick a date first.'); return; }
+      fetch('/set_refresh_after', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({question_id: questionId, refresh_after: input.value})
+      }).then(r => r.json()).then(data => {
+        if (data.ok) location.reload();
+        else alert('Failed to save: ' + (data.error || 'unknown error'));
+      }).catch(e => alert('Failed to save: ' + e));
+    }
+    function clearRefreshOverride(questionId) {
+      fetch('/set_refresh_after', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({question_id: questionId, refresh_after: null})
+      }).then(r => r.json()).then(data => {
+        if (data.ok) location.reload();
+        else alert('Failed to clear: ' + (data.error || 'unknown error'));
+      }).catch(e => alert('Failed to clear: ' + e));
     }
 
     document.getElementById('selectAllVisible').addEventListener('change', (e) => {
@@ -1485,13 +1666,36 @@ PAGE_TEMPLATE = """
     document.getElementById('refreshSelected').addEventListener('click', () => {
       const count = selectedIds.size;
       if (count === 0) return;
-      const lowCost = (count * EST_COST_PER_QUESTION_LOW).toFixed(2);
-      const highCost = (count * EST_COST_PER_QUESTION_HIGH).toFixed(2);
+      // ADDED 2026-07-15 (Step 3): figure out which pipeline each selected
+      // id will launch under BEFORE confirming, so the dialog's cost
+      // estimate and description are honest instead of always assuming
+      // tournament_forecast_v2.py. Keyed off each checkbox's own `value`
+      // (same id stored in selectedIds), not the row's `id` HTML attribute
+      // -- those aren't always the same number (post_id vs question_id can
+      // differ for a given question), so this is the only reliable lookup.
+      const batchPathById = {};
+      document.querySelectorAll('.row-select').forEach(cb => {
+        batchPathById[cb.value] = cb.closest('tr').dataset.batchPath === 'true';
+      });
+      let v2Count = 0, batchCount = 0;
+      selectedIds.forEach(id => { if (batchPathById[id]) batchCount++; else v2Count++; });
+
+      // EST_COST_PER_QUESTION_LOW/HIGH is tuned for tournament_forecast_v2's
+      // synchronous per-question cost; EST_COST_PER_QUESTION_BATCH matches
+      // meta_refresh_forecast.py's own dry-run estimate (already includes
+      // the 50% batch discount — see that file's --submit path).
+      const lowCost = (v2Count * EST_COST_PER_QUESTION_LOW + batchCount * EST_COST_PER_QUESTION_BATCH).toFixed(2);
+      const highCost = (v2Count * EST_COST_PER_QUESTION_HIGH + batchCount * EST_COST_PER_QUESTION_BATCH).toFixed(2);
+      const pipelineNote = batchCount === 0
+        ? 'This will run tournament_forecast_v2.py in the background — check the terminal or reload this dashboard in a few minutes to see results.'
+        : v2Count === 0
+          ? 'This will submit ' + batchCount + ' question(s) to meta_refresh_forecast.py as a batch job — results land after the next --check run, not immediately.'
+          : (v2Count + ' question(s) will run via tournament_forecast_v2.py (results in a few minutes); ' +
+             batchCount + ' will be submitted to meta_refresh_forecast.py as a batch job (results after the next --check run).');
       const ok = confirm(
-        'Refresh ' + count + ' question(s)?\n\n' +
-        'Estimated cost: $' + lowCost + '–$' + highCost + '\n\n' +
-        'This will run tournament_forecast_v2.py in the background — ' +
-        'check the terminal or reload this dashboard in a few minutes to see results.'
+        'Refresh ' + count + ' question(s)?\\n\\n' +
+        'Estimated cost: $' + lowCost + '–$' + highCost + '\\n\\n' +
+        pipelineNote
       );
       if (!ok) return;
 
@@ -1506,7 +1710,20 @@ PAGE_TEMPLATE = """
         .then(r => r.json())
         .then(data => {
           if (data.ok) {
-            alert('Launched — forecasting ' + data.count + ' question(s) in the background.');
+            // ADDED 2026-07-15 (Step 3): the response now reports which
+            // pipeline each id actually launched under -- surface that
+            // honestly rather than one generic message, since the two
+            // pipelines have very different turnaround (v2 finishes
+            // within this run; batch-path only SUBMITS now, results land
+            // after the next --check).
+            const v2 = (data.launched && data.launched.tournament_forecast_v2) || [];
+            const batch = (data.launched && data.launched.meta_refresh_forecast) || [];
+            const parts = [];
+            if (v2.length) parts.push(v2.length + ' via tournament_forecast_v2 (results in a few minutes)');
+            if (batch.length) parts.push(batch.length + ' via meta_refresh_forecast batch submission (results after the next --check run)');
+            let msg = 'Launched — ' + parts.join('; ') + '.';
+            if (data.errors && data.errors.length) msg += '\\n\\nSome launches failed: ' + data.errors.join('; ');
+            alert(msg);
             selectedIds.clear();
             document.querySelectorAll('.row-select').forEach(cb => cb.checked = false);
             document.getElementById('selectAllVisible').checked = false;
@@ -1750,8 +1967,12 @@ GROUP_TEMPLATE = """
       <tbody>
         {% for m in members %}
         <tr>
-          <td><input type="checkbox" class="member-select" value="{{ m.question_id }}"
-                     onclick="toggleMemberSelect(this)"></td>
+          <td>
+            {% if m.status_bucket == 'open' and not m.is_refresh_excluded %}
+              <input type="checkbox" class="member-select" value="{{ m.question_id }}"
+                     onclick="toggleMemberSelect(this)">
+            {% endif %}
+          </td>
           <td>{{ m.period_label }}</td>
           <td><span class="badge status-{{ m.status_class }}">{{ m.status_label }}</span></td>
           <td>{{ m.submitted_summary }}</td>
@@ -1821,8 +2042,8 @@ GROUP_TEMPLATE = """
       const lowCost = (count * EST_COST_PER_QUESTION_LOW).toFixed(2);
       const highCost = (count * EST_COST_PER_QUESTION_HIGH).toFixed(2);
       const ok = confirm(
-        'Refresh ' + count + ' sub-question(s)?\n\n' +
-        'Estimated cost: $' + lowCost + '–$' + highCost + '\n\n' +
+        'Refresh ' + count + ' sub-question(s)?\\n\\n' +
+        'Estimated cost: $' + lowCost + '–$' + highCost + '\\n\\n' +
         'This will run tournament_forecast_v2.py in the background — ' +
         'check the terminal or reload the dashboard in a few minutes to see results.'
       );
@@ -2025,6 +2246,45 @@ def raw_json(question_id):
     return jsonify({"_error": f"Question {question_id} not found in either account's live data."})
 
 
+def _classify_refresh_ids(ids: list[int]) -> tuple[list[int], list[int]]:
+    """Split a list of post_ids/question_ids into (v2_ids, batch_ids) --
+    ADDED 2026-07-15 (Step 3). v2_ids go to tournament_forecast_v2.py
+    (FutureEval/Market Pulse), batch_ids go to meta_refresh_forecast.py
+    (ACX2026/Climate/Metaculus Cup/question_series). Uses the SAME
+    is_batch_path signal _make_row computes per row — tournament-membership
+    based (see that function's docstring for why this replaced an earlier
+    file-provenance-based version same day, after Q43347/Metaculus Cup
+    showed the gap live: a question with no local result file anywhere had
+    nothing to detect provenance from, and silently defaulted to the wrong
+    pipeline).
+
+    Matches on EITHER post_id or question_id per id, mirroring
+    tournament_forecast_v2.py's own --ids= dual-matching (group-page member
+    checkboxes send question_id; main-table checkboxes send post_id — see
+    refresh_selected's docstring).
+
+    Anything not found in the current cache defaults to v2_ids — preserves
+    this route's original all-goes-to-v2 behavior as a safe fallback for
+    an id the cache happens to be momentarily missing, rather than
+    silently dropping it."""
+    with CACHE_LOCK:
+        data = CACHE["data"]
+    rows = data["rows"] if data else []
+
+    batch_path_ids = set()
+    for row in rows:
+        if row.get("is_batch_path"):
+            if row.get("post_id") is not None:
+                batch_path_ids.add(row["post_id"])
+            if row.get("question_id") is not None:
+                batch_path_ids.add(row["question_id"])
+
+    v2_ids, batch_ids = [], []
+    for i in ids:
+        (batch_ids if i in batch_path_ids else v2_ids).append(i)
+    return v2_ids, batch_ids
+
+
 @app.route("/refresh", methods=["POST"])
 def refresh_selected():
     """
@@ -2039,15 +2299,31 @@ def refresh_selected():
     table deliberately have no checkbox at all; only the group detail
     page's individual member rows do.
 
-    Spawns tournament_forecast_v2.py --ids=... as a background subprocess
-    (Popen, not run/check_output -- this route must return immediately,
-    not block for however long the actual forecast run takes) and returns
-    right away. Uses sys.executable so the subprocess runs under the SAME
-    interpreter (and therefore the same venv312 environment) as this
-    dashboard process, not whatever "python" happens to resolve to on
-    PATH. There's no live streaming of that subprocess's output back to
-    the browser in this first pass -- check the dashboard's own 5-minute
-    cache refresh, or the terminal/log file, to see the result.
+    CHANGED 2026-07-15 (Step 3): previously this ALWAYS spawned
+    tournament_forecast_v2.py regardless of what was selected -- fine when
+    only FutureEval/Market Pulse rows had checkboxes that meant anything,
+    but wrong now that the batch-path tournaments' rows are just as
+    selectable and that script has no idea those tournaments exist. Now
+    splits the incoming ids via _classify_refresh_ids and can launch BOTH
+    scripts in the same request if the selection spans both pipelines --
+    each spawned independently, so one failing to launch doesn't block the
+    other. Note the batch-path launch only SUBMITS a batch job (mirrors
+    Mike running `meta_refresh_forecast.py --ids=...` by hand) -- results
+    don't land until the next --check run (still on its own automated
+    cron, not triggered by this route), unlike tournament_forecast_v2.py's
+    synchronous --ids= which finishes and submits within the same run.
+    The response's "launched" breakdown lets the frontend say this
+    honestly instead of implying both finish equally fast.
+
+    Spawns each script's --ids=... as a background subprocess (Popen, not
+    run/check_output -- this route must return immediately, not block for
+    however long the actual forecast run takes) and returns right away.
+    Uses sys.executable so the subprocess runs under the SAME interpreter
+    (and therefore the same venv312 environment) as this dashboard
+    process, not whatever "python" happens to resolve to on PATH. There's
+    no live streaming of either subprocess's output back to the browser in
+    this first pass -- check the dashboard's own 5-minute cache refresh,
+    or the terminal/log file, to see the result.
 
     SAFETY: this endpoint does NOT itself gate on cost or confirm anything
     -- that happens client-side (a confirm() dialog showing the selected
@@ -2061,21 +2337,83 @@ def refresh_selected():
     if not ids or not isinstance(ids, list):
         return jsonify({"ok": False, "error": "No ids provided"}), 400
     try:
-        ids_str = ",".join(str(int(i)) for i in ids)
+        ids = [int(i) for i in ids]
     except (ValueError, TypeError):
         return jsonify({"ok": False, "error": "ids must be a list of integers"}), 400
 
+    v2_ids, batch_ids = _classify_refresh_ids(ids)
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    script_path = os.path.join(script_dir, "tournament_forecast_v2.py")
-    try:
-        subprocess.Popen(
-            [sys.executable, script_path, f"--ids={ids_str}"],
-            cwd=script_dir,
-        )
-    except Exception as e:
-        return jsonify({"ok": False, "error": f"Failed to launch: {e}"}), 500
+    launched = {}
+    errors = []
 
-    return jsonify({"ok": True, "launched_ids": ids, "count": len(ids)})
+    if v2_ids:
+        ids_str = ",".join(str(i) for i in v2_ids)
+        script_path = os.path.join(script_dir, "tournament_forecast_v2.py")
+        try:
+            subprocess.Popen([sys.executable, script_path, f"--ids={ids_str}"], cwd=script_dir)
+            launched["tournament_forecast_v2"] = v2_ids
+        except Exception as e:
+            errors.append(f"Failed to launch tournament_forecast_v2.py: {e}")
+
+    if batch_ids:
+        ids_str = ",".join(str(i) for i in batch_ids)
+        script_path = os.path.join(script_dir, "meta_refresh_forecast.py")
+        try:
+            subprocess.Popen([sys.executable, script_path, f"--ids={ids_str}"], cwd=script_dir)
+            launched["meta_refresh_forecast"] = batch_ids
+        except Exception as e:
+            errors.append(f"Failed to launch meta_refresh_forecast.py: {e}")
+
+    if not launched:
+        return jsonify({"ok": False, "error": "; ".join(errors) or "Nothing was launched"}), 500
+
+    return jsonify({
+        "ok": True,
+        "count": len(ids),
+        "launched": launched,
+        "errors": errors or None,
+    })
+
+
+@app.route("/set_refresh_after", methods=["POST"])
+def set_refresh_after():
+    """
+    Added 2026-07-15 (Step 2 of the batch-path refresh scheduling work).
+    Accepts a JSON body {"question_id": 43498, "refresh_after": "2026-08-20"}
+    (a plain date string from the <input type="date">, interpreted as
+    midnight UTC that day) or {"question_id": ..., "refresh_after": null}
+    to clear an existing override and fall back to the default (the
+    checkpoint-ladder schedule keyed off close_time — see
+    meta_refresh_schedule.py's module docstring). Writes via
+    meta_refresh_schedule.save_refresh_override — see that module for the
+    override-file format. This route only writes state; it doesn't launch
+    anything, so there's no cost/confirmation gate needed the way /refresh
+    has one.
+    """
+    payload = request.get_json(silent=True) or {}
+    if "question_id" not in payload:
+        return jsonify({"ok": False, "error": "question_id is required"}), 400
+    try:
+        question_id = int(payload["question_id"])
+    except (ValueError, TypeError):
+        return jsonify({"ok": False, "error": "question_id must be an integer"}), 400
+
+    raw_date = payload.get("refresh_after")
+    refresh_after_dt = None
+    if raw_date:
+        try:
+            # <input type="date"> sends "YYYY-MM-DD" — treat as midnight UTC.
+            refresh_after_dt = datetime.fromisoformat(raw_date).replace(tzinfo=timezone.utc)
+        except Exception:
+            return jsonify({"ok": False, "error": f"Could not parse date: {raw_date!r}"}), 400
+
+    try:
+        meta_refresh_schedule.save_refresh_override(question_id, refresh_after_dt)
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"Failed to save: {e}"}), 500
+
+    return jsonify({"ok": True, "question_id": question_id,
+                     "refresh_after": refresh_after_dt.isoformat() if refresh_after_dt else None})
 
 
 if __name__ == "__main__":

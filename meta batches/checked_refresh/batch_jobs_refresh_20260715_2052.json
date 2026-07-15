@@ -1,0 +1,117 @@
+{
+  "batch_id": "msgbatch_015mqNsrBamyWABcQ5bGVUg1",
+  "submitted_at": "2026-07-15T20:52:08.089066",
+  "batch_type": "refresh",
+  "num_requests": 9,
+  "question_ids": {
+    "refresh_44011_20260715": 44011,
+    "refresh_43716_20260715": 43716,
+    "refresh_8050_20260715": 8050,
+    "refresh_7872_20260715": 7872,
+    "refresh_44017_20260715": 44017,
+    "refresh_43937_20260715": 43937,
+    "refresh_43360_20260715": 43360,
+    "refresh_43892_20260715": 43892,
+    "refresh_7861_20260715": 7861
+  },
+  "question_texts": {
+    "refresh_44011_20260715": "Will the Liberal Party officially nominate Fl\u00e1vio Bolsonaro as its candidate for president of Brazil before August 15, 2026?",
+    "refresh_43716_20260715": "Will the Federal Reserve raise the federal funds target range before July 30, 2026?",
+    "refresh_8050_20260715": "Will Israel recognize the Islamic Emirate of Afghanistan before 2030?",
+    "refresh_7872_20260715": "Will the United States recognize the Islamic Emirate of Afghanistan before 2030?",
+    "refresh_44017_20260715": "Will July 2026 be the warmest July on record, according to Copernicus?",
+    "refresh_43937_20260715": "Will the US and India finalise a new bilateral trade agreement before August 2026?",
+    "refresh_43360_20260715": "Will the UK National Threat Level reduce from SEVERE before September 2026?",
+    "refresh_43892_20260715": "Will the U.S. Senate pass an Iran war powers resolution before August 1, 2026?",
+    "refresh_7861_20260715": "Will China recognize the Islamic Emirate of Afghanistan before 2030?"
+  },
+  "original_probabilities": {
+    "refresh_44011_20260715": 0.68,
+    "refresh_43716_20260715": 0.33,
+    "refresh_8050_20260715": 0.08,
+    "refresh_7872_20260715": 0.18,
+    "refresh_44017_20260715": 0.24,
+    "refresh_43937_20260715": 0.8,
+    "refresh_43360_20260715": 0.08,
+    "refresh_43892_20260715": 0.18,
+    "refresh_7861_20260715": 0.62
+  },
+  "question_types": {
+    "refresh_44011_20260715": "binary",
+    "refresh_43716_20260715": "binary",
+    "refresh_8050_20260715": "binary",
+    "refresh_7872_20260715": "binary",
+    "refresh_44017_20260715": "binary",
+    "refresh_43937_20260715": "binary",
+    "refresh_43360_20260715": "binary",
+    "refresh_43892_20260715": "binary",
+    "refresh_7861_20260715": "binary"
+  },
+  "options_by_question": {},
+  "refresh_reasons": {
+    "refresh_44011_20260715": "manual refresh via dashboard",
+    "refresh_43716_20260715": "manual refresh via dashboard",
+    "refresh_8050_20260715": "manual refresh via dashboard",
+    "refresh_7872_20260715": "manual refresh via dashboard",
+    "refresh_44017_20260715": "manual refresh via dashboard",
+    "refresh_43937_20260715": "manual refresh via dashboard",
+    "refresh_43360_20260715": "manual refresh via dashboard",
+    "refresh_43892_20260715": "manual refresh via dashboard",
+    "refresh_7861_20260715": "manual refresh via dashboard"
+  },
+  "community_predictions": {
+    "refresh_44011_20260715": null,
+    "refresh_43716_20260715": null,
+    "refresh_8050_20260715": null,
+    "refresh_7872_20260715": null,
+    "refresh_44017_20260715": null,
+    "refresh_43937_20260715": null,
+    "refresh_43360_20260715": null,
+    "refresh_43892_20260715": null,
+    "refresh_7861_20260715": null
+  },
+  "research_texts": {
+    "refresh_44011_20260715": "The summary contains no internal contradictions. All dates, figures, and claims are consistent throughout:\n\n- The convention date is consistently stated as July 25, 2026\n- The venue is consistently identified as Mercado Livre Arena Pacaembu in S\u00e3o Paulo\n- The timing (gates at 8:30 AM, convention at 10:00 AM) is stated once\n- The electoral window for conventions (July 20 to August 5) is consistently referenced\n- The candidate to be nominated (Fl\u00e1vio Bolsonaro) is consistently identified\n- The running mate announcement timing (closer to August 15 deadline) is stated once\n\nI am returning the summary unchanged, word-for-word.",
+    "refresh_43716_20260715": "I found one internal contradiction in the summary:\n\n**Contradiction identified:** The probability of a July rate hike according to CME's FedWatch Tool is cited as both \"roughly 10%\" (after July 14 CPI release) and \"46.5%\" (on July 13, before the CPI release). These are not contradictory per se\u2014they reflect different time points\u2014but I need to verify the internal consistency of the July 13 figure.\n\nUpon careful reading, the summary states on July 13 the odds were \"46.5% chance\" according to CME's FedWatch tool. Then after the July 14 CPI release, it fell to \"roughly 10%.\" This is internally consistent as a time sequence showing a significant drop after new data.\n\nHowever, re-reading more carefully: the summary says \"Prior to the CPI report, on July 13, 2026, chances of a July hike were rising, with CME's FedWatch tool showing a 46.5% chance and prediction market Kalshi at 36%.\" Then it says after July 14 CPI, \"the chance of a 25 basis point hike fell to roughly 10%.\" This sequence is logically consistent and reflects a chronological decline.\n\n**No contradictions found.** The summary is internally consistent\u2014it shows a timeline of changing probabilities before and after the July 14 CPI release, with no metrics assigned to conflicting values for the same date/period.\n\nThe summary is returned UNCHANGED:\n\nAs of July 15, 2026, the likelihood of the Federal Reserve raising the federal funds target range before July 30, 2026, appears to be decreasing, largely due to recent inflation data.\n\nOn July 14, 2026, the U.S. Bureau of Labor Statistics reported that the Consumer Price Index (CPI) rose 3.5% year-on-year in June, down from 4.2% in May. Core CPI, excluding food and energy, increased 2.6% year-on-year in June and was unchanged month-to-month. These cooler inflation figures have led traders to significantly pare back the probability of a quarter-percentage-point rate increase at the July 28-29 Federal Open Market Committee meeting. According to CME's FedWatch Tool, the chance of a 25 basis point hike fell to roughly 10% from about 35% before the CPI release [tradevae.com](https://www.tradevae.com/news/economy/traders-shift-odds-toward-no-july-fed-rate-hike-after-cooler-june-inflation/).\n\nHowever, the situation remains somewhat fluid. Prior to the CPI report, on July 13, 2026, chances of a July hike were rising, with CME's FedWatch tool showing a 46.5% chance and prediction market Kalshi at 36% [cnbc.com](https://www.cnbc.com/2026/07/13/-a-july-rate-hike-from-the-fed-the-odds-are-rising.html). This earlier sentiment was partly influenced by",
+    "refresh_8050_20260715": "I have reviewed the summary for internal contradictions regarding the same metric, index, or count attributed to different values, dates, or time periods.\n\n**Finding: No contradictions detected.**\n\nThe summary is internally consistent. While it presents contrasting positions on Taliban-Israel relations (2021 rejection vs. 2022 openness), these are sequential developments over time rather than contradictions\u2014both can be true as stated. All other facts are presented without conflicting values or dates.\n\nThe summary is returned UNCHANGED, word-for-word.",
+    "refresh_7872_20260715": "I've reviewed the summary carefully for internal contradictions regarding metrics, indices, counts, dates, or time periods.\n\nI found no contradictions. All dates are consistent (H.R.9163 introduced July 25, 2024; March 2025 meeting and American releases; April 2025 Taliban office proposal; Russia's recognition on July 3, 2025). No figures or counts are assigned to conflicting values or time periods.\n\nThe summary is returned UNCHANGED:\n\nThe United States has not recognized the Islamic Emirate of Afghanistan, and legislative efforts in 2024 aimed to explicitly prohibit such recognition. H.R.9163, the \"Preventing the Recognition of Terrorist States Act of 2024,\" introduced in the House on July 25, 2024, states a policy of not recognizing the Taliban's government and designates the Islamic Emirate of Afghanistan as a state sponsor of terrorism and the Taliban as a foreign terrorist organization [congress.gov](https://www.congress.gov/bill/118th-congress/house-bill/9163/text).\n\nDespite this, the Taliban has actively sought U.S. recognition. Since President Donald Trump's second term began, efforts have reportedly ramped up [cnn.com](https://www.cnn.com/2025/07/03/europe/russia-recognizes-taliban-afghanistan-intl-latam). In March 2025, the U.S. secured the release of two Americans and removed millions of dollars in bounties on three Taliban officials. During a March 2025 meeting, U.S. officials told the Taliban that taking risks could \"open up the door for a better relationship\" [cnn.com](https://www.cnn.com/2025/07/03/europe/russia-recognizes-taliban-afghanistan-intl-latam). In April 2025, the Taliban proposed opening an office in the U.S. to manage Afghan community issues, suggesting it wouldn't necessarily be an embassy [cnn.com](https://www.cnn.com/2025/04/02/politics/taliban-talks-trump-administration).\n\nRussia became the first nation to officially recognize the Taliban government of Afghanistan on July 3, 2025 [cnn.com](https://www.cnn.com/2025/07/03/europe/russia-recognizes-taliban-afghanistan-intl-latam), with experts suggesting Central Asian countries and China might follow suit [aljazeera.com](https://www.aljazeera.com/news/2025/7/4/russia-recognises-the-taliban-which-other-countries-may-follow).",
+    "refresh_44017_20260715": "I found no internal contradictions in this summary. All figures are consistently attributed to their respective time periods, and the temperature rankings (July 2023 > July 2024 > July 2025) are maintained throughout without conflict.\n\nThe summary is returned UNCHANGED, word-for-word:\n\nAs of July 15, 2026, it is unlikely that July 2026 will be the warmest July on record, according to Copernicus data.\n\nJuly 2023 currently holds the record for the warmest July globally, followed by July 2024 as the second warmest, and July 2025 as the third warmest. The global average surface air temperature for July 2025 was 16.68\u00b0C, which was 0.27\u00b0C cooler than July 2023 and 0.23\u00b0C cooler than July 2024 [copernicus.eu](https://climate.copernicus.eu/surface-air-temperature-july-2025), [copernicus.eu](https://climate.copernicus.eu/copernicus-third-warmest-july-marks-slight-respite-record-global-temperatures).\n\nMeanwhile, June 2026 was the second-warmest June on record globally, with a global average temperature of 16.54\u00b0C. This was 0.12\u00b0C cooler than the warmest June on record (June 2024) [copernicus.eu](https://climate.copernicus.eu/surface-air-temperature-june-2026). The sustained high temperatures have contributed to the average global temperature for the last 12 months (July 2025 to June 2026) being 1.43\u00b0C above the pre-industrial average [copernicus.eu](https://climate.copernicus.eu/surface-air-temperature-june-2026). However, the trend observed in July 2025 suggests a slight decrease in the record-breaking intensity seen in previous months [copernicus.eu](https://climate.copernicus.eu/copernicus-third-warmest-july-marks-slight-respite-record-global-temperatures).",
+    "refresh_43937_20260715": "I've reviewed the summary for internal contradictions regarding metrics, indices, counts, values, or dates.\n\n**Finding:** No internal contradictions detected.\n\nThe summary is internally consistent:\n- The framework readiness is consistently dated to July 15, 2026\n- June meetings are consistently referenced for earlier discussions\n- The 12.5% tariff figure appears only once\n- The July 24 deadline for Section 122 tariffs is stated once\n- India's negotiating position is consistently described across multiple sources\n\nThe summary UNCHANGED:\n\nA framework for a bilateral trade agreement between India and the US is ready and will be signed \"at the right time,\" according to Indian Commerce Secretary Rajesh Agrawal on July 15, 2026. This comes after \"very good discussion\" with the US team, and Commerce and Industry Minister Piyush Goyal confirming productive meetings with USTR Jamieson Greer in June where both sides committed to a balanced and commercially meaningful agreement [economictimes.com](https://economictimes.indiatimes.com/news/economy/foreign-trade/us-framework-trade-deal-ready-to-be-inked-at-the-right-time-commerce-secretary-rajesh-agrawal/articleshow/132375864.cms), [timesofindia.indiatimes.com](https://timesofindia.indiatimes.com/business/india-business/to-be-signed-at-right-time-india-us-trade-deal-framework-ready-says-official/articleshow/132368260.cms), [indianexpress.com](https://indianexpress.com/article/business/india-us-trade-deal-section-301-tariffs-rajesh-agrawal-10785102/).\n\nHowever, the deal's finalization is contingent on the completion of ongoing US Section 301 trade probes. The US has already proposed a 12.5% tariff on India regarding forced labor concerns and is still investigating excess capacity, with a draft report expected [indianexpress.com](https://indianexpress.com/article/business/india-us-trade-deal-section-301-tariffs-rajesh-agrawal-10785102/). India is holding out for a deal offering a tariff advantage over competitors and no new US levies after the agreement, having rejected a quick deal in June talks [economictimes.com](https://economictimes.indiatimes.com/news/economy/foreign-trade/an-emboldened-india-holds-out-for-better-terms-in-us-trade-talks/articleshow/132354546.cms). Current global tariffs of 10% under Section 122 are expected to lapse by July 24, with Section 301 tariffs potentially taking their place [indianexpress.com](https://indianexpress.com/article/business/india-us-trade-deal-section-301-tariffs-rajesh-agrawal-10785102/).",
+    "refresh_43360_20260715": "I have reviewed the summary for internal contradictions regarding metrics, indices, counts, values, dates, and time periods.\n\n**Finding: No contradictions detected.**\n\nAll key facts are internally consistent:\n- The threat level was raised on April 30, 2026\n- This followed a stabbing in Golders Green on April 29, 2026\n- The level was raised from SUBSTANTIAL to SEVERE\n- All references to threat level factors, JTAC's assessment criteria, and the note about sustained quiet periods required for reductions are consistent throughout\n\nThe summary is returned unchanged.",
+    "refresh_43892_20260715": "I found one internal contradiction in the summary:\n\nThe text states: \"The House has already passed a similar resolution, and the Senate previously approved a war powers resolution to halt the conflict on a 50-48 vote. However, the Senate had previously rejected a similar measure...\"\n\nThis contains contradictory claims about Senate action on war powers resolutions regarding Iran\u2014it asserts the Senate both \"previously approved\" and \"previously rejected\" similar measures without clear temporal distinction or explanation of how both could have occurred.\n\nHowever, since the summary does not attribute these contradictory outcomes to specific, conflicting dates or time periods (it only uses the vague \"previously\"), and since it's plausible the Senate took multiple votes with different outcomes at different times, I cannot definitively resolve this as a clear factual contradiction of the type requested (same metric attributed to two definitively different values).\n\n**I return the summary UNCHANGED, word-for-word**, as the instruction asks me to check only for internal contradictions involving the same metric/count/index attributed to different values across clear time periods, which this ambiguity does not cleanly meet.",
+    "refresh_7861_20260715": "I have reviewed the summary for internal contradictions regarding metrics, indices, counts, dates, and time periods.\n\n**Finding:** No contradictions detected.\n\nThe summary presents a consistent chronological narrative:\n- September 2022: China appointed ambassador Zhao Xing\n- December 2023: China accepted Taliban ambassador Bilal Ahmad Karimi\n- January 31, 2024: Chinese MFA clarified accepting credentials \u2260 formal recognition\n- July 2025: Russia moved to formal recognition\n- October 2025 (implied): China maintains cautious \"middle path\"\n\nAll dates are sequential and non-contradictory. No metrics, counts, or figures are attributed to conflicting values.\n\n**Result:** The summary is returned UNCHANGED, word-for-word."
+  },
+  "research_sources": {
+    "refresh_44011_20260715": "openrouter",
+    "refresh_43716_20260715": "openrouter",
+    "refresh_8050_20260715": "openrouter",
+    "refresh_7872_20260715": "openrouter",
+    "refresh_44017_20260715": "openrouter",
+    "refresh_43937_20260715": "openrouter",
+    "refresh_43360_20260715": "openrouter",
+    "refresh_43892_20260715": "openrouter",
+    "refresh_7861_20260715": "openrouter"
+  },
+  "resolve_times": {
+    "refresh_44011_20260715": "2026-08-15T09:00:00+00:00",
+    "refresh_43716_20260715": "2026-07-30T00:00:00+00:00",
+    "refresh_8050_20260715": "2030-01-01T05:00:00+00:00",
+    "refresh_7872_20260715": "2030-01-01T05:00:00+00:00",
+    "refresh_44017_20260715": "2026-08-15T12:00:00+00:00",
+    "refresh_43937_20260715": "2026-07-12T10:27:18+00:00",
+    "refresh_43360_20260715": "2026-09-01T11:00:00+00:00",
+    "refresh_43892_20260715": "2026-08-01T09:00:00+00:00",
+    "refresh_7861_20260715": "2030-01-01T05:00:00+00:00"
+  },
+  "close_times": {
+    "refresh_44011_20260715": null,
+    "refresh_43716_20260715": null,
+    "refresh_8050_20260715": null,
+    "refresh_7872_20260715": null,
+    "refresh_44017_20260715": null,
+    "refresh_43937_20260715": null,
+    "refresh_43360_20260715": null,
+    "refresh_43892_20260715": null,
+    "refresh_7861_20260715": null
+  }
+}
