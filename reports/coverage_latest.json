@@ -1,15 +1,17 @@
 {
-  "checked_at": "2026-07-14T14:02:33.274727+00:00",
+  "checked_at": "2026-07-15T14:02:33.070467+00:00",
   "tournaments": {
     "FutureEval": {
       "tournament_id": 33022,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 0,
+      "open_count": 1,
       "forecasted_count": 0,
       "missing_gated_ids": [],
       "missing_gated_reasons": {},
-      "missing_real_ids": []
+      "missing_real_ids": [
+        44772
+      ]
     },
     "ACX2026": {
       "tournament_id": 32880,
@@ -94,8 +96,8 @@
       "tournament_id": 33021,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 28,
-      "forecasted_count": 28,
+      "open_count": 26,
+      "forecasted_count": 26,
       "missing_gated_ids": [],
       "missing_gated_reasons": {},
       "missing_real_ids": []
@@ -239,7 +241,7 @@
       "missing_real_ids": []
     }
   },
-  "total_gaps": 0,
+  "total_gaps": 1,
   "total_gated": 122,
   "total_gated_reasons": {
     "wrong_type": 56,
