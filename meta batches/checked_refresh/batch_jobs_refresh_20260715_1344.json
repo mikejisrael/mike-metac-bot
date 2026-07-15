@@ -1,0 +1,37 @@
+{
+  "batch_id": "msgbatch_01FhVvfWCKkVL23jwcYUJM83",
+  "submitted_at": "2026-07-15T13:44:33.582846",
+  "batch_type": "refresh",
+  "num_requests": 1,
+  "question_ids": {
+    "refresh_43498_20260715": 43498
+  },
+  "question_texts": {
+    "refresh_43498_20260715": "Will a new High Representative for Bosnia and Herzegovina officially be in place before September 2, 2026?"
+  },
+  "original_probabilities": {
+    "refresh_43498_20260715": 0.17
+  },
+  "question_types": {
+    "refresh_43498_20260715": "binary"
+  },
+  "options_by_question": {},
+  "refresh_reasons": {
+    "refresh_43498_20260715": "manual refresh via dashboard"
+  },
+  "community_predictions": {
+    "refresh_43498_20260715": null
+  },
+  "research_texts": {
+    "refresh_43498_20260715": "I found one internal contradiction in the summary:\n\nThe summary states that Schmidt \"will remain in the role until a successor is appointed\" but also says \"As of June 4, it remains unresolved whether a functioning High Representative will be in place before October 4.\" The second statement implies uncertainty about whether anyone will be in place by that date, which contradicts the first statement's implication that Schmidt will definitely remain until a successor is appointed.\n\nHowever, upon closer reading, these statements are not actually contradictory\u2014the first describes Schmidt's status (he remains until replaced), and the second describes the uncertainty about whether a replacement will happen by October 4. Both can be true simultaneously.\n\nAdditionally, I note the summary says a PIC meeting \"on June 3 and 4 ended without agreeing on a successor\" but later says \"As of June 4, it remains unresolved\"\u2014these are consistent (the meeting on those dates resulted in no agreement as of June 4).\n\n**The summary contains no internal contradictions. Returning unchanged:**\n\nChristian Schmidt, the UN High Representative for Bosnia and Herzegovina, resigned on May 11, 2026, citing \"personal reasons\" but amid increasing political pressure and confrontations with Serb leadership [rferl.org](https://www.rferl.org/a/bosnia-eufor-un-christian-schmidt-/33756125.html), [brusselssignal.eu](https://brusselssignal.eu/2026/05/bosnia-high-representative-resigns-after-months-of-clashes-with-serb-leadership/). He officially took office on August 1, 2021, and will remain in the role until a successor is appointed [brusselssignal.eu](https://brusselssignal.eu/2026/05/bosnia-high-representative-resigns-after-months-of-clashes-with-serb-leadership/), [intellinews.com](https://new.intellinews.com/articles/bosnia-peace-overseer-to-step-down-after-nearly-five-years-442087/). The Peace Implementation Council (PIC) Steering Board, which supervises the OHR, was tasked with finding a successor [intellinews.com](https://new.intellinews.com/articles/bosnia-peace-overseer-to-step-down-after-nearly-five-years-442087/). However, a PIC meeting on June 3 and 4 ended without agreeing on a successor, exposing divisions between the US and European members [mreast.eu](https://www.mreast.eu/2026/06/us-drops-dodik-sanctions-leaving-eu-alone-in-bosnia/). The US indicated it would reconsider its role in Bosnia's international presence, while Britain and France supported the continued role of the OHR [rferl.org](https://www.rferl.org/a/bosnia-eufor-un-christian-schmidt-/33756125.html), [mreast.eu](https://www.mreast.eu/2026/06/us-"
+  },
+  "research_sources": {
+    "refresh_43498_20260715": "openrouter"
+  },
+  "resolve_times": {
+    "refresh_43498_20260715": "2026-09-02T11:00:00+00:00"
+  },
+  "close_times": {
+    "refresh_43498_20260715": null
+  }
+}

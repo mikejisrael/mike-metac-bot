@@ -213,10 +213,154 @@ STALE_REFRESH_CAP = 10
 BATCH_DIR = "meta batches"
 REFRESH_BATCH_PREFIX = os.path.join(BATCH_DIR, "batch_jobs_refresh")
 REFRESH_RESULTS_PREFIX = os.path.join(BATCH_DIR, "batch_results_refresh")
+# ADDED 2026-07-15: once a refresh batch job file has been checked and its
+# results retrieved, it's moved here — see check_refresh_batch()'s rewrite.
+# Keeps the top-level REFRESH_BATCH_PREFIX_*.json glob showing only
+# still-pending batches, so multiple --submit runs between --check runs no
+# longer silently orphan everything except the newest one (see the
+# 2026-07-15 design discussion: "what if I run --submit more than once
+# before --check?" — previously, nothing; the older batch's results were
+# never fetched).
+REFRESH_BATCH_CHECKED_DIR = os.path.join(BATCH_DIR, "checked_refresh")
+# ADDED 2026-07-15 (same day, live incident): a batch can also end up
+# permanently unrecoverable — Anthropic purges results 29 days after batch
+# creation (see _process_one_refresh_batch's "expired" status). Those get
+# moved HERE instead of REFRESH_BATCH_CHECKED_DIR — same effect (stops
+# check_refresh_batch from retrying it forever) but kept visibly distinct
+# from "successfully processed and submitted to Metaculus," since
+# conflating the two would make it look like nothing was lost.
+REFRESH_BATCH_EXPIRED_DIR = os.path.join(BATCH_DIR, "expired_refresh")
+
+# ADDED 2026-07-15: manual, dashboard-driven refresh scheduling for the
+# batch-path tournaments (ACX2026, Climate, Metaculus Cup, the 5
+# question_series), replacing the old automatic STALE_DAYS/
+# STALE_REFRESH_CAP auto-submit — Mike's call, mirroring how Market Pulse
+# moved to manual dashboard selection via tournament_forecast_v2.py's
+# --ids= flag. Two independent triggers decide whether a question is "due"
+# (see is_due_for_refresh below); either one is sufficient:
+#   A) routine  — now >= refresh_after, where refresh_after defaults to
+#      (last forecast time + REFRESH_AFTER_DEFAULT_DAYS) and can be
+#      overridden per-question via the dashboard (see
+#      load_refresh_overrides / watch_state/refresh_overrides.json).
+#   B) final safety net — within FINAL_REFRESH_WINDOW_HOURS hours of close,
+#      mirroring tournament_forecast_v2.py's Market Pulse "final hour
+#      before close" trigger — just with a much longer window, since these
+#      tournaments' questions run for weeks/months rather than Market
+#      Pulse's 59-155-hour sub-question lifespans, so a flat 60-minute
+#      window would rarely fire in time to matter here. 48h chosen as a
+#      reasonable default (Mike's call, 2026-07-15) — trigger B exists so
+#      a question whose close date arrives BEFORE its 30-day timer matures
+#      (e.g. forecast 5 days ago, closes in 10 days) still gets one last
+#      refresh rather than locking in a month-old forecast.
+# STALE_DAYS/CLOSING_SOON_DAYS/STALE_REFRESH_CAP above are left in place
+# (find_questions_to_refresh and the old automatic --submit path still use
+# them) but --submit is no longer run on a cron per Mike's 2026-07-15
+# decision — --ids= (manual, dashboard-driven) and --check (still
+# automated) are the live path now.
+REFRESH_AFTER_DEFAULT_DAYS = 30
+FINAL_REFRESH_WINDOW_HOURS = 48
 
 
 def ensure_batch_dir():
     os.makedirs(BATCH_DIR, exist_ok=True)
+
+
+# ─── Refresh scheduling (added 2026-07-15) ─────────────────────────────────
+def load_refresh_overrides() -> dict:
+    """watch_state/refresh_overrides.json — optional per-question manual
+    overrides for refresh_after, keyed by question_id (string):
+        {"44667": {"refresh_after": "2026-08-20T00:00:00Z", "set_at": "...", "note": "..."}}
+    Written by the dashboard when Mike edits a question's refresh date via
+    the UI (Step 2); read here to compute each question's EFFECTIVE
+    refresh_after. Deliberately a thin standalone file rather than a field
+    on the batch_jobs/batch_results history — those are an append-only
+    forecast record, and a mutable "when should this run again" scheduling
+    field doesn't belong mixed into that. Same None-safe-default pattern as
+    load_excluded_ids/load_refresh_candidate_state elsewhere — the
+    scheduling layer should never break other things if this file doesn't
+    exist yet."""
+    try:
+        with open(os.path.join("watch_state", "refresh_overrides.json")) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def compute_refresh_after(forecast: dict, overrides: dict | None = None) -> datetime | None:
+    """Effective refresh_after for one forecast record (see
+    REFRESH_AFTER_DEFAULT_DAYS docstring above for the two-trigger design):
+    a manual override from refresh_overrides.json if one is set for this
+    question_id, else (last forecast time + REFRESH_AFTER_DEFAULT_DAYS).
+    Returns None only if there's no override AND submitted_at is missing/
+    unparseable — callers should treat that as "unknown, don't auto-flag
+    via trigger A" rather than crashing (trigger B, the close-time safety
+    net, doesn't depend on this and can still fire independently)."""
+    overrides = overrides if overrides is not None else load_refresh_overrides()
+    q_id = str(forecast.get("question_id"))
+    override = overrides.get(q_id, {}).get("refresh_after")
+    if override:
+        try:
+            return datetime.fromisoformat(override.replace("Z", "+00:00"))
+        except Exception:
+            pass  # bad/unparseable override value — fall through to the default
+
+    submitted_at_str = forecast.get("submitted_at")
+    if not submitted_at_str:
+        return None
+    try:
+        submitted_at = datetime.fromisoformat(submitted_at_str)
+        if submitted_at.tzinfo is None:
+            submitted_at = submitted_at.replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
+    return submitted_at + timedelta(days=REFRESH_AFTER_DEFAULT_DAYS)
+
+
+def is_due_for_refresh(forecast: dict, now: datetime | None = None,
+                        overrides: dict | None = None) -> tuple[bool, str]:
+    """Whether one forecast record is due for a refresh right now, and why.
+    Either trigger below is sufficient — see the REFRESH_AFTER_DEFAULT_DAYS/
+    FINAL_REFRESH_WINDOW_HOURS docstring above for the full design
+    rationale. This is the function Step 2's dashboard will call per-row to
+    decide what to surface/highlight as refresh-eligible; kept here rather
+    than duplicated in meta_dashboard.py so both agree on the definition of
+    "due" by construction, not by convention.
+
+    Returns (is_due, reason) — reason is a short human-readable string for
+    display/logging, "" if not due."""
+    now = now or datetime.now(timezone.utc)
+
+    refresh_after = compute_refresh_after(forecast, overrides=overrides)
+    if refresh_after is not None and now >= refresh_after:
+        return True, f"routine refresh due (refresh_after {refresh_after.date().isoformat()} has passed)"
+
+    close_time_str = forecast.get("close_time")
+    if close_time_str:
+        try:
+            close_time = datetime.fromisoformat(close_time_str.replace("Z", "+00:00"))
+        except Exception:
+            close_time = None
+        if close_time is not None:
+            hours_to_close = (close_time - now).total_seconds() / 3600
+            if 0 <= hours_to_close <= FINAL_REFRESH_WINDOW_HOURS:
+                submitted_at = None
+                submitted_at_str = forecast.get("submitted_at")
+                if submitted_at_str:
+                    try:
+                        submitted_at = datetime.fromisoformat(submitted_at_str)
+                        if submitted_at.tzinfo is None:
+                            submitted_at = submitted_at.replace(tzinfo=timezone.utc)
+                    except Exception:
+                        submitted_at = None
+                already_did_final_refresh = (
+                    submitted_at is not None
+                    and submitted_at >= (close_time - timedelta(hours=FINAL_REFRESH_WINDOW_HOURS))
+                )
+                if not already_did_final_refresh:
+                    return True, (f"closing within {FINAL_REFRESH_WINDOW_HOURS}h "
+                                   f"({close_time.date().isoformat()}) — final refresh")
+
+    return False, ""
 
 
 # ─── Pydantic-safe attribute setter ────────────────────────────────────────
@@ -411,7 +555,17 @@ def load_all_batches() -> list[dict]:
 
     job_files = (
         glob.glob(os.path.join(BATCH_DIR, "batch_jobs_2*.json")) +
-        glob.glob(os.path.join(BATCH_DIR, "batch_jobs_refresh_*.json"))
+        glob.glob(os.path.join(BATCH_DIR, "batch_jobs_refresh_*.json")) +
+        # ADDED 2026-07-15: check_refresh_batch() now archives each
+        # processed refresh job file into REFRESH_BATCH_CHECKED_DIR once
+        # its results are retrieved (see that function's docstring). This
+        # history loader still needs the metadata inside those files
+        # (question_ids/texts/resolve_times/close_times — the actual
+        # forecast VALUES come from the separate results files via
+        # _build_forecast_index, but this per-question context doesn't),
+        # so it has to keep looking here too, not just the top-level
+        # pending-batch location.
+        glob.glob(os.path.join(REFRESH_BATCH_CHECKED_DIR, "batch_jobs_refresh_*.json"))
     )
 
     if not job_files:
@@ -472,6 +626,116 @@ def load_all_batches() -> list[dict]:
 
 
 # ─── Identify questions needing refresh ───────────────────────────────────────
+# ─── Manual refresh (added 2026-07-15) ─────────────────────────────────────
+def _latest_usable_forecast_per_question(all_forecasts: list[dict]) -> dict[int, dict]:
+    """Returns the most recent forecast record (by submitted_at) for each
+    question_id that actually has a usable forecast value on file (matching
+    its question_type) — same "usable forecast, most recent wins"
+    semantics as find_questions_to_refresh's own dedup loop below, factored
+    out so the manual --ids= path (build_manual_refresh_list) uses the
+    identical definition of "the current forecast for this question"
+    rather than a second, potentially-drifting copy of the same logic.
+    find_questions_to_refresh itself is left as-is rather than refactored
+    to call this too — it interleaves this check with several other
+    per-forecast concerns (exclusions, no_post_id flagging, bucketing) in
+    a single pass, and unpicking that apart carries more risk than it's
+    worth for this change."""
+    sorted_forecasts = sorted(all_forecasts, key=lambda x: x.get("submitted_at") or "", reverse=True)
+    latest: dict[int, dict] = {}
+    for f in sorted_forecasts:
+        q_id = f["question_id"]
+        if q_id in latest:
+            continue
+        has_forecast = (
+            f["probability"] is not None
+            if f.get("question_type", "binary") == "binary"
+            else f.get("probabilities") is not None
+        )
+        if not has_forecast:
+            continue
+        latest[q_id] = f
+    return latest
+
+
+def build_manual_refresh_list(all_forecasts: list[dict], ids: list[int]) -> tuple[list[dict], list[int]]:
+    """Build the forecast-dict list for a manual --ids= refresh — the
+    batch-path equivalent of tournament_forecast_v2.py's --ids= flag.
+    Refreshes exactly what was asked for: NO staleness/closing-soon/cap
+    filtering at all (unlike the old automatic find_questions_to_refresh
+    path, which this manual mode replaces per Mike's 2026-07-15 decision to
+    move fully to dashboard-driven selection).
+
+    FIXED 2026-07-15 (caught live by Mike): originally matched ids against
+    question_id ONLY. Mike always works from post_id — "you should always
+    default to the post ID as that is what I can see on the website" — and
+    post_id/question_id are NOT reliably equal even for standalone
+    questions (same finding tournament_forecast_v2.py's own --ids= flag
+    already had to account for). Now matches EITHER post_id or question_id,
+    identical precedence to that flag, so pasting in a post_id straight off
+    the site works exactly the way it already does for Market Pulse/
+    FutureEval.
+
+    Returns (forecasts_to_refresh, ids_not_found) so the caller can report
+    any requested id with no forecast on file at all."""
+    latest_by_qid = _latest_usable_forecast_per_question(all_forecasts)
+    # Second index over the SAME "latest usable" set (not a separate scan),
+    # so the two indices can never disagree about which record represents
+    # the current forecast for a question.
+    latest_by_post_id: dict[int, dict] = {}
+    for f in latest_by_qid.values():
+        pid = f.get("post_id")
+        if pid is not None:
+            latest_by_post_id.setdefault(pid, f)
+
+    excluded_ids = load_excluded_ids()
+    to_refresh = []
+    not_found = []
+    seen_qids = set()
+    for req_id in ids:
+        f = latest_by_post_id.get(req_id) or latest_by_qid.get(req_id)
+        if f is None:
+            not_found.append(req_id)
+            continue
+        q_id = f["question_id"]
+        if q_id in seen_qids:
+            # Same underlying question matched twice — e.g. one requested
+            # id happened to equal this question's post_id and another
+            # equalled its question_id. Don't submit it twice.
+            continue
+        seen_qids.add(q_id)
+        if q_id in excluded_ids:
+            print(f"  ⚠️  Q{q_id} is in the permanent refresh-exclusion list "
+                  f"({excluded_ids[q_id].get('reason', '')}) — skipping despite manual selection.")
+            continue
+        f = dict(f)  # don't mutate the shared record in `latest_by_qid`/all_forecasts
+        f["refresh_reason"] = "manual refresh via dashboard"
+        to_refresh.append(f)
+    return to_refresh, not_found
+
+
+async def run_manual_refresh(ids: list[int]):
+    """Entry point for `--ids=44667,44668,...`. Submits ONE refresh batch
+    covering all requested questions together — this is deliberately a
+    single Anthropic batch job, not one per question, so multiple
+    dashboard checkbox selections still get the 50%-batch-discount +
+    prompt-caching benefit that's the whole point of staying on this path
+    rather than switching to a synchronous per-question call."""
+    all_forecasts = load_all_batches()
+    to_refresh, not_found = build_manual_refresh_list(all_forecasts, ids)
+    if not_found:
+        print(f"  ⚠️  No forecast on file matching (as post_id or question_id): "
+              f"{', '.join(str(i) for i in not_found)} — skipping those.")
+    if not to_refresh:
+        print("Nothing to refresh.")
+        return
+    print(f"Manual refresh: {len(to_refresh)} question(s) requested via --ids=")
+    # Reuses submit_refresh_batch by treating the manual list as the
+    # "closing_soon" bucket (uncapped, always included) with an empty
+    # stale pool and cap 0 — avoids a second, parallel batch-submission
+    # code path that could drift out of sync with the real one.
+    await submit_refresh_batch(to_refresh, [], 0)
+
+
 def find_questions_to_refresh(
     all_forecasts: list[dict]
 ) -> tuple[list[dict], list[dict], list[dict], list[dict], list[dict]]:
@@ -1194,6 +1458,19 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
             )
             for custom_id, info in question_map.items()
         },
+        # ADDED 2026-07-15: needed by is_due_for_refresh's trigger B
+        # (final-window-before-close check). Without this, close_time
+        # would only ever be known from the ORIGINAL meta_batch_forecast.py
+        # submission — the first time a question passes through THIS
+        # script's refresh path, that data would otherwise be lost for any
+        # subsequent refresh cycle. Mirrors meta_batch_forecast.py's own
+        # "close_times" key exactly (see that file for the attribute-name
+        # verification note — scheduled_close_time, confirmed live there).
+        "close_times": {
+            custom_id: (info["question"].scheduled_close_time.isoformat()
+                        if getattr(info["question"], "scheduled_close_time", None) else None)
+            for custom_id, info in question_map.items()
+        },
     }
 
     with open(batch_file, "w") as f:
@@ -1205,31 +1482,83 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
 
 
 # ─── Check refresh batch ──────────────────────────────────────────────────────
-async def check_refresh_batch():
-    refresh_files = sorted(
-        glob.glob(f"{REFRESH_BATCH_PREFIX}_*.json"),
-        reverse=True
-    )
-    if not refresh_files:
-        print(f"No refresh batch files found in {BATCH_DIR}/. Run with --submit first.")
-        return
+async def _process_one_refresh_batch(batch_file: str) -> str:
+    """Check and, if ready, fully process ONE refresh batch job file:
+    retrieve status, parse results, write the results file, and submit to
+    Metaculus. Returns "processed" (done, safe to archive as checked),
+    "not_ready" (still in_progress, leave it for next run), "expired"
+    (batch ended, but Anthropic's 29-day results-retention window has
+    already passed — results are PERMANENTLY gone; see below — archive
+    separately, retrying will never help), or "error" (something else went
+    wrong; left in place, will retry next run since it may be transient).
 
-    batch_file = refresh_files[0]
-    print(f"Checking: {batch_file}")
+    Factored out of the old single-file check_refresh_batch() (2026-07-15)
+    so that function can loop over every PENDING job file instead of only
+    ever looking at the newest one — see REFRESH_BATCH_CHECKED_DIR's
+    docstring above for why that mattered: running --submit more than once
+    before --check previously meant every batch except the last was never
+    checked, ever, with no error or warning.
 
-    with open(batch_file) as f:
-        batch_info = json.load(f)
+    FIXED 2026-07-15 (caught live, first real run after the above fix):
+    originally only the initial retrieve() call was wrapped in try/except —
+    everything from results() onward (fetching, parsing, writing, AND
+    submitting to Metaculus) ran unguarded, so a SINGLE bad batch raised an
+    uncaught exception that killed the entire check_refresh_batch() loop,
+    including every batch queued behind it — exactly the failure mode this
+    whole rewrite was meant to eliminate. Confirmed live: a batch from
+    2026-05-30 (46 days old — well past Anthropic's 29-day results
+    retention window, confirmed via docs.claude.com/en/docs/build-with-
+    claude/batch-processing) had `results_url` already gone, and calling
+    .results() on it raised AnthropicError, crashing the run before it
+    ever reached the batch Mike had just submitted moments earlier. Those
+    4 succeeded results from that May 30 batch are gone permanently — a
+    real (if small) consequence of the ORIGINAL single-newest-file-only
+    bug, not something recoverable now. This fix stops it from ever
+    happening again: check results_url explicitly before attempting
+    .results() at all, and wrap the entire remaining body in try/except so
+    no future surprise failure mode (a malformed result, a Metaculus
+    submission error, anything) can take down the whole loop either."""
+    print(f"\nChecking: {batch_file}")
+    try:
+        with open(batch_file) as f:
+            batch_info = json.load(f)
+        batch_id = batch_info["batch_id"]
+        batch = client_anthropic.messages.batches.retrieve(batch_id)
+    except Exception as e:
+        print(f"  ⚠️  Could not retrieve batch status: {e}")
+        return "error"
 
-    batch_id = batch_info["batch_id"]
-    batch = client_anthropic.messages.batches.retrieve(batch_id)
-    print(f"Status: {batch.processing_status}")
-    print(f"Counts: {batch.request_counts}")
+    print(f"  Status: {batch.processing_status}")
+    print(f"  Counts: {batch.request_counts}")
 
     if batch.processing_status != "ended":
-        print("Batch not ready yet. Check back later.")
-        return
+        print("  Batch not ready yet. Will check again next run.")
+        return "not_ready"
 
-    print("\nBatch complete! Processing results...")
+    if not getattr(batch, "results_url", None):
+        # Ended, but no results_url — Anthropic's 29-day retention window
+        # has passed (created_at, not ended_at, is what counts — see docs).
+        # This is PERMANENT: retrying next run will never recover it.
+        submitted_at = batch_info.get("submitted_at", "unknown date")
+        print(f"  ⚠️  Batch ended but results are no longer available (submitted "
+              f"{submitted_at} — past Anthropic's 29-day results retention window). "
+              f"These results are permanently lost.")
+        return "expired"
+
+    try:
+        await _parse_and_submit_refresh_results(batch_id, batch_info)
+        return "processed"
+    except Exception as e:
+        print(f"  ⚠️  Error processing batch results: {e}")
+        return "error"
+
+
+async def _parse_and_submit_refresh_results(batch_id: str, batch_info: dict) -> None:
+    """The actual result-parsing + Metaculus-submission body for one refresh
+    batch — factored out of _process_one_refresh_batch (2026-07-15 fix) so
+    that function can wrap a single call to this one in try/except, rather
+    than needing this whole block re-indented under it."""
+    print("  Batch complete! Processing results...")
 
     results = {}
     total_cache_read = 0
@@ -1327,7 +1656,7 @@ async def check_refresh_batch():
     results_file = f"{REFRESH_RESULTS_PREFIX}_{timestamp}.json"
     with open(results_file, "w") as f:
         json.dump(results, f, indent=2)
-    print(f"\nSaved results to {results_file}")
+    print(f"  Saved results to {results_file}")
     if total_cache_read or total_cache_write:
         print(f"  💰 Prompt cache: {total_cache_read} tokens read, "
               f"{total_cache_write} tokens written across this batch")
@@ -1336,6 +1665,46 @@ async def check_refresh_batch():
               f"(system prompt may be under Haiku 4.5's 4,096-token minimum).")
 
     await submit_to_metaculus(results)
+
+
+async def check_refresh_batch():
+    """CHANGED (2026-07-15): now loops over EVERY pending refresh batch job
+    file, oldest first, instead of only ever looking at the single newest
+    one. Each fully-processed batch gets moved into
+    REFRESH_BATCH_CHECKED_DIR so it's never re-processed (and never
+    silently skipped) on a future run — see that constant's docstring for
+    the incident this fixes: multiple --submit runs before a --check
+    previously meant every batch except the last was never checked, ever,
+    with no error or warning. Safe to run on an automated cron now (Mike's
+    plan: twice daily) regardless of how many times --ids= was used to
+    submit refreshes in between."""
+    os.makedirs(REFRESH_BATCH_CHECKED_DIR, exist_ok=True)
+    os.makedirs(REFRESH_BATCH_EXPIRED_DIR, exist_ok=True)
+    refresh_files = sorted(glob.glob(f"{REFRESH_BATCH_PREFIX}_*.json"))
+    if not refresh_files:
+        print(f"No pending refresh batch files found in {BATCH_DIR}/. Run with --ids=... first.")
+        return
+
+    print(f"{len(refresh_files)} pending refresh batch file(s) to check.")
+    processed, not_ready, expired, errored = 0, 0, 0, 0
+    for batch_file in refresh_files:
+        status = await _process_one_refresh_batch(batch_file)
+        if status == "processed":
+            processed += 1
+            dest = os.path.join(REFRESH_BATCH_CHECKED_DIR, os.path.basename(batch_file))
+            os.rename(batch_file, dest)
+        elif status == "not_ready":
+            not_ready += 1
+        elif status == "expired":
+            expired += 1
+            dest = os.path.join(REFRESH_BATCH_EXPIRED_DIR, os.path.basename(batch_file))
+            os.rename(batch_file, dest)
+        else:
+            errored += 1
+
+    print(f"\nDone: {processed} batch(es) processed and submitted, "
+          f"{not_ready} still in progress, {expired} permanently expired "
+          f"(results lost — see warnings above), {errored} error(s).")
 
 
 # ─── Submit to Metaculus (shared by batch + single paths) ────────────────────
@@ -2411,8 +2780,24 @@ async def main(submit: bool = False):
 
 if __name__ == "__main__":
     import sys
+    _ids_arg = next((a for a in sys.argv if a.startswith("--ids=")), None)
     if "--check" in sys.argv:
         asyncio.run(check_refresh_batch())
+    elif _ids_arg is not None:
+        # ADDED 2026-07-15: manual, dashboard-driven refresh — the
+        # batch-path equivalent of tournament_forecast_v2.py's --ids=.
+        # Checked BEFORE --submit below so `--ids=... --submit` (in case
+        # that combination is ever typed out of habit) still takes the
+        # manual path rather than falling through to the old automatic one.
+        try:
+            _ids = [int(x) for x in _ids_arg.split("=", 1)[1].split(",") if x.strip()]
+        except ValueError:
+            print("--ids= must be a comma-separated list of question_ids, e.g. --ids=44667,44668")
+            sys.exit(1)
+        if not _ids:
+            print("--ids= given with no ids.")
+            sys.exit(1)
+        asyncio.run(run_manual_refresh(_ids))
     elif "--submit" in sys.argv:
         asyncio.run(main(submit=True))
     elif "--single" in sys.argv:
