@@ -1631,7 +1631,16 @@ PAGE_TEMPLATE = """
         method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({question_id: questionId, refresh_after: input.value})
       }).then(r => r.json()).then(data => {
-        if (data.ok) location.reload();
+        if (data.ok) {
+          // ADDED 2026-07-15: a date past this question's close_time gets
+          // clamped down to close_time server-side (see /set_refresh_after)
+          // — worth a heads-up rather than silently landing on a different
+          // date than what was actually typed in.
+          if (data.clamped_to_close) {
+            alert('That date was after this question\\'s close date, so it was set to the close date instead.');
+          }
+          location.reload();
+        }
         else alert('Failed to save: ' + (data.error || 'unknown error'));
       }).catch(e => alert('Failed to save: ' + e));
     }
@@ -2389,6 +2398,15 @@ def set_refresh_after():
     override-file format. This route only writes state; it doesn't launch
     anything, so there's no cost/confirmation gate needed the way /refresh
     has one.
+
+    CHANGED 2026-07-15: clamps the requested date to close_time if it
+    would otherwise land after it (Mike's call — a refresh scheduled past
+    when a question stops accepting forecasts is meaningless).
+    compute_refresh_after already enforces this as a safety net regardless
+    of how an override was set, but doing it here too means the response
+    (and therefore what the dashboard displays right after saving) reflects
+    the clamped date immediately, rather than only becoming visible on the
+    next page load once the ladder logic applies its own clamp.
     """
     payload = request.get_json(silent=True) or {}
     if "question_id" not in payload:
@@ -2400,6 +2418,7 @@ def set_refresh_after():
 
     raw_date = payload.get("refresh_after")
     refresh_after_dt = None
+    clamped = False
     if raw_date:
         try:
             # <input type="date"> sends "YYYY-MM-DD" — treat as midnight UTC.
@@ -2407,13 +2426,29 @@ def set_refresh_after():
         except Exception:
             return jsonify({"ok": False, "error": f"Could not parse date: {raw_date!r}"}), 400
 
+        with CACHE_LOCK:
+            data = CACHE["data"]
+        rows = data["rows"] if data else []
+        match = next((r for r in rows if r.get("post_id") == question_id
+                      or r.get("question_id") == question_id), None)
+        close_time = None
+        if match and match.get("close_time"):
+            try:
+                close_time = datetime.fromisoformat(match["close_time"].replace("Z", "+00:00"))
+            except Exception:
+                close_time = None
+        if close_time is not None and refresh_after_dt > close_time:
+            refresh_after_dt = close_time
+            clamped = True
+
     try:
         meta_refresh_schedule.save_refresh_override(question_id, refresh_after_dt)
     except Exception as e:
         return jsonify({"ok": False, "error": f"Failed to save: {e}"}), 500
 
     return jsonify({"ok": True, "question_id": question_id,
-                     "refresh_after": refresh_after_dt.isoformat() if refresh_after_dt else None})
+                     "refresh_after": refresh_after_dt.isoformat() if refresh_after_dt else None,
+                     "clamped_to_close": clamped})
 
 
 if __name__ == "__main__":
