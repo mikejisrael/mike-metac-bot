@@ -1146,7 +1146,9 @@ PAGE_TEMPLATE = """
     {% if not data.token_configured %} — ⚠️ METAC_TOURNAMENT_TOKEN not set in .env{% endif %}
   </div>
   <div class="refresh-note">
-    Last refreshed: {{ last_refresh }} · auto-refreshes every 5 minutes
+    Last refreshed: {{ last_refresh }} · auto-refreshes every 5 minutes (paused while questions are selected)
+    <button id="manualRefreshBtn" onclick="location.reload()"
+            style="margin-left:8px;font-size:11px;padding:2px 8px;cursor:pointer;">🔄 Refresh now</button>
     {% if cache_error %} · ⚠️ last refresh failed: {{ cache_error }}{% endif %}
   </div>
 
@@ -1571,7 +1573,23 @@ PAGE_TEMPLATE = """
     restoreFilters();
     applySort();
     applyFilters();
-    setTimeout(() => location.reload(), 300000);
+    // CHANGED 2026-07-16: was an unconditional setTimeout(reload, 300000) —
+    // this is a plain in-memory JS Set, reset by any full page load, so a
+    // reload landing mid-way through checking boxes for a refresh-candidate
+    // review silently wiped out the whole in-progress selection with no
+    // warning. Now polls every 15s and only actually reloads once 5
+    // minutes have passed AND nothing is currently selected — auto-refresh
+    // still happens on its own the moment it's safe to, it just waits
+    // rather than steamrolling an active selection. The manual "🔄 Refresh
+    // now" button (added same day) covers the case where Mike wants to
+    // force a reload immediately regardless of either condition.
+    let lastAutoRefresh = Date.now();
+    setInterval(() => {
+      const fiveMinutesPassed = (Date.now() - lastAutoRefresh) >= 300000;
+      if (fiveMinutesPassed && selectedIds.size === 0) {
+        location.reload();
+      }
+    }, 15000);
 
     // ─── Manual-selection refresh (2026-07-14) ────────────────────────────
     // Rough per-question cost estimate, matching the same figure used
@@ -2452,19 +2470,38 @@ def set_refresh_after():
 
 
 if __name__ == "__main__":
-    try:
-        data, bot_live, personal_live, local = build_dashboard_data()
-        with CACHE_LOCK:
-            CACHE["data"]               = data
-            CACHE["live_by_qid"]        = bot_live
-            CACHE["personal_live_by_qid"] = personal_live
-            CACHE["local_by_qid"]       = local
-            CACHE["last_refresh"]       = datetime.now(timezone.utc)
-        print(f"Initial cache built: {data['total_predicted']} questions")
-    except Exception as e:
-        print(f"Initial cache build failed (will retry in background): {e}")
-        with CACHE_LOCK:
-            CACHE["error"] = str(e)
+    # ADDED 2026-07-16: use_reloader=True below means Werkzeug now
+    # restarts the server automatically whenever this file is saved
+    # (Mike's ask — auto-restart on save in Notepad++). That works by
+    # spawning a SEPARATE watcher process that re-execs a fresh
+    # `python meta_dashboard.py` child on every change; both the watcher
+    # and the child independently run this entire script from the top.
+    # Without this guard, the initial build_dashboard_data() fetch (hits
+    # Metaculus/OpenRouter) and the background refresh_cache_loop thread
+    # would BOTH start twice per launch — once wastefully in the watcher,
+    # which never actually serves a request. WERKZEUG_RUN_MAIN is only set
+    # (by Werkzeug itself) in the real child process, so gating on it
+    # means this setup runs exactly once, in the process that matters.
+    # Also correctly still runs normally if use_reloader is ever flipped
+    # back to False — the "or not USE_RELOADER" branch covers that case
+    # (no watcher/child split happens then, so there's nothing to guard
+    # against).
+    USE_RELOADER = True
+    if not USE_RELOADER or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        try:
+            data, bot_live, personal_live, local = build_dashboard_data()
+            with CACHE_LOCK:
+                CACHE["data"]               = data
+                CACHE["live_by_qid"]        = bot_live
+                CACHE["personal_live_by_qid"] = personal_live
+                CACHE["local_by_qid"]       = local
+                CACHE["last_refresh"]       = datetime.now(timezone.utc)
+            print(f"Initial cache built: {data['total_predicted']} questions")
+        except Exception as e:
+            print(f"Initial cache build failed (will retry in background): {e}")
+            with CACHE_LOCK:
+                CACHE["error"] = str(e)
 
-    threading.Thread(target=refresh_cache_loop, daemon=True).start()
-    app.run(port=5002, debug=True, use_reloader=False)
+        threading.Thread(target=refresh_cache_loop, daemon=True).start()
+
+    app.run(port=5002, debug=True, use_reloader=USE_RELOADER)

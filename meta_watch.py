@@ -310,7 +310,19 @@ def check_resolutions() -> None:
     """For every bot-submitted forecast not already known-resolved, check
     its current status via the singular /api2/questions/{post_id}/ detail
     endpoint. Alerts once per question the first time it's found resolved,
-    never again after that (tracked in RESOLUTION_STATE_FILE)."""
+    never again after that (tracked in RESOLUTION_STATE_FILE).
+
+    FIXED 2026-07-16: previously sent ONE individual send_alert() call per
+    newly-resolved question, inside the loop — the exact same anti-pattern
+    already found and fixed for check_new_futureeval_questions on
+    2026-06-30 (158 rapid-fire individual alerts on a fresh watch-state
+    file hit ntfy.sh's rate limit, only 77/158 landed). This one hadn't
+    actually been observed failing live, but it's structurally identical
+    and sits right next to a proven case of the same bug, so — same
+    batching fix: collect all newly-resolved questions from this run and
+    send ONE alert at the end, same MAX_LISTED-capped-body pattern
+    check_new_futureeval_questions and check_refresh_candidates already
+    use."""
     bot_forecasts = _load_bot_forecasts()
     state = _load_json(RESOLUTION_STATE_FILE, {})
 
@@ -322,7 +334,7 @@ def check_resolutions() -> None:
     print(f"  Checking resolution status for {len(capped)}/{len(to_check)} not-yet-resolved "
           f"bot forecast(s) this run (of {len(bot_forecasts)} total tracked)...")
 
-    newly_resolved = 0
+    newly_resolved = []
     for i, (q_id, info) in enumerate(capped, 1):
         post_id = info["post_id"]
         url = f"https://www.metaculus.com/api2/questions/{post_id}/"
@@ -347,16 +359,8 @@ def check_resolutions() -> None:
         )
 
         if is_resolved:
-            newly_resolved += 1
             resolution_value = data.get("resolution")
-            prob = info.get("probability")
-            prob_str = f"{prob:.0%}" if isinstance(prob, (int, float)) else "n/a"
-            send_alert(
-                f"Post {post_id} (Q{q_id}): {info['question_text'][:100]}\n"
-                f"Resolved: {resolution_value}\n"
-                f"You forecast: {prob_str}",
-                title="✅ Forecast resolved"
-            )
+            newly_resolved.append((q_id, post_id, info, resolution_value))
             state[str(q_id)] = {
                 "alerted":     True,
                 "resolution":  resolution_value,
@@ -372,9 +376,22 @@ def check_resolutions() -> None:
             print(f"    ...{i}/{len(capped)} checked")
         time.sleep(1.2)  # same politeness delay used elsewhere in this codebase
 
+    if newly_resolved:
+        MAX_LISTED = 15
+        lines = []
+        for q_id, post_id, info, resolution_value in newly_resolved[:MAX_LISTED]:
+            prob = info.get("probability")
+            prob_str = f"{prob:.0%}" if isinstance(prob, (int, float)) else "n/a"
+            lines.append(f"- Post {post_id} (Q{q_id}): {info['question_text'][:80]}\n"
+                         f"  Resolved: {resolution_value} — you forecast: {prob_str}")
+        body = "\n".join(lines)
+        if len(newly_resolved) > MAX_LISTED:
+            body += f"\n...and {len(newly_resolved) - MAX_LISTED} more."
+        send_alert(body, title=f"✅ {len(newly_resolved)} forecast(s) resolved")
+
     _save_json(RESOLUTION_STATE_FILE, state)
-    print(f"  Resolution check complete: {newly_resolved} newly resolved (alerted), "
-          f"{len(capped) - newly_resolved} still open/pending"
+    print(f"  Resolution check complete: {len(newly_resolved)} newly resolved (alerted), "
+          f"{len(capped) - len(newly_resolved)} still open/pending"
           f"{f', {len(to_check) - len(capped)} deferred to next run (cap reached)' if len(to_check) > len(capped) else ''}.")
 
 

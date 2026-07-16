@@ -599,7 +599,7 @@ def build_manual_refresh_list(all_forecasts: list[dict], ids: list[int]) -> tupl
             continue
         seen_qids.add(q_id)
         if q_id in excluded_ids:
-            print(f"  ⚠️  Q{q_id} is in the permanent refresh-exclusion list "
+            print(f"  ⚠️  Q{f.get('post_id') or q_id} is in the permanent refresh-exclusion list "
                   f"({excluded_ids[q_id].get('reason', '')}) — skipping despite manual selection.")
             continue
         f = dict(f)  # don't mutate the shared record in `latest_by_qid`/all_forecasts
@@ -1029,7 +1029,9 @@ Before answering write:
 (g) How your view has changed (or not) since the original forecast
 (h) If community prediction exists and differs >10%, explain why you diverge
 
-The last thing you write is: "Probability: ZZ%"
+The last thing you write, with NOTHING after it — no summary, no
+wrap-up, no further commentary — is exactly this line:
+Probability: ZZ%
 """
 
 
@@ -1216,7 +1218,8 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
         what the stale-pool loop below counts against stale_cap, not
         whether it was merely attempted."""
         q_id = forecast["question_id"]
-        print(f"  {label} Fetching Q{q_id}...")
+        display_id = forecast.get("post_id") or q_id
+        print(f"  {label} Fetching Q{display_id}...")
 
         question = await fetch_question_by_id(
             forecast.get("post_id"), q_id, expected_text=forecast.get("question_text")
@@ -1228,7 +1231,7 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
         # 0.5s still wasn't enough headroom across a run of ~15+ requests.
         await asyncio.sleep(1.5)
         if question is None:
-            print(f"    ⚠️  Could not fetch Q{q_id} (closed, mismatch, or missing "
+            print(f"    ⚠️  Could not fetch Q{display_id} (closed, mismatch, or missing "
                   f"post_id — see above), skipping")
             return False
 
@@ -1260,6 +1263,7 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
             "options":                question.options if is_mc else None,
             "refresh_reason":         forecast.get("refresh_reason", ""),
             "question_id":            q_id,
+            "post_id":                forecast.get("post_id"),
             "original_question_text": forecast.get("question_text", ""),
             # Carried forward from local history. The live scheduled_resolution_time
             # fetched just above is unreliable: when Metaculus hasn't set a real
@@ -1342,6 +1346,16 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
         "num_requests": len(requests),
         "question_ids": {
             custom_id: info["question_id"]
+            for custom_id, info in question_map.items()
+        },
+        # ADDED 2026-07-16: Mike works from post_id (what's visible on the
+        # site), not question_id — --check's results output was showing
+        # question_id throughout. This is what makes that fixable: without
+        # it, check_refresh_batch (which runs later, from disk, not from
+        # question_map in memory) would have no way to know a question's
+        # post_id at all.
+        "post_ids": {
+            custom_id: info["post_id"]
             for custom_id, info in question_map.items()
         },
         "question_texts": {
@@ -1519,6 +1533,8 @@ async def _parse_and_submit_refresh_results(batch_id: str, batch_info: dict) -> 
                 total_cache_write += getattr(usage, "cache_creation_input_tokens", 0) or 0
 
             q_id = batch_info["question_ids"][custom_id]
+            post_id = batch_info.get("post_ids", {}).get(custom_id)
+            display_id = post_id or q_id
             q_text = batch_info.get("question_texts", {}).get(custom_id) or \
                      next((v for k, v in batch_info.get("question_texts", {}).items()
                            if batch_info.get("question_ids", {}).get(k) == q_id), "Unknown question")
@@ -1529,6 +1545,7 @@ async def _parse_and_submit_refresh_results(batch_id: str, batch_info: dict) -> 
                 probs = parse_mc_probabilities_text(text, options) if options else None
                 results[custom_id] = {
                     "question_id":    q_id,
+                    "post_id":        post_id,
                     "question_text":  q_text,
                     "question_type":  "multiple_choice",
                     "probabilities":  probs,
@@ -1541,24 +1558,18 @@ async def _parse_and_submit_refresh_results(batch_id: str, batch_info: dict) -> 
                 }
                 if probs is not None:
                     summary = ", ".join(f"{opt}: {probs[opt]:.0%}" for opt in options)
-                    print(f"  Q{q_id} (MC): {summary} — {q_text[:50]}")
+                    print(f"  Q{display_id} (MC): {summary} — {q_text[:50]}")
                 else:
-                    print(f"  Q{q_id} (MC): ⚠️  could not parse a valid distribution — {q_text[:50]}")
+                    print(f"  Q{display_id} (MC): ⚠️  could not parse a valid distribution — {q_text[:50]}")
             else:
-                prob = None
-                for line in reversed(text.split('\n')):
-                    if 'probability:' in line.lower():
-                        numbers = re.findall(r'\d+\.?\d*', line)
-                        if numbers:
-                            prob = float(numbers[-1]) / 100
-                            prob = max(0.01, min(0.99, prob))
-                            break
+                prob = parse_binary_probability_text(text)
 
                 change = round((prob - original) * 100, 1) if prob and original else None
                 change_str = f"{'+' if change >= 0 else ''}{change}pt" if change is not None else "n/a"
 
                 results[custom_id] = {
                     "question_id":    q_id,
+                    "post_id":        post_id,
                     "question_text":  q_text,
                     "question_type":  "binary",
                     "probability":    prob,
@@ -1571,16 +1582,18 @@ async def _parse_and_submit_refresh_results(batch_id: str, batch_info: dict) -> 
                     "status":         "success" if prob is not None else "failed",
                 }
                 if prob is not None and original is not None:
-                    print(f"  Q{q_id}: {original:.0%} → {prob:.0%} ({change_str}) — {q_text[:50]}")
+                    print(f"  Q{display_id}: {original:.0%} → {prob:.0%} ({change_str}) — {q_text[:50]}")
                 elif prob is not None:
-                    print(f"  Q{q_id}: → {prob:.0%} (no prior on file) — {q_text[:50]}")
+                    print(f"  Q{display_id}: → {prob:.0%} (no prior on file) — {q_text[:50]}")
                 else:
-                    print(f"  Q{q_id}: ⚠️  could not parse a probability — {q_text[:50]}")
+                    print(f"  Q{display_id}: ⚠️  could not parse a probability — {q_text[:50]}")
         else:
             q_id = batch_info["question_ids"][custom_id]
+            post_id = batch_info.get("post_ids", {}).get(custom_id)
             q_text = batch_info.get("question_texts", {}).get(custom_id, "Unknown question")
             entry = {
                 "question_id":   q_id,
+                "post_id":       post_id,
                 "question_text": q_text,
                 "question_type": q_type,
                 "status":        "failed",
@@ -1716,15 +1729,55 @@ def call_claude_single(prompt: str) -> tuple[float | None, str]:
         messages=[{"role": "user", "content": prompt}],
     )
     text = response.content[0].text
-    prob = None
+    prob = parse_binary_probability_text(text)
+    return prob, text
+
+
+def parse_binary_probability_text(text: str) -> float | None:
+    """Shared binary-probability parser for BOTH the batch-refresh path
+    (_parse_and_submit_refresh_results) and --single (call_claude_single) —
+    extracted 2026-07-16 so both parse Claude's response with the exact
+    same validated logic, instead of two copies that could silently drift
+    out of sync (same rationale as parse_mc_probabilities_text's own
+    extraction below — see that function's docstring).
+
+    PRIMARY: the last line containing the literal compliant format
+    "Probability: ZZ%" (what build_refresh_prompt explicitly asks for).
+
+    FALLBACK (added 2026-07-16, confirmed live on Q39841/
+    refresh_39841_20260716): Claude occasionally appends an unrequested
+    "wrap-up" summary after what should have been its final line, and
+    never actually writes the compliant "Probability:" line at all — it
+    just concludes in prose (e.g. "**Result:** 12–14%, central **13%**."),
+    even though the word "probability" appears several times elsewhere in
+    ordinary reasoning sentences (verified live: none of those matched the
+    compliant format either — e.g. "Outcome: NO (probability accumulates
+    to ~82%)" is a scenario-analysis aside, not the conclusion).
+
+    If no compliant line is found anywhere, falls back to the LAST bolded
+    percentage (**NN%**) among the final 5 non-empty lines — a narrow,
+    high-confidence pattern (Claude commonly bolds its actual final answer
+    as a natural writing habit) rather than grabbing any percentage
+    anywhere in the text, which would risk latching onto an earlier
+    scenario-analysis number instead of the real conclusion. Restricting
+    to bolded values also skips right past an unbolded range like
+    "12–14%" and correctly lands on the bolded point estimate "13%" that
+    follows it. Recovery is always logged by the caller, never silent."""
     for line in reversed(text.split("\n")):
         if "probability:" in line.lower():
             numbers = re.findall(r"\d+\.?\d*", line)
             if numbers:
-                prob = float(numbers[-1]) / 100
-                prob = max(0.01, min(0.99, prob))
-                break
-    return prob, text
+                return max(0.01, min(0.99, float(numbers[-1]) / 100))
+
+    tail_lines = [l for l in text.split("\n") if l.strip()][-5:]
+    for line in reversed(tail_lines):
+        bold_matches = re.findall(r"\*\*(\d+\.?\d*)\s*%\*\*", line)
+        if bold_matches:
+            print(f"  ℹ️  No compliant 'Probability:' line found — recovered "
+                  f"{bold_matches[-1]}% from a bolded percentage near the end instead.")
+            return max(0.01, min(0.99, float(bold_matches[-1]) / 100))
+
+    return None
 
 
 def parse_mc_probabilities_text(text: str, options: list[str]) -> dict[str, float] | None:
@@ -2614,7 +2667,7 @@ async def main(submit: bool = False):
         print(f"\nℹ️  {len(excluded)} question(s) permanently excluded from refresh "
               f"(see meta_refresh_exclusions.py):")
         for f in excluded:
-            print(f"    Q{f['question_id']}: {f.get('exclusion_reason', '')} — {f['question_text'][:60]}")
+            print(f"    Q{f.get('post_id') or f['question_id']}: {f.get('exclusion_reason', '')} — {f['question_text'][:60]}")
 
     # ADDED 2026-07-06: printed FIRST, before anything else, specifically
     # so it can't be missed the way Q6462/Q39825 were for weeks — those
