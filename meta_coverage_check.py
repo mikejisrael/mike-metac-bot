@@ -168,13 +168,17 @@ MARKET_PULSE_TOURNAMENT_ID = 33066
 # sample Metaculus's live state during that window and see a real, not-yet-
 # forecast question — correctly, at that instant, but misleadingly as a
 # persistent "REAL gap" alert, when it's actually just normal in-flight
-# latency that resolves itself within the hour. Confirmed live (Mike,
+# latency that resolves itself shortly after. Confirmed live (Mike,
 # 2026-07-16): a new FutureEval question flagged as missing coverage,
 # resolved on its own once tournament_forecast_v2.py's next run reached it.
-# 60 minutes gives a full cycle of margin over the ~30-min cron cadence
-# (covers one missed tick plus processing/API slack) before treating a
-# missing question as a genuine gap worth alerting on.
-MIN_QUESTION_AGE_MINUTES = 60
+# CHANGED (2026-07-16, Mike's call): shortened from an initial 60 minutes
+# to 15 — FutureEval questions are only open briefly, so a longer grace
+# window would eat into coverage-checking time that actually matters for a
+# short-lived tournament. Trade-off: 15 minutes is under v2's own 30-min
+# cron cadence, so this won't fully absorb every case of "just missed the
+# last tick" — some transient gaps may still surface. That's accepted as
+# the right trade for this tournament rather than a longer, safer window.
+MIN_QUESTION_AGE_MINUTES = 15
 
 BOT_TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN")
 
