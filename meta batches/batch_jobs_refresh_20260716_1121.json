@@ -1,0 +1,144 @@
+{
+  "batch_id": "msgbatch_016B3SeiYrB6sV3hhWST6mei",
+  "submitted_at": "2026-07-16T11:21:28.080838",
+  "batch_type": "refresh",
+  "num_requests": 9,
+  "question_ids": {
+    "refresh_43852_20260716": 43852,
+    "refresh_43926_20260716": 43926,
+    "refresh_44166_20260716": 44166,
+    "refresh_34020_20260716": 34020,
+    "refresh_41628_20260716": 41628,
+    "refresh_42157_20260716": 42157,
+    "refresh_4922_20260716": 4922,
+    "refresh_28395_20260716": 28395,
+    "refresh_40902_20260716": 40902
+  },
+  "post_ids": {
+    "refresh_43852_20260716": 43822,
+    "refresh_43926_20260716": 43900,
+    "refresh_44166_20260716": 44151,
+    "refresh_34020_20260716": 34504,
+    "refresh_41628_20260716": 41890,
+    "refresh_42157_20260716": 42367,
+    "refresh_4922_20260716": 4922,
+    "refresh_28395_20260716": 28395,
+    "refresh_40902_20260716": 41174
+  },
+  "question_texts": {
+    "refresh_43852_20260716": "Will Iceland vote Yes in the 2026 EU negotiations referendum?",
+    "refresh_43926_20260716": "Will a bot beat all humans in the Summer 2026 Metaculus Cup?",
+    "refresh_44166_20260716": "What will be the access status of Claude Fable and Mythos on September 1, 2026?",
+    "refresh_34020_20260716": "Will customs duties revenue to the federal government increase from $80 billion in fiscal year 2023 to $160 billion in fiscal year 2026 (in 2023 dollars)?",
+    "refresh_41628_20260716": "Will credible evidence emerge before 2027 that Meta can access the content of WhatsApp messages despite end-to-end encryption claims?",
+    "refresh_42157_20260716": "Will Reza Pahlavi visit Iran during 2026?",
+    "refresh_4922_20260716": "Will there be active warfare between the United States and China before 2027?",
+    "refresh_28395_20260716": "Will the World Health Organization prequalify moxidectin before 2027?",
+    "refresh_40902_20260716": "Will restrictions on the use of the Traditional Latin Mass in the Catholic Church be loosened during 2026?"
+  },
+  "original_probabilities": {
+    "refresh_43852_20260716": 0.48,
+    "refresh_43926_20260716": 0.62,
+    "refresh_44166_20260716": {
+      "Fable Open, Mythos Open": 0.72,
+      "Fable US-only, Mythos Open": 0.1,
+      "Fable Closed, Mythos Open": 0.04,
+      "Fable Open, Mythos Closed": 0.05,
+      "Fable US-only, Mythos Closed": 0.05,
+      "Fable Closed, Mythos Closed": 0.04
+    },
+    "refresh_34020_20260716": 0.18,
+    "refresh_41628_20260716": 0.12,
+    "refresh_42157_20260716": 0.12,
+    "refresh_4922_20260716": 0.05,
+    "refresh_28395_20260716": 0.58,
+    "refresh_40902_20260716": 0.28
+  },
+  "question_types": {
+    "refresh_43852_20260716": "binary",
+    "refresh_43926_20260716": "binary",
+    "refresh_44166_20260716": "multiple_choice",
+    "refresh_34020_20260716": "binary",
+    "refresh_41628_20260716": "binary",
+    "refresh_42157_20260716": "binary",
+    "refresh_4922_20260716": "binary",
+    "refresh_28395_20260716": "binary",
+    "refresh_40902_20260716": "binary"
+  },
+  "options_by_question": {
+    "refresh_44166_20260716": [
+      "Fable Open, Mythos Open",
+      "Fable US-only, Mythos Open",
+      "Fable Closed, Mythos Open",
+      "Fable Open, Mythos Closed",
+      "Fable US-only, Mythos Closed",
+      "Fable Closed, Mythos Closed"
+    ]
+  },
+  "refresh_reasons": {
+    "refresh_43852_20260716": "manual refresh via dashboard",
+    "refresh_43926_20260716": "manual refresh via dashboard",
+    "refresh_44166_20260716": "manual refresh via dashboard",
+    "refresh_34020_20260716": "manual refresh via dashboard",
+    "refresh_41628_20260716": "manual refresh via dashboard",
+    "refresh_42157_20260716": "manual refresh via dashboard",
+    "refresh_4922_20260716": "manual refresh via dashboard",
+    "refresh_28395_20260716": "manual refresh via dashboard",
+    "refresh_40902_20260716": "manual refresh via dashboard"
+  },
+  "community_predictions": {
+    "refresh_43852_20260716": null,
+    "refresh_43926_20260716": null,
+    "refresh_44166_20260716": null,
+    "refresh_34020_20260716": null,
+    "refresh_41628_20260716": null,
+    "refresh_42157_20260716": null,
+    "refresh_4922_20260716": null,
+    "refresh_28395_20260716": null,
+    "refresh_40902_20260716": null
+  },
+  "research_texts": {
+    "refresh_43852_20260716": "I found one internal contradiction in the summary:\n\nThe summary cites two different polling results for Icelandic public opinion on EU membership/negotiations:\n1. \"a Gallup poll for R\u00daV indicated 57% favored reopening talks\"\n2. \"an April poll showed 47% against full membership and 40% in favor\"\n\nThese appear to measure different things (reopening talks vs. full membership) and show different support levels, but both are presented without clear temporal distinction beyond one being labeled \"April.\" The first poll lacks a date specification entirely.\n\nHowever, since these polls appear to measure different questions (reopening negotiations vs. full membership support), they are not technically contradictory\u2014they're measuring different things. The summary as written could be misleading but is not internally contradictory in the strict sense of the same metric having two different values.\n\n**Return: UNCHANGED**\n\nThe summary contains no clear internal contradictions where the same metric is attributed to conflicting values. The two polls measure different questions, so both can coexist in the summary.",
+    "refresh_43926_20260716": "I've reviewed the summary carefully for internal contradictions regarding the same metrics, indices, or counts attributed to different values, dates, or time periods.\n\nI found no such contradictions. All figures are either:\n- Attributed to consistent dates (multiple references to \"May 2026\" or \"Spring 2026\")\n- Qualitative descriptions without conflicting numerical claims\n- Contextually distinct (e.g., Spring 2026 Cup vs. Summer 2026 Cup)\n\nThe summary is internally consistent.\n\n**UNCHANGED**",
+    "refresh_44166_20260716": "I've reviewed the summary carefully for internal contradictions regarding the same metric, index, or count attributed to different values, dates, or time periods.\n\nI found no such contradictions. The summary consistently attributes:\n- Export control lifting to June 12, 2026\n- Access restoration to July 1, 2026\n- The free usage period for Fable 5 to \"through July 7, 2026\"\n- Mythos 5 restrictions and planned expansions without conflicting dates\n- Pricing consistently at $10 per million input tokens and $50 per million output tokens\n\nThe summary contains no instances where the same metric is assigned different values across different dates or time periods.\n\n**The summary is returned UNCHANGED, word-for-word.**",
+    "refresh_34020_20260716": "I have reviewed the summary carefully for internal contradictions\u2014checking whether the same metric, index, or count is attributed to different values across different dates or time periods.\n\nI found no internal contradictions. All figures are either:\n- Associated with specific dates (e.g., \"As of April 2026,\" \"February 20, 2026\")\n- Presented as ranges or changes over periods without conflicting assignments\n- Clearly distinguished as different metrics (e.g., effective tariff rate vs. customs revenue)\n\nThe summary is consistent internally.\n\n**UNCHANGED:**\n\nCustoms duties revenue has seen significant increases and subsequent adjustments. Between January 2025 and April 2026, tariff rate changes generated $253.9 billion in customs revenue, before accounting for refunds or indirect effects [pennwharton.upenn.edu](https://budgetmodel.wharton.upenn.edu/p/2026-06-16-effective-tariff-rates-and-revenues-updated-june-16-2026/).\n\nAs of April 2026, the average effective tariff rate stood at 7.0%, a decline from previous months and the lowest since March 2025 [pennwharton.upenn.edu](https://budgetmodel.wharton.upenn.edu/p/2026-06-16-effective-tariff-rates-and-revenues-updated-june-16-2026/). This decline followed the Supreme Court's February 20, 2026 declaration that the Internal Emergency Economic Powers Act (IEEPA) tariffs were unconstitutional. While roughly equivalent tariffs were temporarily reinstated under Section 122 of the 1974 Trade Act, this ruling allowed businesses to file for IEEPA tariff refunds, with the first becoming available in early May 2026 [bipartisanpolicy.org](https://bipartisanpolicy.org/explainer/tariff-tracker/).\n\nDespite these changes, the effective tariff rate on China remains the highest among major trading partners at 24% as of April 2026. Steel and aluminum products face the highest category-specific effective tariff rates at 40.9% [pennwharton.upenn.edu](https://budgetmodel.wharton.upenn.edu/p/2026-06-16-effective-tariff-rates-and-revenues-updated-june-16-2026/). In response to tariff hikes, 83.9% of imports from Canada and Mexico claimed USMCA exemption as of April 2026, a sharp increase since early 2025 [pennwharton.upenn.edu](https://budgetmodel.wharton.upenn.edu/p/2026-06-16-effective-tariff-rates-and-revenues-updated-june-16-2026/). One forecasting platform gives an 87.7% chance that customs duties revenue will reach $160 billion in fiscal year 2026 [metaculus.com](https://www.metaculus.com/questions/34504/customs-duties-revenue-increase-to-160-billion-",
+    "refresh_41628_20260716": "I've reviewed the summary carefully for internal contradictions regarding metrics, indices, counts, dates, and time periods.\n\n**Finding:** No internal contradictions detected.\n\nThe timeline is consistent:\n- January 16, 2026: Agent's email sent\n- January 2026: Investigation referred to as 10-month duration (consistent with ~March 2025 start)\n- Soon after January 16, 2026: Investigation closed\n- May 2023: Dowling's analysis applied to WhatsApp client\n- May 2026: Texas AG lawsuit filed\n\nAll dates, figures, and attributions are internally consistent with no conflicting values for the same metrics across different time periods.\n\n**Return the summary UNCHANGED:**\n\nIn January 2026, a US Commerce Department Bureau of Industry and Security agent, after a 10-month investigation internally called \"Operation Sourced Encryption,\" claimed in an email to over a dozen federal officials that \"There is no limit to the type of WhatsApp message that can be viewed by Meta.\" He stated that Meta \"can and does view and store all the text messages, photographs, audio and video recordings\" in an unencrypted format and that a \"tiered permissions system\" for access existed since at least 2019, including foreign workers [techspot.com](https://www.techspot.com/news/112232-federal-agent-whatsapp-encryption-lie-investigation-shut-down.html). The agent's email was not a formal accusation, and his claims have not been independently confirmed [japantimes.co.jp](https://www.japantimes.co.jp/business/2026/04/29/tech/us-investigation-whatsapp-privacy/).\n\nSoon after the agent sent this email on January 16, 2026, the Commerce Department abruptly closed the investigation, with a spokesperson dismissing the claims as \"unsubstantiated and outside the scope of his authority\" [japantimes.co.jp](https://www.japantimes.co.jp/business/2026/04/29/tech/us-investigation-whatsapp-privacy/), [techspot.com](https://www.techspot.com/news/112232-federal-agent-whatsapp-encryption-lie-investigation-shut-down.html). Meta has vehemently denied the allegations, with spokesperson Andy Stone stating, \"The claim that WhatsApp can access people's encrypted communications is patently false\" [japantimes.co.jp](https://www.japantimes.co.jp/business/2026/04/29/tech/us-investigation-whatsapp-privacy/), [techspot.com](https://www.techspot.com/news/112232-federal-agent-whatsapp-encryption-lie-investigation-shut-down.html).\n\nTechnologists and encryption experts, including Benjamin Dowling of King's College London, who co-authored a study reverse-engineering WhatsApp's cryptographic protocol, have found no indication that the app behaves differently from Meta's descriptions, although their analysis only applied to the WhatsApp client as of May 2023 [arstechnica.",
+    "refresh_42157_20260716": "I found one internal contradiction in the summary:\n\nThe summary states that Pahlavi \"claiming 50,000 had used it by July 2025\" regarding a secure portal for defectors. However, the research summary is dated around January 2026 (based on the Fox News, Al Jazeera, and Reuters statements from January 12 and 16, 2026). This means the July 2025 date is retrospective to the January 2026 statements, which is internally consistent. However, the phrasing creates ambiguity about whether this 50,000 figure was current as of July 2025 or as of the January 2026 interviews.\n\nUpon careful review, this is not actually a direct contradiction of the type specified (the same metric attributed to two different values). The July 2025 date is clearly meant as a historical reference point within the narrative.\n\n**Return: UNCHANGED**\n\nThe summary contains no internal contradictions meeting the specified criteria.",
+    "refresh_4922_20260716": "I have reviewed the summary for internal contradictions regarding metrics, indices, counts, dates, and time periods.\n\n**Finding: No contradictions detected.**\n\nAll factual claims are either:\n- Singular statements (e.g., China's 2027 military goals, the Volt Typhoon cyberespionage campaign in 2024)\n- Non-contradictory sequential information (e.g., 2024 exercises testing strikes at certain ranges, followed by separate 2024 cyberespionage activities)\n- Conditional/analytical statements without quantitative conflicts\n\nThe summary is returned **UNCHANGED**.",
+    "refresh_28395_20260716": "I have carefully reviewed the research summary for internal contradictions regarding the same metric, index, or count attributed to different values, dates, or time periods.\n\nI found no contradictions. All dates, figures, and attributions are internally consistent:\n\n- The FDA sNDA submission is consistently dated August 2024 with an expected decision by March 2025\n- The Ghana Food and Drugs Authority approval is consistently dated December 2024 following an August 2024 application\n- The WHO prequalification timeline is consistently referenced as \"end of 2026\" in GiveWell's forecast and \"before 2027\" in the question\n- The WHO EOI invitation and grant contingency are consistently described\n- All regulatory pathway discussions are consistent across references\n\n**The summary is returned UNCHANGED:**\n\nThe World Health Organization (WHO) is anticipated to issue an invitation for Expressions of Interest (EOI) for the prequalification of moxidectin, with grant funds to Medicines Development for Global Health (MDGH) contingent on this invitation [givewell.org](https://www.givewell.org/research/grants/medicines-development-for-global-health-moxidectin-who-pre-qualification-grant-june-2024). MDGH has received advice from the WHO as of September 2023 on the regulatory routes for moxidectin's use in lymphatic filariasis elimination programs and is considering applying for WHO prequalification via the full assessment pathway for this indication [who.int](https://cdn.who.int/media/docs/default-source/2025-eml-expert-committee/addition-of-new-medicines/a.20_moxidectin.pdf?sfvrsn=811cf48b_6).\n\nMoxidectin was approved by the US FDA for onchocerciasis in patients aged 12 and older [who.int](https://cdn.who.int/media/docs/default-source/2025-eml-expert-committee/addition-of-new-medicines/a.20_moxidectin.pdf?sfvrsn=811cf48b_6). A supplemental New Drug Application (sNDA) was submitted to the US FDA in August 2024 to extend the onchocerciasis indication to children aged 4 and older, with a decision expected by March 2025 [who.int](https://cdn.who.int/media/docs/default-source/2025-eml-expert-committee/addition-of-new-medicines/a.20_moxidectin.pdf?sfvrsn=811cf48b_6). The Ghana Food and Drugs Authority approved moxidectin in December 2024, after an application was submitted in August 2024 [who.int](https://www.who.int/news/item/12-12-2024-moxidectin-approved-by-the-ghana-food-and-drugs-authority-a-new-milestone-in-the-fight-against-river-blindness), [who.int](https://cdn",
+    "refresh_40902_20260716": "I found a critical contradiction in this summary:\n\nThe summary states that the SSPX \"consecration of four bishops without a papal mandate in July 2026\" occurred, and multiple quotes are dated to July 2026. However, the summary also references \"Pope Leo XIV, currently on holiday\" and events from \"March 2025.\"\n\nThis is internally contradictory because:\n1. \"Pope Leo XIV\" is not a real pope (the current pope as of my knowledge cutoff is Pope Francis)\n2. The timeline jumps inconsistently (March 2025 \u2192 July 2026)\n3. A pope named Leo XIV does not exist in the Catholic Church's actual succession\n\nAdditionally, Archbishop Georg G\u00e4nswein is described as \"current apostolic nuncio to the Baltic States,\" but I cannot verify this is his actual current position.\n\n**I cannot resolve these contradictions from the text alone.** The summary appears to contain fictional elements (Pope Leo XIV) mixed with what may be real or speculative content about 2026 events. \n\n**I'm returning this summary as FLAGGED rather than unchanged or rewritten**, because the contradictions suggest the entire research summary may be unreliable or fabricated, rather than containing simple dating errors that can be corrected by preferring more recent sources."
+  },
+  "research_sources": {
+    "refresh_43852_20260716": "openrouter",
+    "refresh_43926_20260716": "openrouter",
+    "refresh_44166_20260716": "openrouter",
+    "refresh_34020_20260716": "openrouter",
+    "refresh_41628_20260716": "openrouter",
+    "refresh_42157_20260716": "openrouter",
+    "refresh_4922_20260716": "openrouter",
+    "refresh_28395_20260716": "openrouter",
+    "refresh_40902_20260716": "openrouter"
+  },
+  "resolve_times": {
+    "refresh_43852_20260716": "2026-08-30T00:00:00+00:00",
+    "refresh_43926_20260716": "2026-09-02T00:00:00+00:00",
+    "refresh_44166_20260716": "2026-09-01T12:00:00+00:00",
+    "refresh_34020_20260716": "2028-01-01T04:59:00+00:00",
+    "refresh_41628_20260716": "2027-01-06T23:00:00+00:00",
+    "refresh_42157_20260716": "2027-01-06T00:00:00+00:00",
+    "refresh_4922_20260716": "2027-01-30T13:00:00+00:00",
+    "refresh_28395_20260716": "2027-01-01T17:00:00+00:00",
+    "refresh_40902_20260716": "2027-01-01T00:00:00+00:00"
+  },
+  "close_times": {
+    "refresh_43852_20260716": null,
+    "refresh_43926_20260716": null,
+    "refresh_44166_20260716": null,
+    "refresh_34020_20260716": null,
+    "refresh_41628_20260716": null,
+    "refresh_42157_20260716": null,
+    "refresh_4922_20260716": null,
+    "refresh_28395_20260716": null,
+    "refresh_40902_20260716": null
+  }
+}

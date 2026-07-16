@@ -43,6 +43,31 @@ stuck at the top of the STALE preview for weeks before anyone noticed —
 the no_post_id flag alone caught 21 more on its very first real run
 (1 already fixed, 8 auto-backfillable since question_id happened to
 equal post_id, 14 needing manual Metaculus lookups — all now resolved).
+
+CHANGED (2026-07-16), catching up on ~1.5 days of fast-moving work:
+- tournament_forecast_v2.py was entirely MISSING from the file registry
+  despite being the actual primary forecaster (FutureEval + Market Pulse,
+  synchronous, own 30-min cron) — added, and tournament_forecast.py's
+  (v1) description corrected to reflect its current detection-only role
+  (SUBMISSION_DISABLED_PARALLEL_TEST = True), not the primary-submission
+  role it used to have before the v1->v2 merge.
+- meta_refresh_forecast.py's refresh workflow changed shape entirely: the
+  automatic STALE-selection --submit cron was retired in favor of manual,
+  dashboard-driven --ids= selection, plus a new checkpoint-ladder
+  scheduling module (meta_refresh_schedule.py, added to the registry) and
+  a --check cron of its own (twice daily). QUICK COMMANDS and the CLOSING
+  SOON hint both updated to point at the real current workflow instead of
+  the retired --submit path.
+- meta_dashboard.py's own description corrected: it's a Flask app, not
+  Streamlit — that was just wrong, not a change in the app itself.
+- FIXED a real bug this surfaced: build_results_map() only globbed the
+  top-level batch dir for job files, but meta_refresh_forecast.py's
+  --check now archives processed/expired refresh job files into
+  checked_refresh/ and expired_refresh/ subfolders (added 2026-07-15) —
+  without also globbing those, any refresh batch would silently vanish
+  from BATCH HISTORY and CLOSING SOON the moment its job file got
+  archived, even though its results file never moved. Now globs all
+  three locations.
 """
 
 import json
@@ -54,9 +79,18 @@ BATCH_DIR = "meta batches"
 
 # ─── File registry ─────────────────────────────────────────────────────────────
 METACULUS_FILES = [
-    ("tournament_forecast.py",      "FutureEval ONLY — synchronous, prize-eligible, most protected"),
+    # CHANGED (2026-07-16): tournament_forecast.py's description was stale
+    # since the v1->v2 merge — it's been detection/alerting-only for a
+    # while now (SUBMISSION_DISABLED_PARALLEL_TEST = True), not the
+    # protected prize-eligible submission path anymore. That role belongs
+    # to tournament_forecast_v2.py below, which was missing from this
+    # registry entirely despite being the actual primary forecaster
+    # (FutureEval + Market Pulse, synchronous, on its own 30-min cron).
+    ("tournament_forecast.py",      "FutureEval — v1, now detection/alerting-only safety net (submission disabled)"),
+    ("tournament_forecast_v2.py",   "FutureEval + Market Pulse — PRIMARY synchronous forecaster, prize-eligible, most protected"),
     ("meta_batch_forecast.py",      "Main batch forecasting (ACX2026/Climate/Metaculus Cup + 5 question-series)"),
-    ("meta_refresh_forecast.py",    "Re-forecast closing-soon / stale questions (binary + MC, --single)"),
+    ("meta_refresh_forecast.py",    "Re-forecast closing-soon / stale questions (binary + MC, --ids=, --check, --single)"),
+    ("meta_refresh_schedule.py",    "Shared: checkpoint-ladder refresh scheduling (close_time-based, no client-heavy imports)"),
     ("meta_forecast_gate.py",       "Shared: is-this-question-worth-forecasting gate (type/forecasters/close-time)"),
     ("meta_refresh_gate.py",        "Shared: minimum-refresh-gap gate (used by refresh + watch alerting)"),
     ("meta_refresh_exclusions.py",  "Shared: permanent manual exclusion list for refresh (CLI: add/remove/list)"),
@@ -74,7 +108,7 @@ METACULUS_FILES = [
     ("export_forecasts.py",         "Export forecasts to CSV"),
     ("show_reasoning.py",           "Display bot reasoning for a question ID"),
     ("meta_status.py",              "This status dashboard"),
-    ("meta_dashboard.py",           "Streamlit web dashboard (personal + bot account tracking)"),
+    ("meta_dashboard.py",           "Flask web dashboard (personal + bot account tracking, manual refresh selection)"),
     ("live_data.py",                "Live data fetcher (VIX, BTC, FRED, etc.)"),
     ("cached_llm.py",               "System prompt builder"),
     ("analyse_reports.py",          "Report analysis script"),
@@ -83,10 +117,18 @@ METACULUS_FILES = [
 METACULUS_BATCH_FILES = [
     (os.path.join(BATCH_DIR, "batch_jobs.json"),             "Latest batch job info (pointer)"),
     (os.path.join(BATCH_DIR, "batch_jobs_2*.json"),          "Timestamped batch job history"),
-    (os.path.join(BATCH_DIR, "batch_jobs_refresh_*.json"),   "Refresh batch job history"),
+    (os.path.join(BATCH_DIR, "batch_jobs_refresh_*.json"),   "Pending refresh batch jobs (not yet --check'd)"),
     (os.path.join(BATCH_DIR, "batch_results.json"),          "Latest batch results (pointer)"),
     (os.path.join(BATCH_DIR, "batch_results_2*.json"),       "Timestamped batch results history"),
     (os.path.join(BATCH_DIR, "batch_results_refresh_*.json"),"Refresh batch results history"),
+    # ADDED 2026-07-16: refresh job files get archived here once --check
+    # processes/expires them (see meta_refresh_forecast.py's
+    # REFRESH_BATCH_CHECKED_DIR/REFRESH_BATCH_EXPIRED_DIR, added 2026-07-15)
+    # — listed here so this registry itself doesn't look like they've
+    # vanished, matching the build_results_map fix below that keeps them
+    # visible in BATCH HISTORY too.
+    (os.path.join(BATCH_DIR, "checked_refresh", "batch_jobs_refresh_*.json"), "Refresh jobs: checked, results retrieved"),
+    (os.path.join(BATCH_DIR, "expired_refresh", "batch_jobs_refresh_*.json"), "Refresh jobs: results permanently expired (29-day window)"),
 ]
 
 IBKR_FILES = [
@@ -163,6 +205,20 @@ def print_file_group(title, file_specs, show_missing=False):
 
 
 # ─── Match results to job files by question ID overlap ────────────────────────
+# FIXED 2026-07-16: job_file globs now also look inside checked_refresh/ and
+# expired_refresh/ (meta_refresh_forecast.py's --check archives each
+# processed/expired refresh job file into one of those two subfolders once
+# it's been dealt with — added 2026-07-15, see that file's
+# REFRESH_BATCH_CHECKED_DIR/REFRESH_BATCH_EXPIRED_DIR). Without this, any
+# refresh batch would silently vanish from BATCH HISTORY and CLOSING SOON
+# below the moment its job file got archived — its results file is still
+# sitting right there in meta batches/, unmoved, but this dashboard had no
+# way to find it once the matching job file left the top-level folder.
+# Expired ones are deliberately included too (not skipped) rather than
+# silently dropped — they'll just show "pending" forever since their
+# results are genuinely, permanently gone (Anthropic's 29-day retention
+# window), which is honest and matches this codebase's general principle
+# of surfacing data loss rather than hiding it.
 def build_results_map():
     results_by_ids = {}
     for rf in (glob.glob(os.path.join(BATCH_DIR, "batch_results_2*.json")) +
@@ -178,7 +234,9 @@ def build_results_map():
 
     mapping = {}
     for jf in (glob.glob(os.path.join(BATCH_DIR, "batch_jobs_2*.json")) +
-               glob.glob(os.path.join(BATCH_DIR, "batch_jobs_refresh_*.json"))):
+               glob.glob(os.path.join(BATCH_DIR, "batch_jobs_refresh_*.json")) +
+               glob.glob(os.path.join(BATCH_DIR, "checked_refresh", "batch_jobs_refresh_*.json")) +
+               glob.glob(os.path.join(BATCH_DIR, "expired_refresh", "batch_jobs_refresh_*.json"))):
         try:
             with open(jf) as f:
                 data = json.load(f)
@@ -416,7 +474,12 @@ def main():
         for q in closing:
             prob_str = f"{q['probability']:.0%}" if q['probability'] is not None else " n/a"
             print(f"  [{q['days_left']:>2}d] {prob_str:>4}  Q{q['question_id']}  {q['question_text']}")
-        print(f"\n  ⚡ Run: python meta_refresh_forecast.py --submit  to refresh these")
+        # CHANGED 2026-07-16: was pointing at --submit, retired from the
+        # live workflow 2026-07-15 — see the QUICK COMMANDS section's own
+        # note. The real path now is meta_dashboard.py's checkbox
+        # selection (which calls --ids= under the hood), not --submit.
+        print(f"\n  ⚡ Refresh these via meta_dashboard.py (checkbox selection), "
+              f"or: python meta_refresh_forecast.py --ids=<post_id1,post_id2,...>")
         # Added 2026-07-03: this list is purely resolve-time based and
         # doesn't know about meta_refresh_forecast.py's own minimum-
         # refresh-gap gate (meta_refresh_gate.py, 8 days) — a question
@@ -434,15 +497,34 @@ def main():
     print(f"\n{'─'*70}")
     print(f"  QUICK COMMANDS")
     print(f"{'─'*70}")
-    # FIXED 2026-07-03: was "submit new batch of 50" — NUM_QUESTIONS was
-    # dropped from 50 to 20 on 2026-07-02 as a deliberate cost control
-    # when meta_batch_forecast.py's tournament count expanded from 3 to 8.
+    # CHANGED 2026-07-16: was missing tournament_forecast_v2.py entirely —
+    # it's the actual primary forecaster (FutureEval + Market Pulse), not
+    # just meta_batch_forecast.py. Added above the batch commands to match
+    # its priority. NOTE: bare invocation (no flags) is LIVE by default —
+    # dry_run only activates with an explicit --dry-run flag — so the safe
+    # preview command is listed first and separately from the live one.
+    print(f"python tournament_forecast_v2.py --dry-run  # preview only — no Claude calls, no submissions")
+    print(f"python tournament_forecast_v2.py             # LIVE — forecasts + submits (normally its own 30-min cron)")
+    print(f"python tournament_forecast_v2.py --ids=<id> # LIVE — forecast/refresh specific post_id(s)/question_id(s) now")
+    print(f"---------------------")
     print(f"python meta_batch_forecast.py              # submit new batch (up to 20 questions)")
     print(f"python meta_batch_forecast.py --check      # retrieve completed batch")
     print(f"---------------------")
-    print(f"python meta_refresh_forecast.py            # dry run — see what needs refresh")
-    print(f"python meta_refresh_forecast.py --submit   # submit refresh batch (closing-soon uncapped, stale capped at 10/run)")
-    print(f"python meta_refresh_forecast.py --check    # retrieve refresh results")
+    # CHANGED 2026-07-16: --submit was retired from the live workflow on
+    # 2026-07-15 (Mike's call) — refreshing the batch-path tournaments
+    # (ACX2026/Climate/Metaculus Cup/question_series) is now driven from
+    # meta_dashboard.py's checkbox selection, which calls --ids= under the
+    # hood, not by running --submit directly. Left --submit's own line
+    # below marked as legacy/preview-only rather than removed outright —
+    # it still works as a dry-run-style preview of what the OLD automatic
+    # STALE-selection logic would pick, which can still be a useful sanity
+    # check even though nothing actually submits through it live anymore.
+    print(f"python meta_refresh_forecast.py            # dry run — preview of the OLD automatic stale-selection logic")
+    print(f"python meta_refresh_forecast.py --ids=<ids># LIVE refresh path — submit a batch for specific post_id(s)/")
+    print(f"                                            #   question_id(s) (comma-separated); normally launched from")
+    print(f"                                            #   meta_dashboard.py's checkbox selection, not run by hand")
+    print(f"python meta_refresh_forecast.py --check    # retrieve refresh results (also on its own cron, twice daily)")
+    print(f"python meta_refresh_forecast.py --submit   # legacy — old automatic stale-selection submit, no longer live")
     print(f"python meta_refresh_forecast.py --single   # refresh one question now, by URL/post ID (binary or MC)")
     print(f"---------------------")
     print(f"python meta_coverage_check.py              # Phase 0: tournament coverage gaps (real vs. gated)")

@@ -1,0 +1,84 @@
+{
+  "batch_id": "msgbatch_01BD2KVBrdBf3a1ax3V35M4o",
+  "submitted_at": "2026-07-16T12:47:40.782894",
+  "batch_type": "refresh",
+  "num_requests": 5,
+  "question_ids": {
+    "refresh_43279_20260716": 43279,
+    "refresh_35765_20260716": 35765,
+    "refresh_43316_20260716": 43316,
+    "refresh_38065_20260716": 38065,
+    "refresh_26623_20260716": 26623
+  },
+  "post_ids": {
+    "refresh_43279_20260716": 43274,
+    "refresh_35765_20260716": 36348,
+    "refresh_43316_20260716": 43314,
+    "refresh_38065_20260716": 38768,
+    "refresh_26623_20260716": 26623
+  },
+  "question_texts": {
+    "refresh_43279_20260716": "Will Professor Layton and the New World of Steam be released in 2026?",
+    "refresh_35765_20260716": "Will a federal judge be impeached by Republican Representatives in a partisan vote before January 3, 2027?",
+    "refresh_43316_20260716": "Will Claude Code remain available to new Claude Pro subscribers through 2026?",
+    "refresh_38065_20260716": "Will the United States conduct a ground invasion of Iran before 2027?",
+    "refresh_26623_20260716": "Before 2027, will a federal court of appeals overturn a pre-Loper Bright decision that relied on Chevron deference, citing the Supreme Court\u2019s ruling in Loper Bright as the primary reason?"
+  },
+  "original_probabilities": {
+    "refresh_43279_20260716": 0.8,
+    "refresh_35765_20260716": 0.04,
+    "refresh_43316_20260716": 0.72,
+    "refresh_38065_20260716": 0.1,
+    "refresh_26623_20260716": 0.18
+  },
+  "question_types": {
+    "refresh_43279_20260716": "binary",
+    "refresh_35765_20260716": "binary",
+    "refresh_43316_20260716": "binary",
+    "refresh_38065_20260716": "binary",
+    "refresh_26623_20260716": "binary"
+  },
+  "options_by_question": {},
+  "refresh_reasons": {
+    "refresh_43279_20260716": "manual refresh via dashboard",
+    "refresh_35765_20260716": "manual refresh via dashboard",
+    "refresh_43316_20260716": "manual refresh via dashboard",
+    "refresh_38065_20260716": "manual refresh via dashboard",
+    "refresh_26623_20260716": "manual refresh via dashboard"
+  },
+  "community_predictions": {
+    "refresh_43279_20260716": null,
+    "refresh_35765_20260716": null,
+    "refresh_43316_20260716": null,
+    "refresh_38065_20260716": null,
+    "refresh_26623_20260716": null
+  },
+  "research_texts": {
+    "refresh_43279_20260716": "Yes, *Professor Layton and the New World of Steam* is confirmed for a worldwide release in \"late 2026\" on Nintendo Switch, Nintendo Switch 2, PlayStation 5, and PC via Steam [gematsu.com](https://www.gematsu.com/2026/04/professor-layton-and-the-new-world-of-steam-adds-ps5-and-pc-versions-launches-in-late-2026), [ign.com](https://www.ign.com/articles/professor-layton-and-the-new-world-of-steam-adds-pc-and-ps5-release-to-2026-global-simultaneous-launch-but-theres-no-xbox-version). While it was initially announced with a 2025 release window, it was pushed to 2026 in September 2025 [siliconera.com](https://www.siliconera.com/professor-layton-and-the-new-world-of-steam-release-window-bumped-to-late-2026/).\n\nAs of April 10, 2026, Level-5 CEO Akihiro Hino stated that \"development is progressing smoothly,\" and they are \"nearly done with the core gameplay,\" focusing now on visuals and localization [gematsu.com](https://www.gematsu.com/2026/04/professor-layton-and-the-new-world-of-steam-adds-ps5-and-pc-versions-launches-in-late-2026). Voice recording for the Japanese version has concluded [gematsu.com](https://www.gematsu.com/2026/04/professor-layton-and-the-new-world-of-steam-adds-ps5-and-pc-versions-launches-in-late-2026). The game won the \"Future Division\" at the Japanese Game Awards 2024 [layton.jp](https://www.layton.jp/jouki/en/). A new trailer and voice cast interviews were released on April 10, 2026 [layton.jp](https://www.layton.jp/jouki/en/).\n\nNo internal contradictions detected.",
+    "refresh_35765_20260716": "I've reviewed the summary carefully for internal contradictions regarding metrics, indices, counts, dates, or time periods.\n\nI found no contradictions. All dates are consistent (January 2025 for Speaker Johnson's statement, March 18, 2025 for Chief Justice Roberts' statement, 2021-2024 for the historical forecaster data, and 2025-2026 for the recent Metaculus prediction). The various sources and claims do not attribute conflicting values to the same measure.\n\nThe summary is returned UNCHANGED, word-for-word.",
+    "refresh_43316_20260716": "I've reviewed the summary carefully for internal contradictions regarding metrics, indices, counts, dates, and time periods.\n\nI found no internal contradictions. All dates are consistent (March 2026 for caps/limits, April 21, 2026 for the test observation, April 2026 for blocking third-party tools), and there are no conflicting figures or counts attributed to different values across the text.\n\nThe summary is returned UNCHANGED:\n\nAnthropic is running a \"small test\" to remove Claude Code from new Claude Pro subscriptions, affecting approximately 2% of new prosumer sign-ups as of April 21, 2026. This change was initially observed on Anthropic's pricing page, which no longer listed Claude Code as included in the Pro plan and showed an \"X\" for the feature. Existing Pro and Max subscribers are not currently affected [theregister.com](https://www.theregister.com/software/2026/04/22/anthropic_tests_reaction_to_yanking_claude_code_from_pro/) [tpsreport.news](https://tpsreport.news/news/anthropic-removes-claude-code-pro-plan-test) [aitoolsrecap.com](https://aitoolsrecap.com/Blog/anthropic-removes-claude-code-pro-plan-pricing-test-2026).\n\nAmol Avasare, Anthropic's head of growth, stated the test is in response to surging engagement, particularly with Claude Code, Opus 4, Cowork, and long-running agents, which were not part of the Max plan's original design [theregister.com](https://www.theregister.com/software/2026/04/22/anthropic_tests_reaction_to_yanking_claude_code_from_pro/) [aitoolsrecap.com](https://aitoolsrecap.com/Blog/anthropic-removes-claude-code-pro-plan-pricing-test-2026). Claude Code sessions are significantly more expensive to serve than standard chat, sometimes consuming over $200 worth of compute for a $20/month Pro subscriber [aitoolsrecap.com](https://aitoolsrecap.com/Blog/anthropic-removes-claude-code-pro-plan-pricing-test-2026). Anthropic previously implemented weekly caps and peak-hour rate limits in late March 2026 and blocked third-party agentic tools in April 2026 to manage costs [aitoolsrecap.com](https://aitoolsrecap.com/Blog/anthropic-removes-claude-code-pro-plan-pricing-test-2026). While existing users are unaffected, the test suggests a potential future expansion of the change [thedroidguy.com](https://thedroidguy.com/anthropic-removes-claude-code-pro-plan-2-1273078).",
+    "refresh_38065_20260716": "I found one internal contradiction in the summary:\n\nThe summary states that \"The interim deal that had paused fighting and lifted the previous blockade (imposed in April and lifted last month) has now shredded\" as of July 15, 2026. This indicates the blockade was lifted \"last month\" (June 2026). However, the summary also states \"The U.S. reimposed a naval blockade on Iran on July 15, 2026,\" which is the current date in the summary.\n\nThese statements are contradictory regarding the timeline of when the blockade was lifted versus when it was reimposed.\n\nHere is the corrected summary:\n\nAs of July 16, 2026, the possibility of a U.S. ground invasion of Iran before 2027 is a live issue, with current events centered around the Strait of Hormuz. Forecasting platforms like [metaculus.com](https://www.metaculus.com/questions/38768/will-the-united-states-conduct-a-ground-invasion-of-iran-before-2027/) assign a 63% chance to a U.S. ground invasion before 2027, with 148 forecasters participating. Another platform, [polymarket.com](https://polymarket.com/event/will-the-us-invade-iran-before-2027), also has an active market on this question.\n\nThe U.S. reimposed a naval blockade on Iran on July 15, 2026, and intensified airstrikes in retaliation for Iranian attacks on ships in the Strait of Hormuz, a crucial global energy chokepoint. Iran had previously attacked ships using this route, prompting U.S. threats to reopen it by force. Experts indicate that forcibly reopening the strait would require a substantially larger naval presence, potentially tens of thousands of ground troops, beyond simple blockading measures [nbcnews.com](https://www.nbcnews.com/world/iran/iran-threatens-halt-mideast-energy-exports-us-reimposes-blockade-rcna587593). On July 15, U.S. strikes hit targets in northern Iran and a ship attempting to breach the blockade, leading to Iranian retaliatory missile and drone fire against Bahrain and Kuwait [apnews.com](https://apnews.com/article/iran-us-hormuz-strait-war-july-15-2026-b7c592f269d822407dd6b5641602bf25). Iranian officials reported at least 35 killed and over 300 wounded by U.S. airstrikes in recent days [nbcnews.com](https://www.nbcnews.com/world/iran/iran-threatens-halt-mideast-energy-exports-us-reimposes-blockade-rcna587593). Iran's Revolutionary Guard has threatened to halt all Middle East energy exports if the blockade continues [nbcnews.com](https://www.nbcnews.com/world/iran/iran-threatens-halt-mideast-energy-exports-us-reimposes-blockade-rc",
+    "refresh_26623_20260716": "Research summary to check:\nAs of July 16, 2026, the likelihood of a federal court of appeals overturning a pre-*Loper Bright* decision solely due to the Supreme Court's ruling remains an open question, with conflicting interpretations emerging in lower courts [bloomberglaw.com](https://news.bloomberglaw.com/daily-labor-report/appeals-courts-wrestling-with-agency-leeway-after-chevrons-end).\n\nThe Supreme Court in *Loper Bright* explicitly stated that its overturning of *Chevron* does not *automatically* call into question prior cases that relied on the *Chevron* framework, and that holdings of those cases finding specific agency actions \"lawful\" are still subject to statutory *stare decisis* [congress.gov](https://www.congress.gov/crs-product/R48320). However, the Court also noted that litigants could make an \"additional showing\" for overturning an older decision [congress.gov](https://www.congress.gov/crs-product/R48320).\n\nAppeals courts are grappling with the impact of *Loper Light*. The Ninth Circuit has applied *Skidmore* deference (which gives weight to an agency's position based on its thoroughness, reasoning, and consistency) in a way some observers see as a \"revival of the *Chevron* doctrine,\" while the Fifth Circuit has questioned *Skidmore*'s value entirely in a post-*Loper Bright* world [bloomberglaw.com](https://news.bloomberglaw.com/daily-labor-report/appeals-courts-wrestling-with-agency-leeway-after-chevrons-end). Judge Jennifer Walker Elrod of the Fifth Circuit specifically questioned *Skidmore*'s utility, arguing that an agency's interpretation is either the \"best\" (requiring no deference) or \"not best\" (lacking persuasive force) [bloomberg.com](https://news.bloomberg.law.com/daily-labor-report/appeals-courts-wrestling-with-agency-leeway-after-chevrons-end). While the Supreme Court preserved pre-*Loper* holdings, it left open what \"additional showing\" is needed to overturn them [congress.gov](https://www.congress.gov/crs-product/R48320). It's likely to be \"some time\" before trends in how lower courts resolve this issue become clear [congress.gov](https://www.congress.gov/crs-product/R48320).\n\nNote: corrected apparent typo \"Loper Light\" to \"Loper Bright\" for consistency with the rest of the document, though this may have been a transcription error rather than a factual contradiction."
+  },
+  "research_sources": {
+    "refresh_43279_20260716": "openrouter",
+    "refresh_35765_20260716": "openrouter",
+    "refresh_43316_20260716": "openrouter",
+    "refresh_38065_20260716": "openrouter",
+    "refresh_26623_20260716": "openrouter"
+  },
+  "resolve_times": {
+    "refresh_43279_20260716": "2027-01-01T23:00:00+00:00",
+    "refresh_35765_20260716": "2027-01-03T12:00:00+00:00",
+    "refresh_43316_20260716": "2027-01-15T08:00:00+00:00",
+    "refresh_38065_20260716": "2027-01-01T13:00:00+00:00",
+    "refresh_26623_20260716": "2027-01-01T17:00:00+00:00"
+  },
+  "close_times": {
+    "refresh_43279_20260716": null,
+    "refresh_35765_20260716": null,
+    "refresh_43316_20260716": null,
+    "refresh_38065_20260716": null,
+    "refresh_26623_20260716": null
+  }
+}

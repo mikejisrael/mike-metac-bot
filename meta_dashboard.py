@@ -2504,4 +2504,24 @@ if __name__ == "__main__":
 
         threading.Thread(target=refresh_cache_loop, daemon=True).start()
 
-    app.run(port=5002, debug=True, use_reloader=USE_RELOADER)
+    # ADDED 2026-07-16: confirmed live — the default watchdog-based
+    # reloader (auto-picked when the watchdog package is installed, per
+    # the "Restarting with watchdog (windowsapi)" log line) watches the
+    # ENTIRE working directory for .py changes, not just this app's real
+    # dependencies. Mike saved bybit_sim.py (a completely unrelated
+    # crypto-sim project living in the same folder) and the dashboard
+    # restarted anyway — same thing happened for meta_watch.py and
+    # meta_coverage_check.py, which this app doesn't even import. Neither
+    # restart was actually necessary: this app only ever imports
+    # meta_cp_extract, meta_refresh_exclusions, and meta_refresh_schedule
+    # (checked directly against this file's own import list) — every
+    # forecasting script it LAUNCHES (tournament_forecast_v2.py,
+    # meta_refresh_forecast.py) gets re-read fresh from disk on its own
+    # each time it's spawned as a new subprocess, restart or not, so this
+    # app restarting for THEIR changes was never buying anything either.
+    # reloader_type="stat" watches only files backing currently-loaded
+    # modules (sys.modules) instead of scanning the whole directory —
+    # correctly narrows this to exactly the 3 real imports above with no
+    # file list to maintain, rather than restarting for every unrelated
+    # script that happens to live in the same folder.
+    app.run(port=5002, debug=True, use_reloader=USE_RELOADER, reloader_type="stat")
