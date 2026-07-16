@@ -1,16 +1,41 @@
 {
-  "checked_at": "2026-07-15T14:02:33.070467+00:00",
+  "checked_at": "2026-07-16T14:02:45.980247+00:00",
   "tournaments": {
     "FutureEval": {
       "tournament_id": 33022,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 1,
+      "open_count": 2,
+      "forecasted_count": 0,
+      "missing_gated_ids": [
+        44773
+      ],
+      "missing_gated_reasons": {
+        "too_new_to_flag": 1
+      },
+      "missing_real_ids": [
+        44562
+      ]
+    },
+    "Market Pulse Challenge 26Q3": {
+      "tournament_id": 33066,
+      "fetch_method": "allowed_tournaments",
+      "unverified_fetch_scope": false,
+      "open_count": 10,
       "forecasted_count": 0,
       "missing_gated_ids": [],
       "missing_gated_reasons": {},
       "missing_real_ids": [
-        44772
+        44788,
+        44793,
+        44794,
+        44820,
+        44821,
+        44823,
+        44824,
+        44825,
+        44826,
+        44827
       ]
     },
     "ACX2026": {
@@ -18,17 +43,48 @@
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
       "open_count": 27,
-      "forecasted_count": 27,
-      "missing_gated_ids": [],
-      "missing_gated_reasons": {},
-      "missing_real_ids": []
+      "forecasted_count": 0,
+      "missing_gated_ids": [
+        40672,
+        40689,
+        40780,
+        40781,
+        40832,
+        40890,
+        40898
+      ],
+      "missing_gated_reasons": {
+        "wrong_type": 7
+      },
+      "missing_real_ids": [
+        40671,
+        40673,
+        40674,
+        40675,
+        40677,
+        40679,
+        40777,
+        40792,
+        40794,
+        40831,
+        40839,
+        40840,
+        40842,
+        40843,
+        40845,
+        40897,
+        40900,
+        40901,
+        40902,
+        40912
+      ]
     },
     "Climate Tipping Points": {
       "tournament_id": 1756,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
       "open_count": 62,
-      "forecasted_count": 6,
+      "forecasted_count": 0,
       "missing_gated_ids": [
         14733,
         14734,
@@ -72,6 +128,8 @@
         15483,
         15485,
         15486,
+        15487,
+        15488,
         15497,
         15498,
         15500,
@@ -88,19 +146,54 @@
         15833
       ],
       "missing_gated_reasons": {
-        "wrong_type": 56
+        "wrong_type": 58
       },
-      "missing_real_ids": []
+      "missing_real_ids": [
+        15489,
+        15490,
+        15492,
+        15493
+      ]
     },
     "Metaculus Cup": {
       "tournament_id": 33021,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
       "open_count": 26,
-      "forecasted_count": 26,
-      "missing_gated_ids": [],
-      "missing_gated_reasons": {},
-      "missing_real_ids": []
+      "forecasted_count": 0,
+      "missing_gated_ids": [
+        43345,
+        43364,
+        43492,
+        43495,
+        43965,
+        44166,
+        44240,
+        44704,
+        44705
+      ],
+      "missing_gated_reasons": {
+        "wrong_type": 9
+      },
+      "missing_real_ids": [
+        43336,
+        43360,
+        43363,
+        43498,
+        43501,
+        43506,
+        43510,
+        43522,
+        43852,
+        43854,
+        43926,
+        43937,
+        44014,
+        44139,
+        44250,
+        44369,
+        44633
+      ]
     },
     "Nuclear Risk Horizons": {
       "tournament_id": 1173,
@@ -157,14 +250,20 @@
       "fetch_method": "project_param",
       "unverified_fetch_scope": true,
       "open_count": 6,
-      "forecasted_count": 5,
+      "forecasted_count": 0,
       "missing_gated_ids": [
         44177
       ],
       "missing_gated_reasons": {
         "too_far_out": 1
       },
-      "missing_real_ids": []
+      "missing_real_ids": [
+        39090,
+        43472,
+        43938,
+        44007,
+        44139
+      ]
     },
     "Taiwan Tinderbox": {
       "tournament_id": 3048,
@@ -229,22 +328,13 @@
         "too_far_out": 6
       },
       "missing_real_ids": []
-    },
-    "Market Pulse Challenge 26Q3": {
-      "tournament_id": 33066,
-      "fetch_method": "allowed_tournaments",
-      "unverified_fetch_scope": false,
-      "open_count": 0,
-      "forecasted_count": 0,
-      "missing_gated_ids": [],
-      "missing_gated_reasons": {},
-      "missing_real_ids": []
     }
   },
-  "total_gaps": 1,
-  "total_gated": 122,
+  "total_gaps": 57,
+  "total_gated": 141,
   "total_gated_reasons": {
-    "wrong_type": 56,
+    "too_new_to_flag": 1,
+    "wrong_type": 74,
     "too_far_out": 66
   },
   "too_far_out_samples": [
