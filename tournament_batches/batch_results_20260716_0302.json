@@ -1,0 +1,21 @@
+{
+  "q_44561": {
+    "question_id": 44561,
+    "post_id": 44463,
+    "question_text": "How many U.S. banks will fail in August 2026?",
+    "question_type": "multiple_choice",
+    "status": "success",
+    "submitted_forecast": {
+      "0": 0.72,
+      "1": 0.18,
+      "2-3": 0.07,
+      "4-6": 0.02,
+      "7+": 0.01
+    },
+    "reasoning": "# Analysis\n\n## (a) Time left until resolution\nToday is July 16, 2026. August 2026 begins in approximately 15 days and ends 46 days from now. We have roughly 16 days of visibility into what will happen in August 2026.\n\n## (b) Most likely outcome and why\n\nThe most likely outcome is **0 failures in August 2026**.\n\n**Reasoning:**\n\n1. **Base Rate Context**: The background notes that bank failures \"in recent years have been low.\" The question mentions the most recent failure was May 1, 2026, suggesting a relatively stable banking environment despite occasional failures coming \"in waves.\"\n\n2. **Current Environment**: As of July 16, 2026, only two banks have failed year-to-date (through mid-July). This is a very low failure rate\u2014roughly 2-3 per year would be considered a normal baseline for the recent period.\n\n3. **August is Not Historically Special**: There's no reason to expect August specifically to see elevated bank failures compared to other months. Failures don't cluster seasonally.\n\n4. **Momentum Argument**: With 16 days of lead time into August and no major banking crisis emerging signals evident in the research provided, the trajectory suggests low continued failure rates.\n\n5. **Option Structure Skew**: The fact that \"0\" is the first option suggests forecasters anticipated this as the modal outcome. The distribution of options (0, 1, 2-3, 4-6, 7+) is heavily weighted toward low numbers, with the tail risks representing stress scenarios.\n\n## (c) Key uncertainties\n\n- **Sudden systemic shock**: A geopolitical event, major financial shock, or credit market stress could trigger multiple failures. However, no such signals appear in the current research.\n- **Existing stress in the pipeline**: Banks under FDIC supervision or with known issues could fail, but these typically follow prolonged periods of deterioration visible beforehand.\n- **Timing of previously-distressed institutions**: Some banks may have been identified as troubled months ago and could be formally closed in August specifically.\n\nGiven the low failure rate year-to-date and lack of systemic stress signals, the probability mass should center heavily on 0-1 failures, with minimal probability on scenarios requiring 2+ failures.\n\n## Option probabilities:\n\n0: 72%\n1: 18%\n2-3: 7%\n4-6: 2%\n7+: 1%",
+    "community_prediction": null,
+    "research_source": "openrouter",
+    "research_text": "As of July 16, 2026, two U.S. banks have failed",
+    "submitted_at": "2026-07-16T03:02:33.860222+00:00"
+  }
+}
