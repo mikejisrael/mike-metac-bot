@@ -159,6 +159,23 @@ TOURNAMENTS = {
 # etc.) just for one integer this read-only reporting script needs.
 MARKET_PULSE_TOURNAMENT_ID = 33066
 
+# ADDED 2026-07-16: a question that appeared on Metaculus moments ago
+# hasn't necessarily been missed — the forecasting scripts (tournament_
+# forecast_v2.py, meta_batch_forecast.py) run on their own ~30-min cron
+# cadence, so there's an inherent window between "question opens" and
+# "the next scheduled run picks it up." This coverage check runs on an
+# INDEPENDENT schedule (meta_phase_reports.yaml), so it can legitimately
+# sample Metaculus's live state during that window and see a real, not-yet-
+# forecast question — correctly, at that instant, but misleadingly as a
+# persistent "REAL gap" alert, when it's actually just normal in-flight
+# latency that resolves itself within the hour. Confirmed live (Mike,
+# 2026-07-16): a new FutureEval question flagged as missing coverage,
+# resolved on its own once tournament_forecast_v2.py's next run reached it.
+# 60 minutes gives a full cycle of margin over the ~30-min cron cadence
+# (covers one missed tick plus processing/API slack) before treating a
+# missing question as a genuine gap worth alerting on.
+MIN_QUESTION_AGE_MINUTES = 60
+
 BOT_TOKEN = os.getenv("METAC_TOURNAMENT_TOKEN")
 
 # Mirrors meta_batch_forecast.py's same-named constant deliberately — how
@@ -237,6 +254,7 @@ def fetch_open_questions_series(series_id: int) -> list[dict]:
                 "question_type": None,
                 "num_forecasters": None,
                 "close_time": None,
+                "open_time": None,
             })
             continue
         close_str = item.get("scheduled_close_time") or q_info.get("scheduled_close_time")
@@ -246,11 +264,22 @@ def fetch_open_questions_series(series_id: int) -> list[dict]:
                 close_dt = datetime.fromisoformat(close_str.replace("Z", "+00:00"))
             except Exception:
                 pass
+        # ADDED 2026-07-16: for MIN_QUESTION_AGE_MINUTES (see that constant's
+        # docstring) — same extraction/parsing pattern as close_dt above,
+        # just a different field.
+        open_str = item.get("open_time") or q_info.get("open_time")
+        open_dt = None
+        if open_str:
+            try:
+                open_dt = datetime.fromisoformat(open_str.replace("Z", "+00:00"))
+            except Exception:
+                pass
         out.append({
             "question_id": qid,
             "question_type": q_info.get("type"),
             "num_forecasters": item.get("nr_forecasters"),
             "close_time": close_dt,
+            "open_time": open_dt,
         })
     if extraction_failed_post_ids:
         print(f"  ⚠️  question_series {series_id}: could not resolve a nested question_id for "
@@ -293,20 +322,28 @@ def fetch_open_questions(client, tournament_id: int) -> list:
 
 
 def _gate_inputs(q) -> tuple:
-    """Extract (question_type, num_forecasters, close_time). Two shapes
-    handled: forecasting_tools question objects (the 4 real tournaments,
-    via fetch_open_questions/ApiFilter — confirmed real, declared fields,
-    checked directly against the installed library) and plain dicts (the
-    5 question_series tournaments, via fetch_open_questions_series — see
-    that function's docstring). Added dict support 2026-07-06 rather than
-    forcing the question_series path to construct fake question objects
-    just to satisfy this function's original object-only assumption."""
+    """Extract (question_type, num_forecasters, close_time, open_time). Two
+    shapes handled: forecasting_tools question objects (the 4 real
+    tournaments, via fetch_open_questions/ApiFilter — confirmed real,
+    declared fields, checked directly against the installed library) and
+    plain dicts (the 5 question_series tournaments, via
+    fetch_open_questions_series — see that function's docstring). Added
+    dict support 2026-07-06 rather than forcing the question_series path
+    to construct fake question objects just to satisfy this function's
+    original object-only assumption.
+
+    open_time ADDED 2026-07-16 for MIN_QUESTION_AGE_MINUTES (see that
+    constant's docstring) — getattr fallback to created_time mirrors the
+    exact same verified pattern already used in tournament_forecast_v2.py/
+    meta_refresh_forecast.py's submit_refresh_batch for the same library
+    objects."""
     if isinstance(q, dict):
-        return (q.get("question_type"), q.get("num_forecasters"), q.get("close_time"))
+        return (q.get("question_type"), q.get("num_forecasters"), q.get("close_time"), q.get("open_time"))
     return (
         getattr(q, "question_type", None),
         getattr(q, "num_forecasters", None),
         getattr(q, "close_time", None),
+        getattr(q, "open_time", None) or getattr(q, "created_time", None),
     )
 
 
@@ -343,6 +380,7 @@ def run_coverage_check():
 
     client = MetaculusClient(token=BOT_TOKEN)
     forecasted = fetch_forecasted_questions(client)
+    now = datetime.now(timezone.utc)
 
     report = {
         "checked_at": datetime.now(timezone.utc).isoformat(),
@@ -391,10 +429,30 @@ def run_coverage_check():
                 # same by_id dict) but fail toward visibility, not silence.
                 real_ids.append(qid)
                 continue
-            q_type, num_forecasters, close_time = _gate_inputs(q)
+            q_type, num_forecasters, close_time, open_time = _gate_inputs(q)
             extraction_failed = q_type is None and num_forecasters is None and close_time is None
 
-            if tid == MARKET_PULSE_TOURNAMENT_ID:
+            # ADDED 2026-07-16: runs FIRST, ahead of every other rule below
+            # (including Market Pulse's unconditional "always real" and the
+            # extraction_failed fallback) — see MIN_QUESTION_AGE_MINUTES's
+            # docstring for the race this fixes. Only applies when open_time
+            # is actually known; a missing open_time falls through to the
+            # existing logic below unchanged — same "unknown -> don't let it
+            # hide a genuine miss" principle already used for
+            # extraction_failed, just applied to this new check too.
+            is_too_new = False
+            if open_time is not None:
+                try:
+                    age_minutes = (now - open_time).total_seconds() / 60
+                    is_too_new = 0 <= age_minutes < MIN_QUESTION_AGE_MINUTES
+                except Exception:
+                    pass
+
+            if is_too_new:
+                gated_ids.append(qid)
+                gated_reasons_this_tournament["too_new_to_flag"] += 1
+                global_gated_reasons["too_new_to_flag"] += 1
+            elif tid == MARKET_PULSE_TOURNAMENT_ID:
                 # ADDED 2026-07-13: Market Pulse is forecasted by
                 # tournament_forecast_v2.py, a SEPARATE script from
                 # meta_batch_forecast.py — with different eligibility
