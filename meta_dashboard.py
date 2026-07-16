@@ -56,6 +56,7 @@ from forecasting_tools import MetaculusClient, ApiFilter
 from meta_cp_extract import extract_live_cp
 from meta_refresh_exclusions import load_excluded_ids
 import meta_refresh_schedule
+import tournament_registry
 
 load_dotenv()
 
@@ -73,19 +74,20 @@ print(f"Personal client: {'ready' if personal_client else '⚠️  METACULUS_TOK
 
 LOCAL_RESULT_DIRS = ["tournament_batches", "tournament_batches_v2", "meta batches"]
 
-TOURNAMENT_LABELS = {
-    33022: "FutureEval",
-    32880: "ACX2026",
-     1756: "Climate Tipping Points",
-    33021: "Metaculus Cup",
-    33066: "Market Pulse Challenge 26Q3",  # added 2026-07-12 alongside group-row support
-}
+# CHANGED 2026-07-16: now derived from tournament_registry.py instead of a
+# hand-written dict. The old version here only had 5 entries (FutureEval,
+# ACX2026, Climate, Metaculus Cup, Market Pulse) and was silently missing
+# all 5 question_series tournaments (Nuclear Risk Horizons, Current
+# Events, Taiwan Tinderbox, Economic Indicators, Animal Welfare) that
+# meta_coverage_check.py's separate TOURNAMENTS dict already had — those
+# forecasts were falling into the OTHER_LABEL bucket below. See
+# tournament_registry.py's module docstring for the full history.
+TOURNAMENT_LABELS = tournament_registry.labels_by_id()
+TOURNAMENT_CATEGORIES = tournament_registry.category_by_id()  # id -> "Tournaments"/"Question Series", not yet surfaced in the UI (nested filter UI is a later step)
 PERSONAL_LABEL = "Personal"
 OTHER_LABEL    = "Other"
 UNKNOWN_LABEL  = "Unknown"
-TOURNAMENT_ORDER = [
-    "FutureEval", "ACX2026", "Climate Tipping Points", "Metaculus Cup",
-    "Market Pulse Challenge 26Q3",
+TOURNAMENT_ORDER = tournament_registry.display_order() + [
     PERSONAL_LABEL, OTHER_LABEL, UNKNOWN_LABEL,
 ]
 
@@ -460,16 +462,28 @@ def summarize_forecast(q_type: str, forecast) -> str:
 
 
 def detect_tournaments(raw: dict) -> list[str]:
+    """FIXED 2026-07-16: this only ever read projects["tournament"] (plus
+    default_project when its type=="tournament") — it never checked
+    projects["question_series"] at all. A question that's ONLY on a
+    question_series project (Nuclear Risk Horizons, Current Events,
+    Taiwan Tinderbox, Economic Indicators, Animal Welfare) therefore
+    produced an EMPTY ids set here, falling through to the `or
+    [OTHER_LABEL]` fallback at both call sites — landing in "Other" not
+    because the label was unmapped, but because this function never even
+    looked for it. Fixed alongside the TOURNAMENT_LABELS drift fix (see
+    that dict's comment) since patching the label map alone would not
+    have changed this function's behavior at all."""
     if not raw:
         return []
     projects = raw.get("projects", {}) or {}
     ids = set()
-    for t in projects.get("tournament", []) or []:
-        tid = t.get("id")
-        if tid is not None:
-            ids.add(tid)
+    for key in ("tournament", "question_series"):
+        for t in projects.get(key, []) or []:
+            tid = t.get("id")
+            if tid is not None:
+                ids.add(tid)
     dp = projects.get("default_project")
-    if dp and dp.get("type") == "tournament" and dp.get("id") is not None:
+    if dp and dp.get("type") in ("tournament", "question_series") and dp.get("id") is not None:
         ids.add(dp["id"])
     if not ids:
         return []

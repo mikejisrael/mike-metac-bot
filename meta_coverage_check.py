@@ -125,39 +125,33 @@ load_dotenv()
 from forecasting_tools import MetaculusClient, ApiFilter
 from meta_alerts import send_alert
 from meta_forecast_gate import passes_forecast_gate, forecast_gate_failure_reason, QUESTION_SERIES_IDS
+import tournament_registry
 
 REPORTS_DIR = "reports"
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
-TOURNAMENTS = {
-    33022: "FutureEval",
-    32880: "ACX2026",
-     1756: "Climate Tipping Points",
-    33021: "Metaculus Cup",
-    # EXPANDED 2026-07-02: matches meta_batch_forecast.py's ALLOWED_TOURNAMENTS
-    # expansion — same 5 series, same IDs (resolved via resolve_series_ids.py,
-    # not guessed). See module docstring: UNVERIFIED FETCH SCOPE for these 5.
-     1173: "Nuclear Risk Horizons",
-    32774: "Current Events",
-     3048: "Taiwan Tinderbox",
-     2018: "Economic Indicators",
-     2995: "Animal Welfare",
-    # ADDED 2026-07-13: Market Pulse Challenge 26Q3. type='tournament' (not
-    # question_series), so it goes through the normal fetch_open_questions()
-    # path below, NOT fetch_open_questions_series() — but needs its own
-    # special-cased gate logic (see MARKET_PULSE_TOURNAMENT_ID usage in
-    # run_coverage_check() below) since it's forecasted by a DIFFERENT
-    # script (tournament_forecast_v2.py) with different eligibility rules
-    # than meta_batch_forecast.py's binary-only + MIN_FORECASTERS gate this
-    # file otherwise checks missing questions against.
-    33066: "Market Pulse Challenge 26Q3",
-}
+# CHANGED 2026-07-16: now derived from tournament_registry.py instead of a
+# hand-written dict duplicating meta_dashboard.py's (separately
+# maintained, and already caught drifting — see tournament_registry.py's
+# module docstring). Same 10 entries as before, same values — this is a
+# no-op behavior change, just removing the second copy.
+#
+# Market Pulse Challenge 26Q3 (33066): type='tournament' (not
+# question_series), so it goes through the normal fetch_open_questions()
+# path below, NOT fetch_open_questions_series() — but needs its own
+# special-cased gate logic (see MARKET_PULSE_TOURNAMENT_ID usage in
+# run_coverage_check() below) since it's forecasted by a DIFFERENT script
+# (tournament_forecast_v2.py) with different eligibility rules than
+# meta_batch_forecast.py's binary-only + MIN_FORECASTERS gate this file
+# otherwise checks missing questions against.
+TOURNAMENTS = tournament_registry.labels_by_id()
 
-# Matches tournament_forecast_v2.py's own constant of the same name/value.
-# Not imported from there directly to avoid pulling in that file's much
-# heavier dependency chain (Anthropic client, forecasting prompt builders,
-# etc.) just for one integer this read-only reporting script needs.
-MARKET_PULSE_TOURNAMENT_ID = 33066
+# Still a plain constant (not a heavier import from tournament_forecast_v2.py
+# itself) for the same reason as before this change — this read-only
+# reporting script avoids pulling in that file's Anthropic client / prompt
+# builder dependency chain just for one integer. Pulled from the registry
+# now instead of hardcoded a second time.
+MARKET_PULSE_TOURNAMENT_ID = tournament_registry.TOURNAMENTS["market_pulse_26q3"]["id"]
 
 # ADDED 2026-07-16: a question that appeared on Metaculus moments ago
 # hasn't necessarily been missed — the forecasting scripts (tournament_
