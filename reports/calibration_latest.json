@@ -1,15 +1,20 @@
 {
-  "checked_at": "2026-07-16T14:04:36.962210+00:00",
-  "questions_scored": 15,
-  "questions_predicted_total": 363,
-  "questions_resolved_checked": 19,
-  "average_peer_score": -2.2886954216396713,
+  "checked_at": "2026-07-17T14:04:12.074064+00:00",
+  "questions_scored": 16,
+  "questions_predicted_total": 365,
+  "questions_resolved_checked": 20,
+  "average_peer_score": -1.6555299596163904,
   "calibration": [],
   "score_scatter": [
     {
       "question_id": 44255,
       "close_time": "2026-07-02T00:00:00Z",
       "peer_score": 43.535179006786436
+    },
+    {
+      "question_id": 44211,
+      "close_time": "2026-06-26T21:00:00Z",
+      "peer_score": 7.841951970732832
     },
     {
       "question_id": 44016,
