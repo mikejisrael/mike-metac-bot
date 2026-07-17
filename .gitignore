@@ -11,6 +11,9 @@ bybit_bot.py
 bybit_check_positions.py
 bybit_dashboard.py
 bybit_regime_analysis.py
+test.py
+meta batches/
+reports/*.json
 
 ### General gitignore ###
 
@@ -192,3 +195,4 @@ reports/calibration_2*.json
 # meant to be committed — see meta_watch.py's module docstring.
 
 .tmp.driveupload/
+.tmp.driveupload/ 
