@@ -1,0 +1,93 @@
+name: Bybit Sim Run (bybit_sim.py)
+
+on:
+  workflow_dispatch:  # manual trigger from GitHub UI, and the target for a
+                       # cron-job.org scheduled job — same pattern as
+                       # tournament_forecast_v2.yaml: GitHub's native
+                       # `schedule:` trigger is unreliable, so external cron
+                       # drives this too.
+  #schedule:
+    #- cron: "0 23,3,7,11,15,19 * * *"  # SUGGESTED only, not live — set the
+    # actual schedule in cron-job.org hitting this workflow's
+    # workflow_dispatch. This maps Mike's old local Sydney/Perth-adjacent
+    # Task Scheduler times (9am/1pm/5pm/9pm/1am/5am AEST, UTC+10) to UTC:
+    # 9am AEST = 23:00 UTC (previous day), 1pm = 03:00, 5pm = 07:00,
+    # 9pm = 11:00, 1am = 15:00, 5am = 19:00. VERIFY against Mike's actual
+    # timezone and DST before relying on this — AEST/AEDT shifts twice a
+    # year and Perth (AWST, UTC+8, no DST) differs from Sydney (AEST/AEDT).
+    # Set the real schedule directly in cron-job.org, in whatever timezone
+    # cron-job.org's UI uses (usually configurable per-job).
+
+# Prevent overlapping runs of this workflow. A run in progress writes to
+# bybit_sim_data/ and bybit_logs/, so two overlapping runs could race on
+# the same files. This is the ONLY scheduled workflow touching these
+# directories (no v1/v2-style split), so no cross-workflow collision to
+# worry about like tournament_forecast_v2.yaml has — but same defensive
+# retry-on-push-rejection logic is included below anyway, in case a manual
+# workflow_dispatch run overlaps with a scheduled one.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  bybit-sim:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed to push bybit_sim_data/ and bybit_logs/ back
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Run bybit_sim.py
+        run: poetry run python bybit_sim.py
+        env:
+          # bybit_sim.py only reads ANTHROPIC_API_KEY (confirmed via
+          # findstr check, 2026-07-17) — no Metaculus tokens needed.
+          # bybit_coin_bench.py's auto-benching runs inline via import
+          # inside bybit_sim.py, so no separate env vars or trigger needed
+          # for that either.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Commit sim state and logs
+        # if: always() — same reasoning as tournament_forecast_v2.yaml:
+        # partial progress before a mid-run failure should still be
+        # committed, not discarded when the runner is torn down.
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add bybit_sim_data/ bybit_logs/ 2>/dev/null || true
+          git diff --cached --quiet && echo "No new results to commit." || (
+            git commit -m "chore: bybit sim run [skip ci]"
+
+            attempt=1
+            max_attempts=5
+            until git push; do
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "Push failed after $max_attempts attempts — giving up."
+                exit 1
+              fi
+              echo "Push rejected (attempt $attempt/$max_attempts) — likely a concurrent push from another workflow or a manual dispatch overlap. Rebasing and retrying..."
+              git pull --rebase
+              attempt=$((attempt + 1))
+              sleep $((RANDOM % 10 + 5))  # small random backoff so racing workflows don't retry in lockstep
+            done
+          )
