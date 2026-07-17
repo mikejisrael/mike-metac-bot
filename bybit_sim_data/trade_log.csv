@@ -327,3 +327,7 @@ trade_date,trade_time,symbol,direction,entry_price,qty,notional_usdt,margin_usdt
 2026-07-15,05:00:03,XPLUSDT,short,0.09345,4811.128946,449.6,89.92,5,0.089712,0.095319,0.72,0.005,-1.7,22,"FEAR — market oversold, slight long bias but follow technicals",BEARISH
 2026-07-15,09:00:02,ETHUSDT,long,1881.94,0.23954,450.8,90.16,5,1957.2176,1844.3012,0.72,0.0047,-2.67,22,"FEAR — market oversold, slight long bias but follow technicals",NONE
 2026-07-16,09:00:03,XLMUSDT,long,0.18901,2921.115285,552.12,92.02,6,0.19657,0.18523,0.72,0.01,-0.67,25,"FEAR — market oversold, slight long bias but follow technicals",NONE
+2026-07-17,15:29:45,KASUSDT,short,0.02801,17536.594074,491.2,98.24,5,0.02689,0.02857,0.72,0.005,-0.87,27,NEUTRAL — standard sizing,NONE
+2026-07-17,15:29:45,SEIUSDT,short,0.04676,10399.914457,486.3,97.26,5,0.04489,0.047695,0.72,-0.0104,1.25,27,NEUTRAL — standard sizing,NONE
+2026-07-17,15:29:45,DOTUSDT,long,0.8542,563.568251,481.4,96.28,5,0.888368,0.837116,0.68,0.01,-0.09,27,NEUTRAL — standard sizing,NONE
+2026-07-17,15:29:45,MNTUSDT,long,0.437,1090.617849,476.6,95.32,5,0.45448,0.42826,0.68,0.0003,-0.21,27,NEUTRAL — standard sizing,NONE

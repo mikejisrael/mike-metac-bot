@@ -1,0 +1,13 @@
+# Normalize line endings for all text files to LF in the repository,
+# regardless of core.autocrlf or the OS/editor that last touched them.
+# Added 2026-07-17 after a full OS reinstall caused a 92-file CRLF/LF
+# mismatch (old machine's committed LF content vs new machine's CRLF
+# working-tree files, surfaced because core.autocrlf=false on the rebuilt
+# machine). This also prevents a repeat of the bybit_sim_run.bat silent-
+# failure issue, which was caused by a file being saved with LF-only line
+# endings on a .bat file that Windows cmd.exe needs as CRLF.
+* text=auto eol=lf
+
+# Windows batch files specifically need CRLF to run reliably in cmd.exe —
+# override the general eol=lf rule above for this one extension.
+*.bat text eol=crlf
