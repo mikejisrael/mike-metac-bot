@@ -90,6 +90,17 @@ UNKNOWN_LABEL  = "Unknown"
 TOURNAMENT_ORDER = tournament_registry.display_order() + [
     PERSONAL_LABEL, OTHER_LABEL, UNKNOWN_LABEL,
 ]
+# ADDED 2026-07-16: which display labels belong under the "Question Series"
+# filter heading, split out from the main "Tournament" heading (Mike's
+# call — the flat pill row was lumping FutureEval/ACX2026/etc. together
+# with Nuclear Risk Horizons/Current Events/etc., with no visual
+# distinction now that the latter finally show up post-detect_tournaments
+# fix). Registry-derived so a new question_series entry gets its own
+# heading automatically, no template change needed.
+QUESTION_SERIES_LABELS = {
+    v["display_name"] for v in tournament_registry.TOURNAMENTS.values()
+    if v["category"] == "Question Series"
+}
 
 STATUS_LABELS = {
     "open":              "Open",
@@ -991,6 +1002,11 @@ def build_dashboard_data():
 
     tournaments_present = [t for t in TOURNAMENT_ORDER
                            if any(t in r["tournaments"] for r in rows)]
+    # Split for the two-heading filter bar (Tournament / Question Series).
+    # tournaments_present itself is kept as-is (unsplit) since other code
+    # still reads it for the "Tournament filter applies" chart note etc.
+    tournaments_present_main   = [t for t in tournaments_present if t not in QUESTION_SERIES_LABELS]
+    tournaments_present_series = [t for t in tournaments_present if t in QUESTION_SERIES_LABELS]
 
     phase0 = load_phase0_reports()
     openrouter_balance = load_openrouter_balance()
@@ -1043,6 +1059,8 @@ def build_dashboard_data():
         "personal_user_id":    get_confirmed_user_id(personal_client),
         "token_configured":    bot_client is not None,
         "tournaments_present": tournaments_present,
+        "tournaments_present_main": tournaments_present_main,
+        "tournaments_present_series": tournaments_present_series,
     }
     return data, bot_live, personal_live, local
 
@@ -1236,10 +1254,18 @@ PAGE_TEMPLATE = """
                   border-radius:6px;font-size:13px;margin-bottom:12px;box-sizing:border-box;">
     <div class="filter-group-label">Tournament</div>
     <div class="pills" id="tournamentPills">
-      {% for t in data.tournaments_present %}
+      {% for t in data.tournaments_present_main %}
       <div class="pill" data-value="{{ t }}">{{ t }}</div>
       {% endfor %}
     </div>
+    {% if data.tournaments_present_series %}
+    <div class="filter-group-label">Question Series</div>
+    <div class="pills" id="questionSeriesPills">
+      {% for t in data.tournaments_present_series %}
+      <div class="pill" data-value="{{ t }}">{{ t }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
     <div class="filter-group-label">Status</div>
     <div class="pills" id="statusPills">
       {% for s in status_order %}
@@ -1384,9 +1410,17 @@ PAGE_TEMPLATE = """
     function getSelected(id) {
       return new Set([...document.querySelectorAll('#' + id + ' .pill.active')].map(el => el.dataset.value));
     }
+    // ADDED 2026-07-16: Tournament and Question Series are now two visually
+    // separate pill groups (#tournamentPills / #questionSeriesPills) but
+    // still one logical filter dimension — a row matches if its tournament
+    // is in EITHER selected set. Every place that used to call
+    // getSelected('tournamentPills') alone now calls this instead.
+    function getSelectedTournaments() {
+      return new Set([...getSelected('tournamentPills'), ...getSelected('questionSeriesPills')]);
+    }
     function saveFilters() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        t: [...getSelected('tournamentPills')], s: [...getSelected('statusPills')],
+        t: [...getSelectedTournaments()], s: [...getSelected('statusPills')],
         g: [...getSelected('signalPills')], q: document.getElementById('searchBox').value
       }));
     }
@@ -1394,7 +1428,8 @@ PAGE_TEMPLATE = """
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
         (saved.t || []).forEach(v => {
-          const el = document.querySelector('#tournamentPills .pill[data-value="' + CSS.escape(v) + '"]');
+          const el = document.querySelector('#tournamentPills .pill[data-value="' + CSS.escape(v) + '"]') ||
+                     document.querySelector('#questionSeriesPills .pill[data-value="' + CSS.escape(v) + '"]');
           if (el) el.classList.add('active');
         });
         (saved.s || []).forEach(v => {
@@ -1529,7 +1564,7 @@ PAGE_TEMPLATE = """
     let currentPage = 1;
 
     function applyFilters() {
-      const selT = getSelected('tournamentPills');
+      const selT = getSelectedTournaments();
       const selS = getSelected('statusPills');
       const selG = getSelected('signalPills');
       const onlyRefreshCandidates = selG.has('refresh_candidate');
