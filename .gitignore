@@ -7,7 +7,10 @@ bench_dashboard_integration.py
 ibkr_*.py
 ibkr_logs/
 Meta-bot*
-
+bybit_bot.py
+bybit_check_positions.py
+bybit_dashboard.py
+bybit_regime_analysis.py
 
 ### General gitignore ###
 
