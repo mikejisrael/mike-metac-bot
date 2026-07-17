@@ -40,6 +40,14 @@ TAKE_PROFIT_PCT      = 0.04       # 4% favourable move
 CANDLE_INTERVAL      = '240'      # 4h candles
 CANDLES_TO_FETCH     = 50
 MARKET_URL           = 'https://api.bybit.com'
+# Cloudflare (fronting Bybit's API) commonly 403s the default
+# requests library User-Agent ("python-requests/x.x.x"), especially from
+# datacenter/cloud IP ranges like GitHub Actions runners. Worked fine
+# locally from a residential IP even without this. Added 2026-07-17 after
+# migrating bybit_sim.py to run on GitHub Actions.
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+}
 
 WATCHLIST = [
     'AAVEUSDT',
@@ -149,7 +157,7 @@ def bybit_get(endpoint: str, params: dict = None) -> dict:
     params = params or {}
     query  = urlencode(params)
     url    = f'{MARKET_URL}{endpoint}?{query}' if query else f'{MARKET_URL}{endpoint}'
-    r = requests.get(url, timeout=15)
+    r = requests.get(url, timeout=15, headers=HEADERS)
     r.raise_for_status()
     data = r.json()
     if data.get('retCode') != 0:
