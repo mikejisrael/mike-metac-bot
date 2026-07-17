@@ -196,3 +196,4 @@ reports/calibration_2*.json
 
 .tmp.driveupload/
 .tmp.driveupload/ 
+bybit_sim_data/ 
