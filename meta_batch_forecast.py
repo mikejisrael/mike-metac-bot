@@ -25,6 +25,7 @@ from meta_cp_extract import extract_live_cp
 from meta_alerts import send_alert
 from meta_research import research_question
 from meta_forecast_gate import MIN_FORECASTERS, DAYS_AHEAD, QUESTION_SERIES_IDS, passes_forecast_gate
+import tournament_registry
 
 client_anthropic = anthropic.Anthropic()
 
@@ -114,19 +115,32 @@ RESULTS_FILE = os.path.join(BATCH_DIR, "batch_results.json")
 # Tournament(s) to pull questions from. ApiFilter.allowed_tournaments accepts
 # a list of str|int (numeric ID or slug), so adding more is just adding here.
 #
-# Cost optimization split (2026-06-30): FutureEval (33022) REMOVED from this
-# list — it has 90-minute close windows and needs tournament_forecast.py's
-# synchronous path (now its ONLY tournament, see that file's FUTUREEVAL_
-# TOURNAMENT_ID-only config). The three remaining tournaments here are none
-# of them time-sensitive in the same way, so they stay on this script's
-# Batch API path (50% cheaper than synchronous) on its own ~every-3-days
-# cron schedule, decoupled from tournament_forecast.py's tighter cadence.
+# CHANGED 2026-07-17: now derived from tournament_registry.py — every
+# entry there with pipeline="batch" and project_type="tournament" (i.e.
+# the ones fetched via ApiFilter's allowed_tournaments, as opposed to the
+# 5 question_series ones below via the separate project= path). This is
+# what actually wires a new registry entry into live forecasting: adding
+# a tournament to tournament_registry.py alone does NOT make it get
+# forecasted — this list (or QUESTION_SERIES_IDS below) is what a script
+# actually fetches against, and both are now sourced from the registry
+# for exactly that reason. US Midterms 2026 ("midterms-2026", $10,000
+# prize pool, confirmed 2026-07-17 no bot exclusion) is included via this
+# migration, alongside the pre-existing 3:
 #   "ACX2026"                    = ACX 2026 Prediction Contest
 #   "climate"                    = Climate Tipping Points
 #   "metaculus-cup-summer-2026"  = Metaculus Cup Summer 2026 (bots can forecast
 #                                  here for calibration data, but are NOT prize-
 #                                  eligible in this one — humans-only for prizes)
-ALLOWED_TOURNAMENTS = ["ACX2026", "climate", "metaculus-cup-summer-2026"]
+#   "midterms-2026"              = US Midterms 2026 (prize-eligible for bots,
+#                                  unlike Metaculus Cup — see tournament_registry.py)
+#
+# Cost optimization split (2026-06-30, still applies): FutureEval (33022)
+# is NOT in this list — it has 90-minute close windows and needs
+# tournament_forecast.py's synchronous path instead. This script's
+# tournaments stay on the Batch API path (50% cheaper than synchronous)
+# on its own ~every-3-days cron schedule, decoupled from tournament_
+# forecast.py's tighter cadence.
+ALLOWED_TOURNAMENTS = tournament_registry.slugs_for("batch", "tournament")
 
 # FIXED 2026-07-02: the 5 series added alongside ALLOWED_TOURNAMENTS above
 # turned out to be type='question_series' on Metaculus's side, not

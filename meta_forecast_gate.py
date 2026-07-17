@@ -36,21 +36,28 @@ than trusted or silently patched over.
 """
 
 from datetime import datetime, timezone, timedelta
+import tournament_registry
 
 MIN_FORECASTERS = 5
 DAYS_AHEAD = 365
 
-# Tournament/project IDs that are type='question_series' on Metaculus's
-# side, not type='tournament' — confirmed via check_project_type.py.
-# meta_batch_forecast.py fetches these via the `project=` parameter
-# directly (see fetch_question_series_questions there); ApiFilter's
-# allowed_tournaments/`tournaments=` param silently fails to scope them.
+# CHANGED 2026-07-17: now derived from tournament_registry.py instead of
+# hardcoded here. Same 5 IDs, same values (verified against the old list
+# below before this change) — this is a no-op behavior change on its own.
+# The reason for the migration: adding US Midterms 2026 to
+# meta_batch_forecast.py's ALLOWED_TOURNAMENTS the same day surfaced that
+# every tournament/question_series ID this codebase cares about needed to
+# live in exactly one place, not scattered across this file and
+# meta_batch_forecast.py's own list — same drift risk that already bit
+# meta_dashboard.py once (see tournament_registry.py's module docstring).
+#
+# Original hardcoded values, kept here for reference:
 #   1173   = Nuclear Risk Horizons Project
 #   32774  = Current Events
 #   3048   = The Taiwan Tinderbox
 #   2018   = Economic Indicators
 #   2995   = Animal Welfare Series
-QUESTION_SERIES_IDS = [1173, 32774, 3048, 2018, 2995]
+QUESTION_SERIES_IDS = tournament_registry.ids_for("question_series")
 
 
 def passes_forecast_gate(

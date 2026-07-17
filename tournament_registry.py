@@ -44,11 +44,6 @@ Each entry:
                 "batch" -> meta_batch_forecast.py (Claude Batch API path)
   notes         Free-text, optional — anything a consumer might want to
                 surface (e.g. Market Pulse's group_of_questions handling).
-
-NOT YET INCLUDED: US Midterms 2026 (metaculus.com/tournament/midterms-2026/).
-Numeric project ID not yet confirmed live via the API — add it here,
-following the same shape as the other type='tournament' entries, once
-confirmed rather than guessed.
 """
 
 TOURNAMENTS = {
@@ -107,6 +102,23 @@ TOURNAMENTS = {
         "notes": (
             "Humans-only for prize money — mike_iz_-bot forecasts here for "
             "calibration data only, not prize-eligible."
+        ),
+    },
+    "midterms_2026": {
+        "id": 32840,
+        "slug": "midterms-2026",
+        "display_name": "US Midterms 2026",
+        "category": "Tournaments",
+        "project_type": "tournament",
+        "fetch_method": "allowed_tournaments",
+        "pipeline": "batch",
+        "notes": (
+            "$10,000 prize pool. Checked tournament rules page 2026-07-17 — "
+            "no bot exclusion stated, unlike Metaculus Cup, so treat as "
+            "prize-eligible unless/until Metaculus says otherwise. "
+            "forecasting_end_date 2026-11-04; close_date runs out to "
+            "2029-01-22 — some questions (e.g. multi-cycle governorship "
+            "control) resolve much later than the midterm election itself."
         ),
     },
     "nuclear_risk_horizons": {
