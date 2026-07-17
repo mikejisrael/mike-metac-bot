@@ -1,0 +1,1330 @@
+{
+  "balance": 9329.891300856149,
+  "starting_balance": 10000.0,
+  "positions": {
+    "TONUSDT": {
+      "symbol": "TONUSDT",
+      "direction": "long",
+      "entry_price": 1.7121,
+      "current_price": 1.7184,
+      "qty": 292.039016,
+      "notional_usdt": 500.0,
+      "margin_usdt": 100.0,
+      "leverage": 5,
+      "take_profit": 1.780584,
+      "stop_loss": 1.677858,
+      "confidence": 0.68,
+      "funding_rate": -0.0857,
+      "oi_change": -3.86,
+      "open_date": "2026-06-12",
+      "open_time": "09:00:02",
+      "unrealised_pnl": 1.8398
+    },
+    "TRXUSDT": {
+      "symbol": "TRXUSDT",
+      "direction": "long",
+      "entry_price": 0.32067,
+      "current_price": 0.32466,
+      "qty": 1871.082421,
+      "notional_usdt": 600.0,
+      "margin_usdt": 100.0,
+      "leverage": 6,
+      "take_profit": 0.333497,
+      "stop_loss": 0.314257,
+      "confidence": 0.72,
+      "funding_rate": -0.0301,
+      "oi_change": 1.92,
+      "open_date": "2026-07-04",
+      "open_time": "05:00:02",
+      "unrealised_pnl": 7.4656,
+      "fear_greed_at_open": 21,
+      "regime_at_open": "FEAR \u2014 market oversold, slight long bias but follow technicals",
+      "sfp_at_open": "NONE"
+    },
+    "BNBUSDT": {
+      "symbol": "BNBUSDT",
+      "direction": "long",
+      "entry_price": 574.6,
+      "current_price": 580.0,
+      "qty": 0.811782,
+      "notional_usdt": 466.45,
+      "margin_usdt": 93.29,
+      "leverage": 5,
+      "take_profit": 597.584,
+      "stop_loss": 563.108,
+      "confidence": 0.68,
+      "funding_rate": 0.01,
+      "oi_change": 0.27,
+      "open_date": "2026-07-09",
+      "open_time": "17:00:01",
+      "unrealised_pnl": 4.3836,
+      "fear_greed_at_open": 22,
+      "regime_at_open": "FEAR \u2014 market oversold, slight long bias but follow technicals",
+      "sfp_at_open": "NONE"
+    },
+    "SOLUSDT": {
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "entry_price": 76.68,
+      "current_price": 77.06,
+      "qty": 7.007825,
+      "notional_usdt": 537.36,
+      "margin_usdt": 89.56,
+      "leverage": 6,
+      "take_profit": 73.6128,
+      "stop_loss": 78.2136,
+      "confidence": 0.72,
+      "funding_rate": 0.0012,
+      "oi_change": 0.81,
+      "open_date": "2026-07-12",
+      "open_time": "21:00:02",
+      "unrealised_pnl": -2.663,
+      "fear_greed_at_open": 26,
+      "regime_at_open": "NEUTRAL \u2014 standard sizing",
+      "sfp_at_open": "NONE"
+    },
+    "DOGEUSDT": {
+      "symbol": "DOGEUSDT",
+      "direction": "long",
+      "entry_price": 0.07449,
+      "current_price": 0.07432,
+      "qty": 7701.973419,
+      "notional_usdt": 573.72,
+      "margin_usdt": 95.62,
+      "leverage": 6,
+      "take_profit": 0.07747,
+      "stop_loss": 0.073,
+      "confidence": 0.72,
+      "funding_rate": 0.0082,
+      "oi_change": 0.14,
+      "open_date": "2026-07-15",
+      "open_time": "01:00:04",
+      "unrealised_pnl": -1.3093,
+      "fear_greed_at_open": 22,
+      "regime_at_open": "FEAR \u2014 market oversold, slight long bias but follow technicals",
+      "sfp_at_open": "NONE"
+    },
+    "SEIUSDT": {
+      "symbol": "SEIUSDT",
+      "direction": "long",
+      "entry_price": 0.04879,
+      "current_price": 0.04879,
+      "qty": 9604.427137,
+      "notional_usdt": 468.6,
+      "margin_usdt": 93.72,
+      "leverage": 5,
+      "take_profit": 0.050742,
+      "stop_loss": 0.047814,
+      "confidence": 0.72,
+      "funding_rate": 0.01,
+      "oi_change": 0.16,
+      "open_date": "2026-07-15",
+      "open_time": "01:00:04",
+      "unrealised_pnl": 0.0,
+      "fear_greed_at_open": 22,
+      "regime_at_open": "FEAR \u2014 market oversold, slight long bias but follow technicals",
+      "sfp_at_open": "NONE"
+    },
+    "SUIUSDT": {
+      "symbol": "SUIUSDT",
+      "direction": "long",
+      "entry_price": 0.7648,
+      "current_price": 0.7609,
+      "qty": 727.876569,
+      "notional_usdt": 556.68,
+      "margin_usdt": 92.78,
+      "leverage": 6,
+      "take_profit": 0.795392,
+      "stop_loss": 0.749504,
+      "confidence": 0.72,
+      "funding_rate": 0.01,
+      "oi_change": 0.85,
+      "open_date": "2026-07-15",
+      "open_time": "01:00:04",
+      "unrealised_pnl": -2.8387,
+      "fear_greed_at_open": 22,
+      "regime_at_open": "FEAR \u2014 market oversold, slight long bias but follow technicals",
+      "sfp_at_open": "NONE"
+    },
+    "APTUSDT": {
+      "symbol": "APTUSDT",
+      "direction": "long",
+      "entry_price": 0.6262,
+      "current_price": 0.6234,
+      "qty": 726.045992,
+      "notional_usdt": 454.65,
+      "margin_usdt": 90.93,
+      "leverage": 5,
+      "take_profit": 0.651248,
+      "stop_loss": 0.613676,
+      "confidence": 0.68,
+      "funding_rate": 0.01,
+      "oi_change": -0.08,
+      "open_date": "2026-07-15",
+      "open_time": "01:00:04",
+      "unrealised_pnl": -2.0329,
+      "fear_greed_at_open": 22,
+      "regime_at_open": "FEAR \u2014 market oversold, slight long bias but follow technicals",
+      "sfp_at_open": "NONE"
+    },
+    "BTCUSDT": {
+      "symbol": "BTCUSDT",
+      "direction": "long",
+      "entry_price": 64290.5,
+      "current_price": 64603.1,
+      "qty": 0.007001,
+      "notional_usdt": 450.1,
+      "margin_usdt": 90.02,
+      "leverage": 5,
+      "take_profit": 66862.12,
+      "stop_loss": 63004.69,
+      "confidence": 0.68,
+      "funding_rate": 0.0086,
+      "oi_change": -0.71,
+      "open_date": "2026-07-15",
+      "open_time": "01:00:04",
+      "unrealised_pnl": 2.1885,
+      "fear_greed_at_open": 22,
+      "regime_at_open": "FEAR \u2014 market oversold, slight long bias but follow technicals",
+      "sfp_at_open": "NONE"
+    },
+    "ETHUSDT": {
+      "symbol": "ETHUSDT",
+      "direction": "long",
+      "entry_price": 1881.94,
+      "current_price": 1924.03,
+      "qty": 0.23954,
+      "notional_usdt": 450.8,
+      "margin_usdt": 90.16,
+      "leverage": 5,
+      "take_profit": 1957.2176,
+      "stop_loss": 1844.3012,
+      "confidence": 0.72,
+      "funding_rate": 0.0047,
+      "oi_change": -2.67,
+      "open_date": "2026-07-15",
+      "open_time": "09:00:02",
+      "unrealised_pnl": 10.0822,
+      "fear_greed_at_open": 22,
+      "regime_at_open": "FEAR \u2014 market oversold, slight long bias but follow technicals",
+      "sfp_at_open": "NONE"
+    },
+    "XLMUSDT": {
+      "symbol": "XLMUSDT",
+      "direction": "long",
+      "entry_price": 0.18901,
+      "current_price": 0.18847,
+      "qty": 2921.115285,
+      "notional_usdt": 552.12,
+      "margin_usdt": 92.02,
+      "leverage": 6,
+      "take_profit": 0.19657,
+      "stop_loss": 0.18523,
+      "confidence": 0.72,
+      "funding_rate": 0.01,
+      "oi_change": -0.67,
+      "open_date": "2026-07-16",
+      "open_time": "09:00:03",
+      "unrealised_pnl": -1.5774,
+      "fear_greed_at_open": 25,
+      "regime_at_open": "FEAR \u2014 market oversold, slight long bias but follow technicals",
+      "sfp_at_open": "NONE"
+    }
+  },
+  "equity_history": [
+    {
+      "ts": "2026-06-07 20:42",
+      "equity": 10000.0
+    },
+    {
+      "ts": "2026-06-07 20:51",
+      "equity": 9991.97
+    },
+    {
+      "ts": "2026-06-07 21:05",
+      "equity": 9992.83
+    },
+    {
+      "ts": "2026-06-07 21:16",
+      "equity": 9998.59
+    },
+    {
+      "ts": "2026-06-08 01:00",
+      "equity": 9986.32
+    },
+    {
+      "ts": "2026-06-08 08:20",
+      "equity": 10048.39
+    },
+    {
+      "ts": "2026-06-08 16:36",
+      "equity": 10008.22
+    },
+    {
+      "ts": "2026-06-08 21:00",
+      "equity": 10020.6
+    },
+    {
+      "ts": "2026-06-09 15:01",
+      "equity": 10047.97
+    },
+    {
+      "ts": "2026-06-09 17:00",
+      "equity": 10062.75
+    },
+    {
+      "ts": "2026-06-09 21:00",
+      "equity": 10027.81
+    },
+    {
+      "ts": "2026-06-10 01:00",
+      "equity": 10016.36
+    },
+    {
+      "ts": "2026-06-10 05:00",
+      "equity": 10022.23
+    },
+    {
+      "ts": "2026-06-11 01:00",
+      "equity": 10005.14
+    },
+    {
+      "ts": "2026-06-11 13:00",
+      "equity": 9981.81
+    },
+    {
+      "ts": "2026-06-11 17:00",
+      "equity": 9999.51
+    },
+    {
+      "ts": "2026-06-11 21:00",
+      "equity": 10009.42
+    },
+    {
+      "ts": "2026-06-12 05:00",
+      "equity": 10035.55
+    },
+    {
+      "ts": "2026-06-12 09:00",
+      "equity": 10039.78
+    },
+    {
+      "ts": "2026-06-12 13:10",
+      "equity": 10042.39
+    },
+    {
+      "ts": "2026-06-12 17:00",
+      "equity": 9948.65
+    },
+    {
+      "ts": "2026-06-12 21:00",
+      "equity": 10032.24
+    },
+    {
+      "ts": "2026-06-13 01:23",
+      "equity": 10094.6
+    },
+    {
+      "ts": "2026-06-13 05:00",
+      "equity": 9941.52
+    },
+    {
+      "ts": "2026-06-13 11:01",
+      "equity": 9947.71
+    },
+    {
+      "ts": "2026-06-13 11:53",
+      "equity": 9990.44
+    },
+    {
+      "ts": "2026-06-13 13:00",
+      "equity": 9960.16
+    },
+    {
+      "ts": "2026-06-13 17:00",
+      "equity": 9971.12
+    },
+    {
+      "ts": "2026-06-13 21:00",
+      "equity": 10007.58
+    },
+    {
+      "ts": "2026-06-14 01:00",
+      "equity": 10082.21
+    },
+    {
+      "ts": "2026-06-14 05:00",
+      "equity": 10065.7
+    },
+    {
+      "ts": "2026-06-14 09:00",
+      "equity": 10079.77
+    },
+    {
+      "ts": "2026-06-16 10:40",
+      "equity": 10294.45
+    },
+    {
+      "ts": "2026-06-16 13:00",
+      "equity": 10210.08
+    },
+    {
+      "ts": "2026-06-16 13:15",
+      "equity": 10225.16
+    },
+    {
+      "ts": "2026-06-16 21:00",
+      "equity": 10351.01
+    },
+    {
+      "ts": "2026-06-17 05:00",
+      "equity": 10234.28
+    },
+    {
+      "ts": "2026-06-17 13:00",
+      "equity": 10310.89
+    },
+    {
+      "ts": "2026-06-17 17:00",
+      "equity": 10212.75
+    },
+    {
+      "ts": "2026-06-17 17:50",
+      "equity": 10205.58
+    },
+    {
+      "ts": "2026-06-17 21:00",
+      "equity": 10109.61
+    },
+    {
+      "ts": "2026-06-18 01:00",
+      "equity": 10150.21
+    },
+    {
+      "ts": "2026-06-18 05:00",
+      "equity": 10157.01
+    },
+    {
+      "ts": "2026-06-18 09:00",
+      "equity": 9999.08
+    },
+    {
+      "ts": "2026-06-18 13:00",
+      "equity": 10105.13
+    },
+    {
+      "ts": "2026-06-18 17:00",
+      "equity": 9853.47
+    },
+    {
+      "ts": "2026-06-19 01:00",
+      "equity": 9890.35
+    },
+    {
+      "ts": "2026-06-19 05:00",
+      "equity": 9730.33
+    },
+    {
+      "ts": "2026-06-19 09:00",
+      "equity": 9748.02
+    },
+    {
+      "ts": "2026-06-20 00:10",
+      "equity": 9637.47
+    },
+    {
+      "ts": "2026-06-20 01:00",
+      "equity": 9651.16
+    },
+    {
+      "ts": "2026-06-20 05:00",
+      "equity": 9551.48
+    },
+    {
+      "ts": "2026-06-20 13:00",
+      "equity": 9534.25
+    },
+    {
+      "ts": "2026-06-20 17:00",
+      "equity": 9534.23
+    },
+    {
+      "ts": "2026-06-20 21:00",
+      "equity": 9534.1
+    },
+    {
+      "ts": "2026-06-21 01:25",
+      "equity": 9562.78
+    },
+    {
+      "ts": "2026-06-21 05:00",
+      "equity": 9539.82
+    },
+    {
+      "ts": "2026-06-21 09:00",
+      "equity": 9566.06
+    },
+    {
+      "ts": "2026-06-21 13:00",
+      "equity": 9556.98
+    },
+    {
+      "ts": "2026-06-21 17:00",
+      "equity": 10069.69
+    },
+    {
+      "ts": "2026-06-21 21:00",
+      "equity": 10068.39
+    },
+    {
+      "ts": "2026-06-22 01:00",
+      "equity": 10043.89
+    },
+    {
+      "ts": "2026-06-22 05:00",
+      "equity": 10046.64
+    },
+    {
+      "ts": "2026-06-22 09:00",
+      "equity": 10037.35
+    },
+    {
+      "ts": "2026-06-22 13:00",
+      "equity": 10039.93
+    },
+    {
+      "ts": "2026-06-22 14:39",
+      "equity": 10042.47
+    },
+    {
+      "ts": "2026-06-22 17:00",
+      "equity": 10042.19
+    },
+    {
+      "ts": "2026-06-22 21:00",
+      "equity": 10042.19
+    },
+    {
+      "ts": "2026-06-22 22:15",
+      "equity": 10031.8
+    },
+    {
+      "ts": "2026-06-23 01:00",
+      "equity": 10045.17
+    },
+    {
+      "ts": "2026-06-23 05:00",
+      "equity": 10032.18
+    },
+    {
+      "ts": "2026-06-23 13:00",
+      "equity": 10003.97
+    },
+    {
+      "ts": "2026-06-23 17:00",
+      "equity": 10036.21
+    },
+    {
+      "ts": "2026-06-23 21:00",
+      "equity": 10058.68
+    },
+    {
+      "ts": "2026-06-24 09:00",
+      "equity": 9942.68
+    },
+    {
+      "ts": "2026-06-24 13:00",
+      "equity": 9954.11
+    },
+    {
+      "ts": "2026-06-24 17:00",
+      "equity": 9929.69
+    },
+    {
+      "ts": "2026-06-24 21:00",
+      "equity": 9984.5
+    },
+    {
+      "ts": "2026-06-25 01:00",
+      "equity": 10062.93
+    },
+    {
+      "ts": "2026-06-25 05:00",
+      "equity": 10267.24
+    },
+    {
+      "ts": "2026-06-25 10:06",
+      "equity": 10099.99
+    },
+    {
+      "ts": "2026-06-25 10:24",
+      "equity": 10111.57
+    },
+    {
+      "ts": "2026-06-25 13:00",
+      "equity": 10160.09
+    },
+    {
+      "ts": "2026-06-25 17:00",
+      "equity": 10039.36
+    },
+    {
+      "ts": "2026-06-25 21:00",
+      "equity": 10180.47
+    },
+    {
+      "ts": "2026-06-26 01:00",
+      "equity": 10421.45
+    },
+    {
+      "ts": "2026-06-26 05:00",
+      "equity": 10423.13
+    },
+    {
+      "ts": "2026-06-26 09:00",
+      "equity": 10337.51
+    },
+    {
+      "ts": "2026-06-26 09:41",
+      "equity": 10309.07
+    },
+    {
+      "ts": "2026-06-26 13:00",
+      "equity": 10553.36
+    },
+    {
+      "ts": "2026-06-26 17:00",
+      "equity": 10292.81
+    },
+    {
+      "ts": "2026-06-26 21:00",
+      "equity": 10432.86
+    },
+    {
+      "ts": "2026-06-27 01:00",
+      "equity": 10395.42
+    },
+    {
+      "ts": "2026-06-27 05:00",
+      "equity": 10318.88
+    },
+    {
+      "ts": "2026-06-27 09:00",
+      "equity": 10306.98
+    },
+    {
+      "ts": "2026-06-27 13:00",
+      "equity": 10248.1
+    },
+    {
+      "ts": "2026-06-27 17:00",
+      "equity": 10267.16
+    },
+    {
+      "ts": "2026-06-27 21:00",
+      "equity": 10279.07
+    },
+    {
+      "ts": "2026-06-28 01:00",
+      "equity": 10230.18
+    },
+    {
+      "ts": "2026-06-28 05:00",
+      "equity": 10259.44
+    },
+    {
+      "ts": "2026-06-28 09:00",
+      "equity": 10282.98
+    },
+    {
+      "ts": "2026-06-28 13:00",
+      "equity": 10291.3
+    },
+    {
+      "ts": "2026-06-28 21:00",
+      "equity": 10320.43
+    },
+    {
+      "ts": "2026-06-29 01:00",
+      "equity": 10321.6
+    },
+    {
+      "ts": "2026-06-29 05:00",
+      "equity": 10356.95
+    },
+    {
+      "ts": "2026-06-29 09:00",
+      "equity": 10426.78
+    },
+    {
+      "ts": "2026-06-29 13:00",
+      "equity": 10320.97
+    },
+    {
+      "ts": "2026-06-29 17:00",
+      "equity": 10309.7
+    },
+    {
+      "ts": "2026-06-29 21:00",
+      "equity": 10296.05
+    },
+    {
+      "ts": "2026-06-30 01:00",
+      "equity": 10326.15
+    },
+    {
+      "ts": "2026-06-30 05:00",
+      "equity": 10261.28
+    },
+    {
+      "ts": "2026-06-30 09:00",
+      "equity": 10286.47
+    },
+    {
+      "ts": "2026-06-30 13:00",
+      "equity": 10304.03
+    },
+    {
+      "ts": "2026-06-30 17:00",
+      "equity": 10284.99
+    },
+    {
+      "ts": "2026-06-30 21:00",
+      "equity": 10329.67
+    },
+    {
+      "ts": "2026-07-01 01:00",
+      "equity": 10341.41
+    },
+    {
+      "ts": "2026-07-01 05:00",
+      "equity": 10321.51
+    },
+    {
+      "ts": "2026-07-01 09:00",
+      "equity": 10337.63
+    },
+    {
+      "ts": "2026-07-01 13:00",
+      "equity": 10316.19
+    },
+    {
+      "ts": "2026-07-01 17:00",
+      "equity": 10336.03
+    },
+    {
+      "ts": "2026-07-01 21:00",
+      "equity": 10349.67
+    },
+    {
+      "ts": "2026-07-02 01:00",
+      "equity": 10281.36
+    },
+    {
+      "ts": "2026-07-02 05:00",
+      "equity": 10216.26
+    },
+    {
+      "ts": "2026-07-02 09:00",
+      "equity": 10202.83
+    },
+    {
+      "ts": "2026-07-02 13:00",
+      "equity": 10222.04
+    },
+    {
+      "ts": "2026-07-02 17:00",
+      "equity": 10231.85
+    },
+    {
+      "ts": "2026-07-02 21:00",
+      "equity": 10290.43
+    },
+    {
+      "ts": "2026-07-03 01:00",
+      "equity": 10317.57
+    },
+    {
+      "ts": "2026-07-03 05:00",
+      "equity": 10324.5
+    },
+    {
+      "ts": "2026-07-03 09:00",
+      "equity": 10291.16
+    },
+    {
+      "ts": "2026-07-03 13:00",
+      "equity": 10365.07
+    },
+    {
+      "ts": "2026-07-03 17:00",
+      "equity": 10376.52
+    },
+    {
+      "ts": "2026-07-04 01:00",
+      "equity": 10495.15
+    },
+    {
+      "ts": "2026-07-04 05:00",
+      "equity": 10497.6
+    },
+    {
+      "ts": "2026-07-04 09:00",
+      "equity": 10531.23
+    },
+    {
+      "ts": "2026-07-04 13:00",
+      "equity": 10508.33
+    },
+    {
+      "ts": "2026-07-04 17:00",
+      "equity": 10506.15
+    },
+    {
+      "ts": "2026-07-04 21:00",
+      "equity": 10490.75
+    },
+    {
+      "ts": "2026-07-05 01:00",
+      "equity": 10555.48
+    },
+    {
+      "ts": "2026-07-05 05:00",
+      "equity": 10642.48
+    },
+    {
+      "ts": "2026-07-05 09:00",
+      "equity": 10624.51
+    },
+    {
+      "ts": "2026-07-05 13:00",
+      "equity": 10478.55
+    },
+    {
+      "ts": "2026-07-05 17:00",
+      "equity": 10475.42
+    },
+    {
+      "ts": "2026-07-05 21:00",
+      "equity": 10457.86
+    },
+    {
+      "ts": "2026-07-06 01:00",
+      "equity": 10546.41
+    },
+    {
+      "ts": "2026-07-06 05:00",
+      "equity": 10562.03
+    },
+    {
+      "ts": "2026-07-06 09:00",
+      "equity": 10654.06
+    },
+    {
+      "ts": "2026-07-06 13:00",
+      "equity": 10610.23
+    },
+    {
+      "ts": "2026-07-07 16:47",
+      "equity": 10485.44
+    },
+    {
+      "ts": "2026-07-07 17:00",
+      "equity": 10487.58
+    },
+    {
+      "ts": "2026-07-07 21:00",
+      "equity": 10470.71
+    },
+    {
+      "ts": "2026-07-08 01:00",
+      "equity": 10510.15
+    },
+    {
+      "ts": "2026-07-08 05:00",
+      "equity": 10462.27
+    },
+    {
+      "ts": "2026-07-08 09:00",
+      "equity": 10424.25
+    },
+    {
+      "ts": "2026-07-08 13:00",
+      "equity": 10380.51
+    },
+    {
+      "ts": "2026-07-08 21:00",
+      "equity": 10323.59
+    },
+    {
+      "ts": "2026-07-09 05:00",
+      "equity": 10333.58
+    },
+    {
+      "ts": "2026-07-09 09:00",
+      "equity": 10342.52
+    },
+    {
+      "ts": "2026-07-09 13:00",
+      "equity": 10302.78
+    },
+    {
+      "ts": "2026-07-09 17:00",
+      "equity": 10357.38
+    },
+    {
+      "ts": "2026-07-09 21:00",
+      "equity": 10329.46
+    },
+    {
+      "ts": "2026-07-09 21:38",
+      "equity": 10328.31
+    },
+    {
+      "ts": "2026-07-10 01:00",
+      "equity": 10344.32
+    },
+    {
+      "ts": "2026-07-10 05:00",
+      "equity": 10377.19
+    },
+    {
+      "ts": "2026-07-10 09:00",
+      "equity": 10378.72
+    },
+    {
+      "ts": "2026-07-10 13:00",
+      "equity": 10415.87
+    },
+    {
+      "ts": "2026-07-10 17:00",
+      "equity": 10404.14
+    },
+    {
+      "ts": "2026-07-10 21:00",
+      "equity": 10423.26
+    },
+    {
+      "ts": "2026-07-11 01:00",
+      "equity": 10407.41
+    },
+    {
+      "ts": "2026-07-11 05:00",
+      "equity": 10417.66
+    },
+    {
+      "ts": "2026-07-11 17:00",
+      "equity": 10429.18
+    },
+    {
+      "ts": "2026-07-11 21:00",
+      "equity": 10448.4
+    },
+    {
+      "ts": "2026-07-12 01:00",
+      "equity": 10438.76
+    },
+    {
+      "ts": "2026-07-12 05:00",
+      "equity": 10438.82
+    },
+    {
+      "ts": "2026-07-12 09:00",
+      "equity": 10427.9
+    },
+    {
+      "ts": "2026-07-12 13:00",
+      "equity": 10425.72
+    },
+    {
+      "ts": "2026-07-12 17:00",
+      "equity": 10411.84
+    },
+    {
+      "ts": "2026-07-12 21:00",
+      "equity": 10425.0
+    },
+    {
+      "ts": "2026-07-13 01:00",
+      "equity": 10431.73
+    },
+    {
+      "ts": "2026-07-13 05:00",
+      "equity": 10430.02
+    },
+    {
+      "ts": "2026-07-13 09:00",
+      "equity": 10398.03
+    },
+    {
+      "ts": "2026-07-13 13:00",
+      "equity": 10409.13
+    },
+    {
+      "ts": "2026-07-13 17:00",
+      "equity": 10390.72
+    },
+    {
+      "ts": "2026-07-13 21:00",
+      "equity": 10368.84
+    },
+    {
+      "ts": "2026-07-14 01:00",
+      "equity": 10357.09
+    },
+    {
+      "ts": "2026-07-14 05:00",
+      "equity": 10390.73
+    },
+    {
+      "ts": "2026-07-14 09:00",
+      "equity": 10410.41
+    },
+    {
+      "ts": "2026-07-14 13:00",
+      "equity": 10394.64
+    },
+    {
+      "ts": "2026-07-14 17:00",
+      "equity": 10365.32
+    },
+    {
+      "ts": "2026-07-14 21:00",
+      "equity": 10378.16
+    },
+    {
+      "ts": "2026-07-15 01:00",
+      "equity": 10313.84
+    },
+    {
+      "ts": "2026-07-15 05:00",
+      "equity": 10294.55
+    },
+    {
+      "ts": "2026-07-15 09:00",
+      "equity": 10314.85
+    },
+    {
+      "ts": "2026-07-15 13:00",
+      "equity": 10303.48
+    },
+    {
+      "ts": "2026-07-15 17:00",
+      "equity": 10301.78
+    },
+    {
+      "ts": "2026-07-15 21:00",
+      "equity": 10300.18
+    },
+    {
+      "ts": "2026-07-16 09:00",
+      "equity": 10353.35
+    },
+    {
+      "ts": "2026-07-16 13:00",
+      "equity": 10368.15
+    }
+  ],
+  "last_scan": "2026-07-16 13:00:02",
+  "scan_count": 198,
+  "total_trades": 312,
+  "total_wins": 116,
+  "total_losses": 196,
+  "realised_pnl": 357.9911,
+  "last_scan_results": [
+    {
+      "symbol": "AAVEUSDT",
+      "price": 96.56,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.42,
+      "leverage": 5,
+      "risk": "MEDIUM",
+      "momentum_24h": -2.05,
+      "momentum_7d": 10.89,
+      "rsi": 55.9,
+      "funding_rate": -0.0083,
+      "oi_change": -0.71,
+      "sfp_signal": "NONE",
+      "reasoning": "Mixed signals prevent high-conviction entry: 24h momentum is negative (-2.05%), failing the BUY rule despite healthy 7d momentum (+10.89%) and neutral RSI (55.9). Volume is significantly below 7d aver",
+      "key_risk": "Low volume and negative 24h momentum could indicate capitulation into a deeper retest; entering long here risks early entry into further downside without volume confirmation.",
+      "executed": false
+    },
+    {
+      "symbol": "ATOMUSDT",
+      "price": 1.5494,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.35,
+      "leverage": 5,
+      "risk": "MEDIUM",
+      "momentum_24h": -1.24,
+      "momentum_7d": -0.87,
+      "rsi": 52.8,
+      "funding_rate": 0.0006,
+      "oi_change": 0.27,
+      "sfp_signal": "NONE",
+      "reasoning": "24h momentum is negative (-1.24%), failing the BUY requirement despite 7d momentum being within acceptable range (-0.87%). Price is only 2.36% above 7d low and 3.83% below 7d high, not meeting the -8%",
+      "key_risk": "Declining volume with conflicting momentum signals creates low-conviction setup; any sharp liquidation cascade could break current range, especially given extreme fear environment and neutral RSI prov",
+      "executed": false
+    },
+    {
+      "symbol": "BCHUSDT",
+      "price": 223.2,
+      "decision": "SELL",
+      "direction": "short",
+      "confidence": 0.72,
+      "leverage": 5,
+      "risk": "HIGH",
+      "momentum_24h": -4.33,
+      "momentum_7d": -4.57,
+      "rsi": 29.6,
+      "funding_rate": -0.0358,
+      "oi_change": -0.1,
+      "sfp_signal": "NONE",
+      "reasoning": "7d momentum at -4.57% approaches the -10% threshold, price is 12.44% below 7d high confirming downtrend, and volume surged 81.2% above average supporting selling pressure. RSI at 29.6 is borderline ov",
+      "key_risk": "RSI near critical oversold level (25) creates squeeze risk if market reverses; extreme fear environment could trigger sharp relief rallies despite technicals",
+      "executed": false
+    },
+    {
+      "symbol": "DOTUSDT",
+      "price": 0.8478,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.35,
+      "leverage": 5,
+      "risk": "MEDIUM",
+      "momentum_24h": -0.8,
+      "momentum_7d": 2.66,
+      "rsi": 55.3,
+      "funding_rate": -0.0049,
+      "oi_change": -0.1,
+      "sfp_signal": "NONE",
+      "reasoning": "24h momentum is negative (-0.80%), failing the primary BUY requirement despite positive 7d momentum (+2.66%) and neutral RSI (55.3). Volume is declining (-30.5% vs 7d avg), showing weak conviction. Pr",
+      "key_risk": "Low volume trend combined with negative 24h momentum may precede further downside if macro fear intensifies; negative funding rate suggests weak short positioning but insufficient bullish signals to r",
+      "executed": false
+    },
+    {
+      "symbol": "HBARUSDT",
+      "price": 0.06768,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.35,
+      "leverage": 5,
+      "risk": "MEDIUM",
+      "momentum_24h": 0.36,
+      "momentum_7d": -2.56,
+      "rsi": 61.8,
+      "funding_rate": -0.019,
+      "oi_change": -0.19,
+      "sfp_signal": "NONE",
+      "reasoning": "24h momentum is positive (+0.36%) and RSI at 61.8 supports a BUY signal, but 7d momentum of -2.56% is only marginally above the -10% threshold, and volume has contracted -42.7% below 7d average, faili",
+      "key_risk": "Declining volume on minor positive momentum suggests weak conviction; risk of sharp reversal if macro fear intensifies or 7d momentum deteriorates further below -10%.",
+      "executed": false
+    },
+    {
+      "symbol": "HYPEUSDT",
+      "price": 66.418,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.35,
+      "leverage": 5,
+      "risk": "MEDIUM",
+      "momentum_24h": -1.22,
+      "momentum_7d": -1.08,
+      "rsi": 66.1,
+      "funding_rate": 0.01,
+      "oi_change": -0.15,
+      "sfp_signal": "NONE",
+      "reasoning": "Mixed signals prevent high-conviction entry. While 24h momentum is slightly negative (-1.22%) and RSI at 66.1 is not overbought, the 7d momentum (-1.08%) and distance from 7d high (-4.21%) don't meet ",
+      "key_risk": "Low volume confirmation combined with declining 7d momentum could precede further downside; wait for either clear bullish reversal on volume or deeper pullback toward support.",
+      "executed": false
+    },
+    {
+      "symbol": "ICPUSDT",
+      "price": 2.18,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.35,
+      "leverage": 5,
+      "risk": "MEDIUM",
+      "momentum_24h": -0.77,
+      "momentum_7d": -2.11,
+      "rsi": 51.6,
+      "funding_rate": 0.01,
+      "oi_change": -0.65,
+      "sfp_signal": "NONE",
+      "reasoning": "7d momentum of -2.11% does not meet the SELL threshold of < -10%, and 24h momentum of -0.77% is negative, failing BUY criteria. RSI at 51.6 is neutral (neither overbought nor oversold), and funding ra",
+      "key_risk": "Extreme Fear macro environment combined with declining volume could lead to sudden liquidation cascades if price breaks below 7d low support at 2.147.",
+      "executed": false
+    },
+    {
+      "symbol": "KASUSDT",
+      "price": 0.02902,
+      "decision": "BUY",
+      "direction": "long",
+      "confidence": 0.68,
+      "leverage": 5,
+      "risk": "MEDIUM",
+      "momentum_24h": 1.15,
+      "momentum_7d": -0.21,
+      "rsi": 64.1,
+      "funding_rate": 0.005,
+      "oi_change": -0.06,
+      "sfp_signal": "NONE",
+      "reasoning": "24h momentum is positive (+1.15%) and 7d momentum (-0.21%) is well above the -10% threshold, meeting buy criteria. RSI at 64.1 is healthy (not overbought), funding is minimal (+0.0050%), and price is ",
+      "key_risk": "Extreme fear environment (Fear & Greed 25) combined with depressed volume suggests weak conviction; risk of reversal if macro sentiment deteriorates further or volume fails to confirm breakout",
+      "executed": false
+    },
+    {
+      "symbol": "LINKUSDT",
+      "price": 8.535,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.35,
+      "leverage": 5,
+      "risk": "HIGH",
+      "momentum_24h": 2.62,
+      "momentum_7d": 12.01,
+      "rsi": 88.8,
+      "funding_rate": 0.0005,
+      "oi_change": 0.21,
+      "sfp_signal": "NONE",
+      "reasoning": "RSI at 88.8 is critically overbought (>75), triggering HIGH risk flag and violating BUY rule (RSI must be <70). While 24h momentum is positive and 7d momentum strong at +12.01%, the extreme RSI readin",
+      "key_risk": "RSI extreme overbought at 88.8 creates imminent pullback/squeeze risk; position entry now risks buying into exhaustion before correction",
+      "executed": false
+    },
+    {
+      "symbol": "MNTUSDT",
+      "price": 0.4286,
+      "decision": "BUY",
+      "direction": "long",
+      "confidence": 0.68,
+      "leverage": 5,
+      "risk": "LOW",
+      "momentum_24h": 1.61,
+      "momentum_7d": 0.94,
+      "rsi": 56.0,
+      "funding_rate": -0.0111,
+      "oi_change": 0.04,
+      "sfp_signal": "NONE",
+      "reasoning": "24h momentum is positive (+1.61%) and 7d momentum is acceptable (+0.94%), both meeting buy criteria. RSI at 56.0 is neutral (not overbought), funding is slightly negative (-0.0111%), and price is only",
+      "key_risk": "Volume trend is -32.9% below 7d average, indicating weak conviction and potential liquidity issues that could amplify slippage on position entry.",
+      "executed": false
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "price": 0.3705,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.35,
+      "leverage": 5,
+      "risk": "HIGH",
+      "momentum_24h": 15.1,
+      "momentum_7d": 18.3,
+      "rsi": 85.4,
+      "funding_rate": 0.005,
+      "oi_change": 7.26,
+      "sfp_signal": "NONE",
+      "reasoning": "RSI at 85.4 is severely overbought (>75), triggering HIGH risk classification and violating the BUY rule (RSI must be <70). While 24h momentum (+15.10%) and 7d momentum (+18.30%) are positive with str",
+      "key_risk": "RSI extreme overbought at 85.4 signals exhaustion; aggressive short liquidation squeeze likely, followed by sharp correction that could trap late longs.",
+      "executed": false
+    },
+    {
+      "symbol": "PAXGUSDT",
+      "price": 4025.1,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.35,
+      "leverage": 5,
+      "risk": "MEDIUM",
+      "momentum_24h": -0.05,
+      "momentum_7d": -0.82,
+      "rsi": 57.4,
+      "funding_rate": 0.005,
+      "oi_change": -0.19,
+      "sfp_signal": "NONE",
+      "reasoning": "24h momentum is neutral (-0.05%), failing to meet BUY criteria despite low funding and RSI in mid-range. 7d momentum of -0.82% is well above the -10% SELL threshold, and price is only -2.50% from 7d h",
+      "key_risk": "Deteriorating volume trend undermines signal reliability; macro fear regime suggests potential washout but technicals lack confirmation for entry",
+      "executed": false
+    },
+    {
+      "symbol": "SKYUSDT",
+      "price": 0.06251,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.35,
+      "leverage": 5,
+      "risk": "HIGH",
+      "momentum_24h": 1.89,
+      "momentum_7d": 14.78,
+      "rsi": 73.1,
+      "funding_rate": 0.005,
+      "oi_change": 0.34,
+      "sfp_signal": "NONE",
+      "reasoning": "RSI at 73.1 is overbought (approaching >75 threshold) and violates the BUY rule requiring RSI < 70, creating immediate squeeze risk. While 24h and 7d momentum are positive and funding is reasonable, t",
+      "key_risk": "RSI overbought at 73.1 with declining volume\u2014high probability of mean reversion or local pullback before directional continuation",
+      "executed": false
+    },
+    {
+      "symbol": "TAOUSDT",
+      "price": 201.04,
+      "decision": "BUY",
+      "direction": "long",
+      "confidence": 0.68,
+      "leverage": 5,
+      "risk": "MEDIUM",
+      "momentum_24h": 1.93,
+      "momentum_7d": -0.9,
+      "rsi": 52.2,
+      "funding_rate": 0.005,
+      "oi_change": -0.8,
+      "sfp_signal": "NONE",
+      "reasoning": "TAO meets BUY criteria: 24h momentum positive at +1.93%, 7d momentum at -0.90% remains above -10% threshold, RSI at 52.2 is neutral (not overbought), and funding rate at +0.0050% is well below excessi",
+      "key_risk": "Declining 7-day volume and -6.99% distance from 7d high suggest weakening conviction; sustained macro fear could trigger further downside before recovery",
+      "executed": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "price": 1.1172,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.35,
+      "leverage": 5,
+      "risk": "HIGH",
+      "momentum_24h": 1.23,
+      "momentum_7d": 2.76,
+      "rsi": 73.1,
+      "funding_rate": 0.0021,
+      "oi_change": 1.72,
+      "sfp_signal": "NONE",
+      "reasoning": "RSI at 73.1 exceeds the 70 overbought threshold, violating the primary BUY condition despite positive momentum. Volume is declining (-36.3% vs 7d avg), failing to confirm price strength. Extreme Fear ",
+      "key_risk": "RSI overbought (73.1) signals potential pullback or correction before sustainable upside; weak volume confirmation reduces conviction despite positive price action.",
+      "executed": false
+    },
+    {
+      "symbol": "ZECUSDT",
+      "price": 573.13,
+      "decision": "HOLD",
+      "direction": "none",
+      "confidence": 0.35,
+      "leverage": 5,
+      "risk": "HIGH",
+      "momentum_24h": 2.88,
+      "momentum_7d": 25.25,
+      "rsi": 77.1,
+      "funding_rate": 0.01,
+      "oi_change": 1.78,
+      "sfp_signal": "NONE",
+      "reasoning": "RSI at 77.1 is overbought (>75), triggering HIGH risk classification and disqualifying BUY despite positive momentum. While 7d momentum is strong (+25.25%) and 24h momentum positive, the extreme overb",
+      "key_risk": "RSI overbought at 77.1 with declining volume indicates potential pullback or reversal; crowded long position with positive funding rate creates squeeze risk",
+      "executed": false
+    }
+  ],
+  "last_macro": {
+    "fear_greed": 25,
+    "fear_greed_label": "Extreme Fear",
+    "btc_dominance": 56.1,
+    "regime": "FEAR \u2014 market oversold, slight long bias but follow technicals"
+  }
+}

@@ -1,0 +1,1 @@
+trade_date,trade_time,symbol,direction,entry_price,qty,notional_usdt,margin_usdt,leverage,take_profit,stop_loss,confidence,funding_rate,oi_change_pct,order_id

@@ -1,0 +1,258 @@
+============================================================ 
+Run started: Wed 10/06/2026  1:00:01.08 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-10 01:00:02
+Balance:       9508.00 USDT
+Open positions:5
+Scan #:        12
+=========================================================
+
+Checking open positions for TP/SL...
+
+Fetching macro context...
+  Fear & Greed:  10 — Extreme Fear
+  BTC Dominance: 55.9%
+  Regime:        FEAR — caution on shorts, favour longs
+
+Available slots: 15
+
+Analysing BTCUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0016%
+  Extreme fear environment (10 FGI) with elevated BTC dominance (55.9%) creates contrarian long setup; price nea
+Analysing ETHUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0013%
+  Mixed signals with conflicting technicals: strong negative momentum (-14.14% 7d) and weak volume (-29.4%) argu
+Analysing BNBUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0013%
+  Mixed signals prevent conviction: macro environment favours longs (extreme fear, market regime), but technical
+Analysing SOLUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0037%
+  Mixed signals prevent conviction: macro environment favours longs (extreme fear, caution on shorts) but techni
+Analysing XRPUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0025%
+  Mixed signals prevent conviction: RSI at neutral 50 with negative 24h/7d momentum (-2.91%/-6.97%) and below 7d
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Analysing TRXUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: -0.0344%
+  Extreme fear environment (FGI=10) with negative funding (-0.0344%) creates favorable conditions for longs desp
+Analysing AVAXUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0047%
+  Mixed signals prevent high-conviction trading. Strong negative momentum (-21.05% 7d) and RSI depression (41.3)
+Skipping TONUSDT — position open
+Analysing LINKUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0066%
+  Mixed signals prevent conviction: negative 7d momentum (-8.95%) and weak volume (-43.8% vs avg) conflict with 
+Analysing DOTUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0096%
+  Mixed signals prevent conviction: macro fear regime and negative 7d momentum (-12.94%) argue against entries, 
+Skipping LTCUSDT — position open
+Analysing NEARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0096%
+  NEAR shows conflicting signals: macro environment favors longs (extreme fear, low BTC dominance), but technica
+Analysing BCHUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: -0.0010%
+  RSI at 31.5 is oversold (<25 threshold approaching), signalling potential reversal support, but strong negativ
+Analysing APTUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0045%
+  APT shows conflicting signals: extreme fear macro environment favours longs, but technical setup is weak with 
+Analysing ICPUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0070%
+  ICP exhibits severe downtrend momentum (-22.64% 7d, -28.60% from 7d high) with weak volume (-54.4% vs 7d avg),
+Analysing HBARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0074%
+  Mixed signals prevent conviction: negative 24h/7d momentum and RSI at 37.7 suggest weakness, but extreme fear 
+Analysing UNIUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100%
+  UNI shows bearish technical setup with -10.94% 7d momentum, RSI at 40.7 (neutral-weak), and 55% volume decline
+Skipping SUIUSDT — position open
+Analysing HYPEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0001%
+  Mixed signals prevent high-conviction entry. While macro fear regime favours longs and funding is neutral (-0.
+
+=========================================================
+Candidates: 0
+
+=========================================================
+Scan #12 complete
+Equity:        10016.36 USDT  (+16.36 USDT overall)
+Trades:        2 closed  (1W / 1L  50% win rate)
+Open positions:5
+New trades:    0
+Done.
+============================================================ 
+Run started: Wed 10/06/2026  5:00:00.65 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-10 05:00:01
+Balance:       9508.00 USDT
+Open positions:5
+Scan #:        13
+=========================================================
+
+Checking open positions for TP/SL...
+
+Fetching macro context...
+  Fear & Greed:  10 — Extreme Fear
+  BTC Dominance: 55.9%
+  Regime:        FEAR — caution on shorts, favour longs
+
+Available slots: 15
+
+Analysing BTCUSDT...
+  Data error for BTCUSDT: Bybit 10006: Too many visits. Exceeded the API Rate Limit.
+  Insufficient data — skipping
+Analysing ETHUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0040%
+  Mixed signals prevent conviction: macro environment favours longs (extreme fear, market regime), but technical
+Analysing BNBUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100%
+  Macro environment favours longs in extreme fear regime with moderate BTC dominance. RSI at 50.5 shows neutral 
+Analysing SOLUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0050%
+  Mixed signals prevent conviction: negative 7d momentum (-13.62%) and recent price weakness (-3.31% 24h) confli
+Analysing XRPUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0067%
+  Mixed signals prevent conviction: negative momentum (-3.55% 24h, -6.86% 7d) and below 7d high (-8.91%) argue a
+Skipping DOGEUSDT — position open
+Skipping ADAUSDT — position open
+Analysing TRXUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: HIGH | Funding: -0.0353%
+  Macro environment favours longs in extreme fear regime. RSI at 29.5 signals oversold conditions with negative 
+Analysing AVAXUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0083%
+  AVAX shows strong downtrend momentum (-20.31% 7d, -20.91% from 7d high) conflicting with macro fear regime tha
+Skipping TONUSDT — position open
+Analysing LINKUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0095%
+  Mixed signals prevent conviction: macro environment favours longs (extreme fear, low BTC dominance) and fundin
+Analysing DOTUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0079%
+  Mixed signals prevent a high-conviction trade. While macro environment (extreme fear, negative funding) and RS
+Skipping LTCUSDT — position open
+Analysing NEARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100%
+  Mixed signals prevent clear conviction: macro fear regime favours longs, but technical setup is weak with -18%
+Analysing BCHUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0097%
+  BCH shows severe downtrend momentum (-27.53% 7d, -28.38% from 7d high) with RSI deeply oversold at 32.2, creat
+Analysing APTUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0261%
+  Mixed signals prevent conviction despite macro FEAR regime favouring longs. Strong negative momentum (-21.95% 
+Analysing ICPUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100%
+  Mixed signals prevent conviction: macro favours longs (extreme fear, caution on shorts) but ICP shows severe d
+Analysing HBARUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0044%
+  While macro environment favours longs (extreme fear, BTC dominance stable), HBAR shows insufficient conviction
+Analysing UNIUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0007%
+  UNI exhibits mixed signals with strong negative momentum (-12.29% 7d, -3.98% 24h) and RSI at 43.4 (neutral-bea
+Skipping SUIUSDT — position open
+Analysing HYPEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0027%
+  Mixed signals prevent conviction: negative 7d momentum (-16.97%) and price weakness (down 22.16% from 7d high)
+
+=========================================================
+Candidates: 0
+
+=========================================================
+Scan #13 complete
+Equity:        10022.23 USDT  (+22.23 USDT overall)
+Trades:        2 closed  (1W / 1L  50% win rate)
+Open positions:5
+New trades:    0
+Done.
+============================================================ 
+Run finished: Wed 10/06/2026  5:01:23.94 
+============================================================ 
+============================================================ 
+Run started: Wed 10/06/2026  9:00:00.92 
+============================================================ 
+^C============================================================ 
+Run started: Wed 10/06/2026 13:00:01.45 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-10 13:00:03
+Balance:       9508.00 USDT
+Open positions:5
+Scan #:        14
+=========================================================
+
+Checking open positions for TP/SL...
+Traceback (most recent call last):
+  File "C:\Users\mikej\metac-bot-template\bybit_sim.py", line 706, in <module>
+    main()
+  File "C:\Users\mikej\metac-bot-template\bybit_sim.py", line 517, in main
+    closes = check_positions(state, now)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\metac-bot-template\bybit_sim.py", line 398, in check_positions
+    print(f"  \u2713 {symbol} {close_reason}: {outcome}  PnL {pnl:+.4f} USDT  "
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
+============================================================ 
+Run finished: Wed 10/06/2026 13:00:06.95 
+============================================================ 
+============================================================ 
+Run started: Wed 10/06/2026 17:00:01.70 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-10 17:00:04
+Balance:       9508.00 USDT
+Open positions:5
+Scan #:        14
+=========================================================
+
+Checking open positions for TP/SL...
+Traceback (most recent call last):
+  File "C:\Users\mikej\metac-bot-template\bybit_sim.py", line 706, in <module>
+    main()
+  File "C:\Users\mikej\metac-bot-template\bybit_sim.py", line 517, in main
+    closes = check_positions(state, now)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\metac-bot-template\bybit_sim.py", line 398, in check_positions
+    print(f"  \u2713 {symbol} {close_reason}: {outcome}  PnL {pnl:+.4f} USDT  "
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
+============================================================ 
+Run finished: Wed 10/06/2026 17:00:06.31 
+============================================================ 
+============================================================ 
+Run started: Wed 10/06/2026 21:00:01.52 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-06-10 21:00:04
+Balance:       9508.00 USDT
+Open positions:5
+Scan #:        14
+=========================================================
+
+Checking open positions for TP/SL...
+Traceback (most recent call last):
+  File "C:\Users\mikej\metac-bot-template\bybit_sim.py", line 706, in <module>
+    main()
+  File "C:\Users\mikej\metac-bot-template\bybit_sim.py", line 517, in main
+    closes = check_positions(state, now)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\metac-bot-template\bybit_sim.py", line 398, in check_positions
+    print(f"  \u2713 {symbol} {close_reason}: {outcome}  PnL {pnl:+.4f} USDT  "
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mikej\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
+============================================================ 
+Run finished: Wed 10/06/2026 21:00:06.30 
+============================================================ 

@@ -1,0 +1,613 @@
+============================================================ 
+Run started: Fri 10/07/2026  1:00:16.93 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-07-10 01:00:18
+Balance:       8782.88 USDT
+Open positions:16
+Scan #:        163
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  22 — Extreme Fear
+  BTC Dominance: 56.2%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Checking open positions for TP/SL...
+  >> ICPUSDT TAKE_PROFIT: WIN  PnL +24.0000 USDT  (+24.0% of margin)
+
+Checking coin bench status...
+  Benched (skipped this cycle): ADAUSDT, ALGOUSDT, AVAXUSDT, ENAUSDT, LTCUSDT, NEARUSDT, UNIUSDT
+Available slots: 5
+
+Analysing AAVEUSDT...
+  Data error for AAVEUSDT: Bybit 10006: Too many visits. Exceeded the API Rate Limit.
+  Insufficient data — skipping
+Analysing APTUSDT...
+  Data error for APTUSDT: Bybit 10006: Too many visits. Exceeded the API Rate Limit.
+  Insufficient data — skipping
+Skipping ATOMUSDT — position open
+Skipping BCHUSDT — position open
+Analysing BTCUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 5x | Risk: LOW | Funding: +0.0056% | SFP: NONE
+  24h momentum is positive (+2.14%) and 7d momentum is healthy (+2.28%), well above the -10% threshold. RSI at 4
+Skipping BNBUSDT — position open
+Analysing DOGEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0030% | SFP: NONE
+  Mixed signals prevent conviction: 24h momentum is positive (+1.11%) but 7d momentum is weak at -2.48% (above -
+Skipping DOTUSDT — position open
+Analysing ETHUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0008% | SFP: NONE
+  24h momentum positive (+1.19%) and 7d momentum above -10% threshold (+2.74%) with RSI at 42.1 (not overbought)
+Skipping HBARUSDT — position open
+Analysing HYPEUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: -0.0025% | SFP: NONE
+  24h momentum is positive (+1.75%) and 7d momentum is strong (+4.11%), both well above the -10% threshold. RSI 
+Analysing ICPUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: LOW | Funding: +0.0100% | SFP: NONE
+  24h momentum +5.03% and 7d momentum +3.78% both positive, well above the -10% threshold. RSI at 59.4 is neutra
+Skipping KASUSDT — position open
+Skipping LINKUSDT — position open
+Skipping MNTUSDT — position open
+Analysing ONDOUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0050% | SFP: NONE
+  Mixed signals prevent conviction: 24h momentum is positive (+2.38%) and funding is benign (+0.0050%), but 7d m
+Skipping PAXGUSDT — position open
+Skipping SEIUSDT — position open
+Skipping SKYUSDT — position open
+Analysing SOLUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0007% | SFP: NONE
+  Mixed signals prevent clear entry: 24h momentum is positive (+1.46%) and funding is neutral (-0.0007%), suppor
+Analysing SUIUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0045% | SFP: NONE
+  24h momentum is positive (+2.95%) and 7d momentum (-2.77%) is above the -10% threshold, with RSI at 40 indicat
+Analysing TAOUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0050% | SFP: NONE
+  24h momentum is positive (+2.51%) and 7d momentum (-2.26%) remains above the -10% threshold, meeting buy crite
+Skipping TONUSDT — position open
+Skipping TRXUSDT — position open
+Analysing XLMUSDT...
+  SELL SHORT | Conf: 72% | Lev: 6x | Risk: HIGH | Funding: +0.0022% | SFP: NONE
+  7d momentum of -8.87% approaches the -10% threshold, price is -15.81% below 7d high (well beyond 8% threshold)
+  Skipping HIGH risk (conf 72% < 82%)
+Analysing XPLUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: HIGH | Funding: +0.0050% | SFP: NONE
+  24h momentum positive (+1.90%) and 7d momentum above -10% threshold (+1.10%) satisfy entry conditions; funding
+Skipping XRPUSDT — position open
+Skipping ZECUSDT — position open
+
+=========================================================
+Candidates: 3
+  Skipping BTCUSDT — LONG concentration at 12/20 slots (conf 72% < 82%)
+  Skipping ICPUSDT — LONG concentration at 12/20 slots (conf 72% < 82%)
+  Skipping HYPEUSDT — LONG concentration at 12/20 slots (conf 68% < 82%)
+
+=========================================================
+Scan #163 complete
+Equity:        10344.32 USDT  (+344.32 USDT overall)
+Trades:        270 closed  (100W / 170L  37% win rate)
+Open positions:15
+New trades:    0
+Done.
+============================================================ 
+Run finished: Fri 10/07/2026  1:01:24.94 
+============================================================ 
+============================================================ 
+Run started: Fri 10/07/2026  5:00:00.22 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-07-10 05:00:01
+Balance:       8906.88 USDT
+Open positions:15
+Scan #:        164
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  22 — Extreme Fear
+  BTC Dominance: 56.2%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Checking open positions for TP/SL...
+  >> ZECUSDT TAKE_PROFIT: WIN  PnL +22.9296 USDT  (+24.0% of margin)
+
+Checking coin bench status...
+  Benched (skipped this cycle): ADAUSDT, ALGOUSDT, AVAXUSDT, ENAUSDT, LTCUSDT, NEARUSDT, UNIUSDT
+Available slots: 6
+
+Analysing AAVEUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: LOW | Funding: +0.0077% | SFP: NONE
+  AAVE meets BUY criteria: positive 24h momentum (+3.76%), strong 7d momentum (+5.02%), RSI 43.9 is neutral (not
+Analysing APTUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  24h momentum positive (+1.29%) and 7d momentum strong (+3.21%), well above -10% threshold. RSI at 42.8 shows r
+Skipping ATOMUSDT — position open
+Skipping BCHUSDT — position open
+Analysing BTCUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 5x | Risk: LOW | Funding: +0.0086% | SFP: NONE
+  24h momentum positive (+1.49%) and 7d momentum bullish (+2.83%) meet buy criteria. RSI at 48.3 is neutral (not
+Skipping BNBUSDT — position open
+Analysing DOGEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0096% | SFP: NONE
+  Mixed signals prevent high-conviction entry. While 24h momentum is positive (+0.65%) and RSI (36.4) is not ove
+Skipping DOTUSDT — position open
+Analysing ETHUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0063% | SFP: NONE
+  24h momentum positive (+0.55%) and 7d momentum above -10% threshold (+2.98%) meet buy criteria. RSI at 41.8 is
+Skipping HBARUSDT — position open
+Analysing HYPEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: -0.0281% | SFP: NONE
+  RSI at 25.6 is below the 30 oversold threshold, triggering HIGH risk classification despite negative funding f
+Analysing ICPUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  24h momentum +7.66% and 7d momentum +8.40% both positive, well above -10% threshold. Volume surging at +109.2%
+Skipping KASUSDT — position open
+Skipping LINKUSDT — position open
+Skipping MNTUSDT — position open
+Analysing ONDOUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0002% | SFP: NONE
+  7d momentum at -3.66% fails to trigger SELL rule (< -10% required), while 24h momentum (+1.30%) is weak and in
+Skipping PAXGUSDT — position open
+Skipping SEIUSDT — position open
+Skipping SKYUSDT — position open
+Analysing SOLUSDT...
+  HOLD       | Conf: 45% | Lev: 5x | Risk: MEDIUM | Funding: +0.0084% | SFP: NONE
+  Mixed signals prevent a high-conviction entry. While 24h momentum is positive (+0.88%) and funding is benign (
+Analysing SUIUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0015% | SFP: NONE
+  Mixed signals prevent high-conviction entry: 24h momentum is positive (+1.02%) and funding is benign (+0.0015%
+Analysing TAOUSDT...
+  Data error for TAOUSDT: Bybit 10006: Too many visits. Exceeded the API Rate Limit.
+  Insufficient data — skipping
+Skipping TONUSDT — position open
+Skipping TRXUSDT — position open
+Analysing XLMUSDT...
+  SELL SHORT | Conf: 72% | Lev: 6x | Risk: HIGH | Funding: -0.0052% | SFP: NONE
+  7d momentum is -5.62% (approaching -10% threshold) and price is 14.01% below 7d high, meeting short criteria. 
+  Skipping HIGH risk (conf 72% < 82%)
+Analysing XPLUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0050% | SFP: NONE
+  RSI at 23.2 is oversold (<25), triggering HIGH risk flag and preventing both BUY and SELL signals. While 24h m
+Skipping XRPUSDT — position open
+Analysing ZECUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: LOW | Funding: +0.0100% | SFP: NONE
+  ZEC meets BUY criteria: 24h momentum +5.84% positive, 7d momentum +14.07% well above -10% threshold, RSI 62.5 
+
+=========================================================
+Candidates: 4
+  Skipping BTCUSDT — LONG concentration at 11/20 slots (conf 72% < 82%)
+  Skipping ICPUSDT — LONG concentration at 11/20 slots (conf 72% < 82%)
+  Skipping ZECUSDT — LONG concentration at 11/20 slots (conf 72% < 82%)
+  Skipping AAVEUSDT — LONG concentration at 11/20 slots (conf 68% < 82%)
+
+=========================================================
+Scan #164 complete
+Equity:        10377.19 USDT  (+377.19 USDT overall)
+Trades:        271 closed  (101W / 170L  37% win rate)
+Open positions:14
+New trades:    0
+Done.
+============================================================ 
+Run finished: Fri 10/07/2026  5:01:21.43 
+============================================================ 
+============================================================ 
+Run started: Fri 10/07/2026  9:00:00.27 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-07-10 09:00:01
+Balance:       9025.35 USDT
+Open positions:14
+Scan #:        165
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  22 — Extreme Fear
+  BTC Dominance: 56.3%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Checking open positions for TP/SL...
+
+Checking coin bench status...
+  Benched (skipped this cycle): ADAUSDT, ALGOUSDT, AVAXUSDT, ENAUSDT, LTCUSDT, NEARUSDT, UNIUSDT
+Available slots: 6
+
+Analysing AAVEUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: LOW | Funding: +0.0022% | SFP: NONE
+  24h momentum positive (+3.16%) and 7d momentum solid (+5.65%), both well above -10% threshold. RSI at 46.1 sho
+Analysing APTUSDT...
+  Data error for APTUSDT: Bybit 10006: Too many visits. Exceeded the API Rate Limit.
+  Insufficient data — skipping
+Skipping ATOMUSDT — position open
+Skipping BCHUSDT — position open
+Analysing BTCUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: +0.0066% | SFP: NONE
+  24h momentum is positive (+1.47%) and 7d momentum (+2.66%) exceeds the -10% threshold, with RSI at 42.8 avoidi
+Skipping BNBUSDT — position open
+Analysing DOGEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  Mixed signals prevent a high-conviction trade. 24h momentum is positive (+0.87%) and RSI (31.7) is near overso
+Skipping DOTUSDT — position open
+Analysing ETHUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0013% | SFP: NONE
+  24h momentum is positive (+0.22%) and 7d momentum (+2.74%) well above -10% threshold, with RSI at 34.8 (not ov
+Skipping HBARUSDT — position open
+Analysing HYPEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: -0.0138% | SFP: NONE
+  RSI at 26.6 is oversold (<25 threshold), triggering HIGH risk designation and violating SELL entry requirement
+Analysing ICPUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  24h momentum is positive (+4.84%) and 7d momentum is strong (+6.80%), well above -10% threshold. Volume is sig
+Skipping KASUSDT — position open
+Skipping LINKUSDT — position open
+Skipping MNTUSDT — position open
+Analysing ONDOUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0050% | SFP: NONE
+  RSI at 27.0 is oversold (< 25 threshold) triggering HIGH risk flag, despite 24h momentum being positive and fu
+Skipping PAXGUSDT — position open
+Skipping SEIUSDT — position open
+Skipping SKYUSDT — position open
+Analysing SOLUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: -0.0008% | SFP: NONE
+  RSI at 27.5 is oversold (< 25 threshold breached), triggering HIGH risk and conflicting with SELL criteria whi
+Analysing SUIUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0054% | SFP: NONE
+  Mixed signals prevent high-conviction entry: 24h momentum is positive (+0.91%) and funding is benign (+0.0054%
+Analysing TAOUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: +0.0050% | SFP: NONE
+  24h momentum is positive (+3.84%) and 7d momentum (+1.59%) exceeds -10% threshold, with RSI at 44.9 well below
+Skipping TONUSDT — position open
+Skipping TRXUSDT — position open
+Analysing XLMUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0090% | SFP: NONE
+  Mixed signals prevent high-conviction entry. While 24h momentum is positive (+3.19%) and funding is benign (+0
+Analysing XPLUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0050% | SFP: NONE
+  24h momentum is positive (+4.68%) and 7d momentum (-0.12%) is above the -10% threshold, meeting primary BUY cr
+Skipping XRPUSDT — position open
+Analysing ZECUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: LOW | Funding: +0.0100% | SFP: NONE
+  24h momentum positive (+3.51%) and 7d momentum strong (+10.98%) satisfy entry conditions. RSI at 43.9 indicate
+
+=========================================================
+Candidates: 5
+  Skipping ICPUSDT — LONG concentration at 11/20 slots (conf 72% < 82%)
+  Skipping ZECUSDT — LONG concentration at 11/20 slots (conf 72% < 82%)
+  Skipping AAVEUSDT — LONG concentration at 11/20 slots (conf 68% < 82%)
+  Skipping BTCUSDT — LONG concentration at 11/20 slots (conf 68% < 82%)
+  Skipping TAOUSDT — LONG concentration at 11/20 slots (conf 68% < 82%)
+
+=========================================================
+Scan #165 complete
+Equity:        10378.72 USDT  (+378.72 USDT overall)
+Trades:        271 closed  (101W / 170L  37% win rate)
+Open positions:14
+New trades:    0
+Done.
+============================================================ 
+Run finished: Fri 10/07/2026  9:01:08.97 
+============================================================ 
+============================================================ 
+Run started: Fri 10/07/2026 13:00:00.54 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-07-10 13:00:02
+Balance:       9025.35 USDT
+Open positions:14
+Scan #:        166
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  23 — Extreme Fear
+  BTC Dominance: 56.3%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Checking open positions for TP/SL...
+  >> BCHUSDT TAKE_PROFIT: WIN  PnL +18.9160 USDT  (+20.0% of margin)
+  >> LINKUSDT TAKE_PROFIT: WIN  PnL +18.7280 USDT  (+20.0% of margin)
+  >> SEIUSDT TAKE_PROFIT: WIN  PnL +18.2841 USDT  (+20.0% of margin)
+
+Checking coin bench status...
+  Benched (skipped this cycle): ADAUSDT, ALGOUSDT, AVAXUSDT, ENAUSDT, LTCUSDT, NEARUSDT, UNIUSDT
+Available slots: 9
+
+Analysing AAVEUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: LOW | Funding: +0.0086% | SFP: NONE
+  24h momentum +5.96% and 7d momentum +7.13% both positive, meeting buy criteria. RSI at 53.5 is neutral (not ov
+Analysing APTUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: -0.0119% | SFP: NONE
+  24h momentum positive (+2.39%) and 7d momentum above -10% threshold (+2.95%) meet BUY criteria. RSI 46.6 is ne
+Skipping ATOMUSDT — position open
+Analysing BCHUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 5x | Risk: LOW | Funding: +0.0094% | SFP: NONE
+  BCH meets core BUY criteria: positive 24h momentum (+3.63%), strong 7d momentum (+9.73%), RSI neutral at 48.8,
+Analysing BTCUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: LOW | Funding: +0.0100% | SFP: NONE
+  24h momentum is positive (+3.19%) and 7d momentum is healthy (+4.09%), well above the -10% threshold. RSI at 5
+Skipping BNBUSDT — position open
+Analysing DOGEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0097% | SFP: BEARISH
+  Mixed signals prevent a clear directional bias. While 24h momentum is positive (+2.46%) and RSI is neutral (45
+Skipping DOTUSDT — position open
+Analysing ETHUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0083% | SFP: NONE
+  24h momentum positive (+2.42%) and 7d momentum above -10% threshold (+3.86%) align with buy criteria. RSI at 4
+Skipping HBARUSDT — position open
+Analysing HYPEUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: -0.0015% | SFP: NONE
+  24h momentum positive (+1.72%) and 7d momentum above threshold (+2.42%) meet BUY criteria. RSI at 40.3 is neut
+Analysing ICPUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0100% | SFP: NONE
+  RSI at 76.5 is overbought (>75), violating the BUY rule ceiling despite positive momentum and acceptable fundi
+Skipping KASUSDT — position open
+Analysing LINKUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0080% | SFP: NONE
+  24h momentum is positive (+3.98%) and 7d momentum is well above -10% threshold (+2.09%), with RSI at neutral 5
+Skipping MNTUSDT — position open
+Analysing ONDOUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0008% | SFP: NONE
+  24h momentum is positive (+2.46%) and RSI (37.4) is not overbought, supporting a potential long setup. However
+Skipping PAXGUSDT — position open
+Analysing SEIUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  SEI meets BUY criteria: positive 24h momentum (+6.59%), strong 7d momentum (+4.62%), RSI at 63.2 (not overboug
+Skipping SKYUSDT — position open
+Analysing SOLUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0009% | SFP: NONE
+  Mixed signals prevent a high-conviction entry. While 24h momentum (+2.12%) is positive and funding is neutral,
+Analysing SUIUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0062% | SFP: NONE
+  24h momentum is positive (+0.93%) and funding is benign (+0.0062%), but 7d momentum remains weak (-2.49%, abov
+Analysing TAOUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0050% | SFP: NONE
+  24h momentum is positive (+5.31%) and 7d momentum is neutral (+0.50%, well above -10% threshold), with volume 
+Skipping TONUSDT — position open
+Skipping TRXUSDT — position open
+Analysing XLMUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0053% | SFP: BEARISH
+  Mixed signals prevent a high-conviction trade. 24h momentum is positive (+4.48%) and RSI is neutral (46.6), me
+Analysing XPLUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0013% | SFP: NONE
+  While 24h momentum is positive (+5.90%) and funding is benign, the 7d momentum (-2.62%) remains negative and p
+Skipping XRPUSDT — position open
+Analysing ZECUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: LOW | Funding: +0.0100% | SFP: NONE
+  24h momentum is positive (+7.38%) and 7d momentum is strong (+15.04%), well above the -10% threshold. RSI at 4
+
+=========================================================
+Candidates: 6
+
+Opening LONG — BCHUSDT:
+  >> FILLED LONG BCHUSDT @ 242.4  TP: 252.096  SL: 237.552  Lev: 5x  Margin: $93.61
+
+Opening LONG — SEIUSDT:
+  >> FILLED LONG SEIUSDT @ 0.05076  TP: 0.05279  SL: 0.049745  Lev: 6x  Margin: $92.67
+  Skipping TAOUSDT — LONG concentration at 10/20 slots (conf 72% < 82%)
+  Skipping ZECUSDT — LONG concentration at 10/20 slots (conf 72% < 82%)
+  Skipping AAVEUSDT — LONG concentration at 10/20 slots (conf 68% < 82%)
+  Skipping BTCUSDT — LONG concentration at 10/20 slots (conf 68% < 82%)
+
+=========================================================
+Scan #166 complete
+Equity:        10415.87 USDT  (+415.87 USDT overall)
+Trades:        274 closed  (104W / 170L  38% win rate)
+Open positions:13
+New trades:    2
+Done.
+============================================================ 
+Run finished: Fri 10/07/2026 13:01:22.08 
+============================================================ 
+============================================================ 
+Run started: Fri 10/07/2026 17:00:00.48 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-07-10 17:00:01
+Balance:       9174.65 USDT
+Open positions:13
+Scan #:        167
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  23 — Extreme Fear
+  BTC Dominance: 56.3%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Checking open positions for TP/SL...
+  >> SEIUSDT STOP_LOSS: LOSS  PnL -11.1182 USDT  (-12.0% of margin)
+
+Checking coin bench status...
+  Benched (skipped this cycle): ADAUSDT, ALGOUSDT, AVAXUSDT, ENAUSDT, LTCUSDT, NEARUSDT, UNIUSDT
+Available slots: 8
+
+Analysing AAVEUSDT...
+  Data error for AAVEUSDT: Bybit 10006: Too many visits. Exceeded the API Rate Limit.
+  Insufficient data — skipping
+Analysing APTUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  24h momentum is slightly negative (-0.40%), failing the primary BUY condition despite positive 7d momentum (+1
+Skipping ATOMUSDT — position open
+Skipping BCHUSDT — position open
+Analysing BTCUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: LOW | Funding: +0.0100% | SFP: NONE
+  24h momentum is positive (+1.36%) and 7d momentum is strong (+3.39%), well above the -10% threshold. RSI at 54
+Skipping BNBUSDT — position open
+Analysing DOGEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  24h momentum is positive (+1.55%) and RSI is neutral (48.0), meeting partial BUY criteria, but 7d momentum is 
+Skipping DOTUSDT — position open
+Analysing ETHUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: LOW | Funding: +0.0081% | SFP: NONE
+  24h momentum positive (+0.95%) and 7d momentum well above -10% threshold (+3.01%) with RSI at neutral 49.6 (no
+Skipping HBARUSDT — position open
+Analysing HYPEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0009% | SFP: NONE
+  Mixed signals prevent conviction: 24h momentum is negative (-0.22%), failing the primary BUY condition despite
+Analysing ICPUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  ICP meets BUY criteria: 24h momentum positive (+2.63%), 7d momentum bullish (+4.16%), RSI at 65.6 (not overbou
+Skipping KASUSDT — position open
+Analysing LINKUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: LOW | Funding: +0.0086% | SFP: NONE
+  24h momentum is positive (+2.08%) and 7d momentum is well above the -10% threshold (+1.57%), with RSI at neutr
+Skipping MNTUSDT — position open
+Analysing ONDOUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0171% | SFP: NONE
+  Mixed signals prevent conviction: 24h momentum is positive (+0.69%) and 7d momentum (-2.79%) exceeds the -10% 
+Skipping PAXGUSDT — position open
+Analysing SEIUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: LOW | Funding: +0.0100% | SFP: NONE
+  24h momentum is positive (+3.26%) and 7d momentum is within acceptable range (-0.12%), well above the -10% thr
+Skipping SKYUSDT — position open
+Analysing SOLUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0015% | SFP: NONE
+  Mixed signals prevent conviction: 24h momentum is positive (+0.83%) and funding is benign (+0.0015%), meeting 
+Analysing SUIUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0059% | SFP: NONE
+  7d momentum of -2.63% fails both buy (>-10%) and sell (<-10%) thresholds, while price is only 7.79% below 7d h
+Analysing TAOUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: +0.0050% | SFP: NONE
+  24h momentum is positive (+2.70%) and 7d momentum is acceptable at -0.72%, well above the -10% threshold. RSI 
+Skipping TONUSDT — position open
+Skipping TRXUSDT — position open
+Analysing XLMUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0016% | SFP: NONE
+  24h momentum is positive (+4.74%) and 7d momentum (-4.91%) remains above the -10% threshold, meeting core buy 
+Analysing XPLUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: -0.0020% | SFP: NONE
+  7d momentum is -6.60%, which does not meet the BUY threshold (>-10%) despite positive 24h momentum. Price is -
+Skipping XRPUSDT — position open
+Analysing ZECUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: LOW | Funding: +0.0100% | SFP: NONE
+  24h momentum +6.71% and 7d momentum +13.63% both strongly positive, well above -10% threshold. RSI 57.7 is hea
+
+=========================================================
+Candidates: 6
+
+Opening LONG — ICPUSDT:
+  >> FILLED LONG ICPUSDT @ 2.302  TP: 2.39408  SL: 2.25596  Lev: 6x  Margin: $92.56
+  Skipping SEIUSDT — LONG concentration at 10/20 slots (conf 72% < 82%)
+  Skipping ZECUSDT — LONG concentration at 10/20 slots (conf 72% < 82%)
+  Skipping BTCUSDT — LONG concentration at 10/20 slots (conf 68% < 82%)
+  Skipping LINKUSDT — LONG concentration at 10/20 slots (conf 68% < 82%)
+  Skipping TAOUSDT — LONG concentration at 10/20 slots (conf 68% < 82%)
+
+=========================================================
+Scan #167 complete
+Equity:        10404.14 USDT  (+404.14 USDT overall)
+Trades:        275 closed  (104W / 171L  38% win rate)
+Open positions:13
+New trades:    1
+Done.
+============================================================ 
+Run finished: Fri 10/07/2026 17:01:22.09 
+============================================================ 
+============================================================ 
+Run started: Fri 10/07/2026 21:00:00.58 
+============================================================ 
+BYBIT SIMULATION ENGINE
+=========================================================
+Scan:          2026-07-10 21:00:02
+Balance:       9163.64 USDT
+Open positions:13
+Scan #:        168
+=========================================================
+
+Fetching macro context...
+  Fear & Greed:  23 — Extreme Fear
+  BTC Dominance: 56.4%
+  Regime:        FEAR — market oversold, slight long bias but follow technicals
+
+Checking open positions for TP/SL...
+  >> DOTUSDT STOP_LOSS: LOSS  PnL -8.8720 USDT  (-10.0% of margin)
+
+Checking coin bench status...
+  Benched (skipped this cycle): ADAUSDT, ALGOUSDT, AVAXUSDT, ENAUSDT, LTCUSDT, NEARUSDT, UNIUSDT
+Available slots: 8
+
+Analysing AAVEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: HIGH | Funding: +0.0100% | SFP: NONE
+  RSI at 74.6 is overbought (approaching 75 threshold), triggering HIGH risk despite positive momentum and volum
+Analysing APTUSDT...
+  BUY  LONG  | Conf: 68% | Lev: 5x | Risk: LOW | Funding: +0.0027% | SFP: NONE
+  24h momentum positive (+0.83%) and 7d momentum solidly above -10% threshold (+1.86%) with RSI at 58.8 (neutral
+Skipping ATOMUSDT — position open
+Skipping BCHUSDT — position open
+Analysing BTCUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  24h momentum +2.62% and 7d momentum +3.89% both positive, well above -10% threshold. RSI at 66.2 is strong but
+Skipping BNBUSDT — position open
+Analysing DOGEUSDT...
+  HOLD       | Conf: 35% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100% | SFP: BEARISH
+  Mixed signals prevent a high-conviction entry. While 24h momentum is positive (+2.72%) and RSI is not overboug
+Analysing DOTUSDT...
+  Data error for DOTUSDT: Bybit 10006: Too many visits. Exceeded the API Rate Limit.
+  Insufficient data — skipping
+Analysing ETHUSDT...
+  Data error for ETHUSDT: Bybit 10006: Too many visits. Exceeded the API Rate Limit.
+  Insufficient data — skipping
+Skipping HBARUSDT — position open
+Analysing HYPEUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: LOW | Funding: +0.0055% | SFP: NONE
+  24h momentum is positive (+2.00%) and 7d momentum (-0.64%) comfortably above the -10% sell threshold, meeting 
+Skipping ICPUSDT — position open
+Skipping KASUSDT — position open
+Analysing LINKUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: -0.0027% | SFP: NONE
+  24h momentum is positive (+3.17%) and 7d momentum is well above -10% threshold (+1.40%), with RSI at 68.3 (not
+Skipping MNTUSDT — position open
+Analysing ONDOUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: LOW | Funding: +0.0050% | SFP: NONE
+  24h momentum is positive at +2.55% and 7d momentum at -2.31% is above the -10% threshold, meeting core BUY cri
+Skipping PAXGUSDT — position open
+Analysing SEIUSDT...
+  Data error for SEIUSDT: Bybit 10006: Too many visits. Exceeded the API Rate Limit.
+  Insufficient data — skipping
+Skipping SKYUSDT — position open
+Analysing SOLUSDT...
+  BUY  LONG  | Conf: 62% | Lev: 5x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  24h momentum is positive (+2.20%) and 7d momentum (-2.72%) remains above -10% threshold, meeting primary BUY c
+Analysing SUIUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  24h momentum positive at +2.64% with 7d momentum at -1.17% (well above -10% threshold), volume confirming at +
+Analysing TAOUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0050% | SFP: NONE
+  TAO meets BUY criteria: 24h momentum +3.92% is positive, 7d momentum -1.21% is well above -10% threshold, RSI 
+Skipping TONUSDT — position open
+Skipping TRXUSDT — position open
+Analysing XLMUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: MEDIUM | Funding: +0.0100% | SFP: NONE
+  24h momentum is positive (+6.64%) and 7d momentum (-4.17%) is above the -10% threshold, with RSI at 66.1 (not 
+Analysing XPLUSDT...
+  SELL SHORT | Conf: 68% | Lev: 5x | Risk: MEDIUM | Funding: +0.0050% | SFP: NONE
+  7d momentum is -10.36% (at threshold) and price is -19.58% below 7d high, meeting short entry criteria. RSI at
+Skipping XRPUSDT — position open
+Analysing ZECUSDT...
+  BUY  LONG  | Conf: 72% | Lev: 6x | Risk: LOW | Funding: -0.0058% | SFP: NONE
+  24h momentum +6.99% and 7d momentum +7.85% both positive, well above -10% threshold. RSI at 60.3 is healthy (n
+
+=========================================================
+Candidates: 8
+  Skipping BTCUSDT — LONG concentration at 10/20 slots (conf 72% < 82%)
+  Skipping LINKUSDT — LONG concentration at 10/20 slots (conf 72% < 82%)
+  Skipping SUIUSDT — LONG concentration at 10/20 slots (conf 72% < 82%)
+  Skipping TAOUSDT — LONG concentration at 10/20 slots (conf 72% < 82%)
+  Skipping XLMUSDT — LONG concentration at 10/20 slots (conf 72% < 82%)
+  Skipping ZECUSDT — LONG concentration at 10/20 slots (conf 72% < 82%)
+  Skipping APTUSDT — LONG concentration at 10/20 slots (conf 68% < 82%)
+
+Opening SHORT — XPLUSDT:
+  >> FILLED SHORT XPLUSDT @ 0.09399  TP: 0.09023  SL: 0.09587  Lev: 5x  Margin: $92.43
+
+=========================================================
+Scan #168 complete
+Equity:        10423.26 USDT  (+423.26 USDT overall)
+Trades:        276 closed  (104W / 172L  38% win rate)
+Open positions:13
+New trades:    1
+Done.
+============================================================ 
+Run finished: Fri 10/07/2026 21:01:09.86 
+============================================================ 

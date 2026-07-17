@@ -2,10 +2,7 @@
 benchmarks/
 sandbox.py
 venv312/
-bybit_*.py
 bybit_*.bat
-bybit_logs/
-bybit_sim_data/
 bench_dashboard_integration.py
 ibkr_*.py
 ibkr_logs/
