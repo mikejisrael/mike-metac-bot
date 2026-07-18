@@ -14,7 +14,7 @@ bybit_regime_analysis.py
 test.py
 meta batches/
 reports/*.json
-
+!reports/coverage_latest.json
 ### General gitignore ###
 
 # Byte-compiled / optimized / DLL files
