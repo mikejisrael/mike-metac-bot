@@ -2513,6 +2513,40 @@ def set_refresh_after():
     except Exception as e:
         return jsonify({"ok": False, "error": f"Failed to save: {e}"}), 500
 
+    # ADDED 2026-07-18: this route used to only write the override to disk
+    # and let the page's location.reload() pick it up via CACHE["data"] —
+    # but CACHE["data"] is only rebuilt by the background thread every
+    # REFRESH_INTERVAL_SECONDS (5 min), not on every request. That made
+    # "did the new date show up after Save?" a race against that timer:
+    # sometimes a background rebuild happened to land between the save and
+    # the reload (looked fine), sometimes it didn't (showed the stale
+    # date) — Mike reported this as intermittent, which matches exactly.
+    # Fix: patch the affected row in place here, using the same
+    # compute_refresh_after / is_due_for_refresh calls build_dashboard_data
+    # itself uses (see there for the canonical version of this block), so
+    # the very next page load is correct regardless of the timer.
+    with CACHE_LOCK:
+        data = CACHE["data"]
+        rows = data["rows"] if data else []
+        row = next((r for r in rows if r.get("post_id") == question_id
+                    or r.get("question_id") == question_id), None)
+        if row is not None and row.get("is_batch_path"):
+            fresh_overrides = meta_refresh_schedule.load_refresh_overrides()
+            _forecast_for_schedule = {
+                "question_id": row.get("question_id"),
+                "submitted_at": row.get("predicted_at"),
+                "close_time": row.get("close_time"),
+            }
+            _refresh_after_dt = meta_refresh_schedule.compute_refresh_after(
+                _forecast_for_schedule, overrides=fresh_overrides
+            )
+            row["refresh_after"] = _refresh_after_dt.isoformat() if _refresh_after_dt else None
+            row["refresh_after_ts"] = int(_refresh_after_dt.timestamp() * 1000) if _refresh_after_dt else None
+            row["is_due_for_batch_refresh"], row["batch_refresh_due_reason"] = (
+                meta_refresh_schedule.is_due_for_refresh(_forecast_for_schedule, overrides=fresh_overrides)
+            )
+            row["has_refresh_override"] = str(question_id) in (fresh_overrides or {})
+
     return jsonify({"ok": True, "question_id": question_id,
                      "refresh_after": refresh_after_dt.isoformat() if refresh_after_dt else None,
                      "clamped_to_close": clamped})
