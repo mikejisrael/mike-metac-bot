@@ -1,18 +1,14 @@
 {
-  "checked_at": "2026-07-18T14:02:24.401626+00:00",
+  "checked_at": "2026-07-19T14:02:12.940853+00:00",
   "tournaments": {
     "FutureEval": {
       "tournament_id": 33022,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 2,
-      "forecasted_count": 1,
-      "missing_gated_ids": [
-        44839
-      ],
-      "missing_gated_reasons": {
-        "too_new_to_flag": 1
-      },
+      "open_count": 0,
+      "forecasted_count": 0,
+      "missing_gated_ids": [],
+      "missing_gated_reasons": {},
       "missing_real_ids": []
     },
     "Market Pulse Challenge 26Q3": {
@@ -108,10 +104,14 @@
       "tournament_id": 33021,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 26,
+      "open_count": 27,
       "forecasted_count": 26,
-      "missing_gated_ids": [],
-      "missing_gated_reasons": {},
+      "missing_gated_ids": [
+        44835
+      ],
+      "missing_gated_reasons": {
+        "wrong_type": 1
+      },
       "missing_real_ids": []
     },
     "US Midterms 2026": {
@@ -341,8 +341,7 @@
   "total_gaps": 61,
   "total_gated": 143,
   "total_gated_reasons": {
-    "too_new_to_flag": 1,
-    "wrong_type": 76,
+    "wrong_type": 77,
     "too_far_out": 66
   },
   "too_far_out_samples": [
