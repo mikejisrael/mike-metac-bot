@@ -12,7 +12,6 @@ bybit_check_positions.py
 bybit_dashboard.py
 bybit_regime_analysis.py
 test.py
-meta batches/
 reports/*.json
 !reports/coverage_latest.json
 !reports/calibration_latest.json
