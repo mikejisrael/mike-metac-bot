@@ -1,0 +1,34 @@
+{
+  "batch_id": "msgbatch_01F2jJoWkGEywQSEbU1DiT5h",
+  "submitted_at": "2026-07-17T16:53:13.353760",
+  "num_requests": 1,
+  "question_ids": {
+    "q_44633": 44633
+  },
+  "post_ids": {
+    "q_44633": 44512
+  },
+  "research_texts": {
+    "q_44633": "I have reviewed the summary for internal contradictions regarding metrics, indices, counts, dates, or time periods.\n\nThe summary contains one potential inconsistency: it references both \"the 47th day of demonstrations\" and \"July 16, 2026\" as the date of the research, but does not specify when the protests began. However, this is not an internal contradiction within the summary itself\u2014it's a consistency check against external facts. The summary does not attribute the same metric to two different values.\n\nAll other claims (protest participation, statements by Klosi and Rama, the Zv\u00ebrnec project discussion) are presented without contradictory attributions.\n\n**The summary is returned UNCHANGED, word-for-word.**"
+  },
+  "research_sources": {
+    "q_44633": "openrouter"
+  },
+  "question_texts": {
+    "q_44633": "Will the Government of Albania or Prime Minister Edi Rama resign before September 2026?"
+  },
+  "community_predictions": {
+    "q_44633": null
+  },
+  "resolve_times": {
+    "q_44633": "2026-09-02T09:00:00+00:00"
+  },
+  "close_times": {
+    "q_44633": null
+  },
+  "categories": {
+    "q_44633": [
+      "Politics"
+    ]
+  }
+}

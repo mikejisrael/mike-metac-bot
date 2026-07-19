@@ -1,0 +1,62 @@
+{
+  "batch_id": "msgbatch_01AvK772kuncfmoKJNfPKB3Z",
+  "submitted_at": "2026-07-18T19:42:52.081811",
+  "batch_type": "refresh",
+  "num_requests": 3,
+  "question_ids": {
+    "refresh_44139_20260718": 44139,
+    "refresh_43854_20260718": 43854,
+    "refresh_44014_20260718": 44014
+  },
+  "post_ids": {
+    "refresh_44139_20260718": 44117,
+    "refresh_43854_20260718": 43824,
+    "refresh_44014_20260718": 43987
+  },
+  "question_texts": {
+    "refresh_44139_20260718": "Will James M. McDonald be sworn in as US Attorney for the Southern District of New York before August 22, 2026?",
+    "refresh_43854_20260718": "Will the Brookmont Catastrophic Bond ETF drop at least $0.25 within two days before September 2026?",
+    "refresh_44014_20260718": "Will the United States provide written notices of withdrawal from the USMCA before September 2026?"
+  },
+  "original_probabilities": {
+    "refresh_44139_20260718": 0.78,
+    "refresh_43854_20260718": 0.2,
+    "refresh_44014_20260718": 0.18
+  },
+  "question_types": {
+    "refresh_44139_20260718": "binary",
+    "refresh_43854_20260718": "binary",
+    "refresh_44014_20260718": "binary"
+  },
+  "options_by_question": {},
+  "refresh_reasons": {
+    "refresh_44139_20260718": "manual refresh via dashboard",
+    "refresh_43854_20260718": "manual refresh via dashboard",
+    "refresh_44014_20260718": "manual refresh via dashboard"
+  },
+  "community_predictions": {
+    "refresh_44139_20260718": null,
+    "refresh_43854_20260718": null,
+    "refresh_44014_20260718": null
+  },
+  "research_texts": {
+    "refresh_44139_20260718": "James M. McDonald's nomination to be U.S. Attorney for the Southern District of New York (SDNY) has not yet been sent to the Senate as of June 22, 2026 [punchbowl.news](https://punchbowl.news/article/senate/senate-sdny-nomination/). President Trump has stated that the confirmation process for Jay Clayton, the current U.S. Attorney for SDNY and Trump's nominee for Director of National Intelligence (DNI), is on hold until McDonald is confirmed for the SDNY role [srnnews.com](https://srnnews.com/trump-clayton-dni-confirmation-wont-go-forward-until-mcdonald-is-confirmed-as-us-attorney/), [law.com](https://www.law.com/newyorklawjournal/2026/07/08/mcdonald-rejoins-us-attorneys-office-as-clayton-steps-back-ahead-of-confirmation-process/). Trump expressed concerns in a Truth Social post that he \"may not be able to get the extraordinary Sullivan & Cromwell Partner, Jamie, approved\" [law.com](https://www.law.com/newyorklawjournal/2026/07/08/mcdonald-rejoins-us-attorneys-office-as-clayton-steps-back-ahead-of-confirmation-process/).\n\nMcDonald, a partner at Sullivan & Cromwell LLP, rejoined the SDNY office as a \"deputy U.S. attorney\" on July 8, 2026, to supervise operations while Clayton steps back from day-to-day leadership ahead of his DNI confirmation hearing [law.com](https://www.law.com/newyorklawjournal/2026/07/08/mcdonald-rejoins-us-attorneys-office-as-clayton-steps-back-ahead-of-confirmation-process/), [news.bloomberglaw.com](https://news.bloomberglaw.com/us-law-week/mcdonald-returns-to-oversee-sdny-as-clayton-seeks-confirmation).",
+    "refresh_43854_20260718": "I've reviewed the summary carefully for internal contradictions regarding the same metrics across different values, dates, or time periods.\n\nI found no contradictions. All figures are either:\n- Associated with specific, non-conflicting dates (July 16, Q2 2026, May 2026, etc.)\n- Described as different metrics (daily change vs. total return, market size vs. issuance volume, etc.)\n- Attributed to different entities (Allstate vs. the ILS ETF, NOAA forecast vs. current market data, etc.)\n\nThe summary is internally consistent.\n\n**UNCHANGED:**\n\nAs of July 16, 2026, the Brookmont Catastrophic Bond ETF (ILS) had a closing price of $19.77 and a NAV of $19.75. Its daily change in market price was -$0.01 (-0.04%), while its NAV had a daily change of $0.01 (0.04%) [ilsetf.com](https://ilsetf.com/ils).\n\nThe catastrophe bond market set several records in Q2 2026, including a record market size of $65.6 billion and a record $11.3 billion in Q2 issuance. May 2026 saw the largest single month of issuance ever at $6.93 billion [artemis.bm](https://www.artemis.bm/news/catastrophe-bond-market-records-that-were-set-in-q2-2026/).\n\nA \"super El Ni\u00f1o\" is forecasted by the US National Oceanic and Atmospheric Administration (NOAA) to potentially begin in September 2026, which could lead to extreme weather events. Insurance-linked securities (ILS) like catastrophe bonds are noted for their portfolio diversification benefits, as their returns are driven by natural disasters rather than financial markets. The total return on all cat bonds currently stands at 9.4% (in USD), with insurance premiums normalized to 5.7% [artemis.bm](https://www.artemis.bm/news/ils-provides-crucial-portfolio-diversification-ahead-of-super-el-nino-vp-bank%E2%80%99s-allg%C3%A4uer/).\n\nAllstate reported pre-tax catastrophe losses of $1.72 billion for Q2 2026 [artemis.bm](https://www.artemis.bm/news/allstates-pre-tax-catastrophe-losses-for-q226-reach-1-72bn/). The ILS ETF has an expense ratio of 1.58% and a 30-day median bid-ask spread of 0.1017% as of July 1, 2026 [pulsealternative.com](https://pulsealternative.com/bonds/most-income-investors-have-never-heard-of-the-bond-etf-paying-8-percent-for-betting-against-natural-disasters/).",
+    "refresh_44014_20260718": "I have reviewed the summary for internal contradictions regarding the same metric, index, or count attributed to different values, dates, or time periods.\n\nI found no such contradictions. The summary is internally consistent:\n\n- It clearly states the July 1, 2026 non-renewal decision\n- It consistently describes the USMCA remaining in effect with annual reviews until 2036\n- It consistently indicates the U.S. chose not to immediately withdraw but to pursue new negotiations\n- All dates and factual claims align without conflicting assignments of values to different periods\n\n**I return the summary UNCHANGED, word-for-word.**"
+  },
+  "research_sources": {
+    "refresh_44139_20260718": "openrouter",
+    "refresh_43854_20260718": "openrouter",
+    "refresh_44014_20260718": "openrouter"
+  },
+  "resolve_times": {
+    "refresh_44139_20260718": "2026-08-22T00:00:00+00:00",
+    "refresh_43854_20260718": "2026-09-01T00:00:00+00:00",
+    "refresh_44014_20260718": "2026-09-01T06:59:00+00:00"
+  },
+  "close_times": {
+    "refresh_44139_20260718": null,
+    "refresh_43854_20260718": null,
+    "refresh_44014_20260718": null
+  }
+}

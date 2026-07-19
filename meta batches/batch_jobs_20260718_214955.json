@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_44011_20260718_214955",
+  "submitted_at": "2026-07-18T21:49:55.367642",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_44011_20260718_214955": 44011
+  },
+  "post_ids": {
+    "single_44011_20260718_214955": 43984
+  },
+  "question_texts": {
+    "single_44011_20260718_214955": "Will the Liberal Party officially nominate Fl\u00e1vio Bolsonaro as its candidate for president of Brazil before August 15, 2026?"
+  },
+  "original_probabilities": {
+    "single_44011_20260718_214955": 0.62
+  },
+  "refresh_reasons": {
+    "single_44011_20260718_214955": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_44011_20260718_214955": 0.85
+  },
+  "resolve_times": {
+    "single_44011_20260718_214955": "2026-08-15T09:00:00+00:00"
+  }
+}

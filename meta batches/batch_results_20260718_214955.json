@@ -1,0 +1,23 @@
+{
+  "single_44011_20260718_214955": {
+    "question_id": 44011,
+    "post_id": 43984,
+    "account": "bot",
+    "question_text": "Will the Liberal Party officially nominate Fl\u00e1vio Bolsonaro as its candidate for president of Brazil before August 15, 2026?",
+    "question_type": "binary",
+    "refresh_reason": "manual single refresh (community prediction shift alert)",
+    "reasoning": "(a) **Time left until resolution:** About 28 days (from July 18, 2026 to August 15, 2026).\n\n(b) **Status quo outcome if nothing changes:** The research mentions a PL convention on July 25, 2026 \u2014 just one week away. If that convention proceeds and nominates Fl\u00e1vio Bolsonaro, the question resolves YES. The registration deadline for candidates is August 15, 2026, which aligns with the resolution date.\n\n(c) **Scenario for NO outcome:** PL's July 25 convention chooses a different candidate (e.g., another Bolsonaro family member, or a completely different figure) due to the scandal involving the leaked tape about the jailed banker. The polling dip and party pressure lead to a candidate shuffle, as speculated in the background.\n\n(d) **Scenario for YES outcome:** Despite the May 2026 scandal and polling dip, Fl\u00e1vio Bolsonaro remains the strongest available opposition candidate for PL, and the party nominates him at the July 25 convention before the August 15 deadline.\n\n(e) **Base rate:** No reliable base rate available \u2014 proceeding on priors. Generally, frontrunning opposition candidates who face scandals but remain top-polling do get nominated more often than not, as parties are reluctant to abandon their most electorally viable figure without a strong alternative.\n\n(f) **How the live data/research/background moves me from base rate:** The research confirms a convention date of July 25, 2026 \u2014 meaning the nomination decision is imminent. The background confirms Fl\u00e1vio has been consistently the top-polling opposition candidate, though his numbers have dipped post-scandal. The speculation about a \"candidate shuffle\" exists but hasn't materialized into an official alternative. The registration deadline of August 15 creates urgency \u2014 if PL hasn't nominated Fl\u00e1vio by then, they'd need an alternative ready. Given the proximity of the convention and the lack of evidence that PL has coalesced around another candidate, a Fl\u00e1vio nomination seems probable.\n\n(g) **How my view has changed from the original 62% forecast:** The community has shifted significantly to 85%, and the key new information is the July 25 convention date. With the convention just a week away and no reported alternative candidate being officially named, the probability has risen substantially. The scandal in May created uncertainty, but as of mid-July, Fl\u00e1vio appears to still be the candidate \u2014 no official pivot has been reported.\n\n(h) **Divergence from community prediction (85%):** The community is at 85% and I'm inclined to be close to that but slightly more conservative. The scandal and polling dip do create some residual risk of a last-minute candidate switch at the convention. However, with no reported strong alternative and the convention days away, 85% seems well-calibrated. I'll sit at 83-85%, essentially agreeing with the community given the evidence available.\n\nProbability: 84%",
+    "community_prediction": 0.85,
+    "research_text": "I have reviewed the research summary for internal contradictions regarding metrics, indices, counts, dates, and time periods.\n\n**Result: No contradictions found.**\n\nThe summary is internally consistent. All dates align properly (convention on July 25, 2026; PT convention August 2; registration deadline August 15), and there are no conflicting figures or values attributed to different time periods.\n\nThe summary is returned unchanged, word-for-word.",
+    "research_source": "openrouter",
+    "had_real_grounding": true,
+    "cp_source": "manual",
+    "divergence_check_possible": true,
+    "divergence_flag_fired": false,
+    "human_decision": "submit_as_is",
+    "status": "success",
+    "probability": 0.84,
+    "submitted_forecast": 0.84,
+    "original_prob": 0.62
+  }
+}
