@@ -612,9 +612,9 @@ async def submit_batch(questions: list[BinaryQuestion]) -> str:
     }
 
     timestamped_file = os.path.join(BATCH_DIR, f"batch_jobs_{timestamp}.json")
-    with open(timestamped_file, 'w') as f:
+    with open(timestamped_file, 'w', newline='\n') as f:
         json.dump(batch_info, f, indent=2)
-    with open(BATCH_FILE, 'w') as f:
+    with open(BATCH_FILE, 'w', newline='\n') as f:
         json.dump(batch_info, f, indent=2)
 
     print(f"✅ Batch submitted: {batch_id}")
@@ -704,9 +704,9 @@ async def check_batch():
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
     timestamped_results = os.path.join(BATCH_DIR, f"batch_results_{timestamp}.json")
-    with open(timestamped_results, 'w') as f:
+    with open(timestamped_results, 'w', newline='\n') as f:
         json.dump(results, f, indent=2)
-    with open(RESULTS_FILE, 'w') as f:
+    with open(RESULTS_FILE, 'w', newline='\n') as f:
         json.dump(results, f, indent=2)
 
     print(f"Saved {len(results)} results to {timestamped_results}")
@@ -896,7 +896,7 @@ async def update_community_predictions():
             await asyncio.sleep(1.2)
 
     batch_info["community_predictions"] = community_preds
-    with open(BATCH_FILE, "w") as f:
+    with open(BATCH_FILE, "w", newline='\n') as f:
         json.dump(batch_info, f, indent=2)
 
     # Also update matching timestamped file
@@ -907,7 +907,7 @@ async def update_community_predictions():
                 jdata = json.load(f)
             if jdata.get("batch_id") == batch_id:
                 jdata["community_predictions"] = community_preds
-                with open(jf, "w") as f:
+                with open(jf, "w", newline='\n') as f:
                     json.dump(jdata, f, indent=2)
                 print(f"  Also updated {jf}")
                 break

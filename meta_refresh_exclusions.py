@@ -48,7 +48,7 @@ def load_excluded_ids() -> dict[int, dict]:
 
 def _save(excluded: dict[int, dict]) -> None:
     os.makedirs("watch_state", exist_ok=True)
-    with open(EXCLUSIONS_FILE, "w") as f:
+    with open(EXCLUSIONS_FILE, "w", newline='\n') as f:
         json.dump({str(k): v for k, v in excluded.items()}, f, indent=2)
 
 

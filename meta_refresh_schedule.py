@@ -112,7 +112,7 @@ def save_refresh_override(question_id: int, refresh_after: datetime | None, note
             "note": note,
         }
     os.makedirs("watch_state", exist_ok=True)
-    with open(REFRESH_OVERRIDES_PATH, "w") as f:
+    with open(REFRESH_OVERRIDES_PATH, "w", newline='\n') as f:
         json.dump(overrides, f, indent=2)
     return overrides
 

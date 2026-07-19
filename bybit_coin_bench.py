@@ -86,7 +86,7 @@ def load_config():
 
 def save_config(cfg):
     os.makedirs(DATA_DIR, exist_ok=True)
-    with open(CONFIG_PATH, "w") as f:
+    with open(CONFIG_PATH, "w", newline='\n') as f:
         json.dump(cfg, f, indent=2)
 
 
@@ -103,7 +103,7 @@ def load_benched():
 
 def save_benched(benched):
     os.makedirs(DATA_DIR, exist_ok=True)
-    with open(BENCHED_PATH, "w") as f:
+    with open(BENCHED_PATH, "w", newline='\n') as f:
         json.dump(benched, f, indent=2)
 
 

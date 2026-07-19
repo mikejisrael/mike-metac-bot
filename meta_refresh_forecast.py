@@ -1425,7 +1425,7 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
         },
     }
 
-    with open(batch_file, "w") as f:
+    with open(batch_file, "w", newline='\n') as f:
         json.dump(batch_info, f, indent=2)
 
     print(f"✅ Refresh batch submitted: {batch_id}")
@@ -1605,7 +1605,7 @@ async def _parse_and_submit_refresh_results(batch_id: str, batch_info: dict) -> 
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
     results_file = f"{REFRESH_RESULTS_PREFIX}_{timestamp}.json"
-    with open(results_file, "w") as f:
+    with open(results_file, "w", newline='\n') as f:
         json.dump(results, f, indent=2)
     print(f"  Saved results to {results_file}")
     if total_cache_read or total_cache_write:
@@ -1911,7 +1911,7 @@ def _save_single_result(
         },
     }
     jobs_file = os.path.join(BATCH_DIR, f"batch_jobs_{timestamp}.json")
-    with open(jobs_file, "w") as f:
+    with open(jobs_file, "w", newline='\n') as f:
         json.dump(batch_info, f, indent=2)
 
     result_entry = {
@@ -1949,7 +1949,7 @@ def _save_single_result(
 
     results = {custom_id: result_entry}
     results_file = os.path.join(BATCH_DIR, f"batch_results_{timestamp}.json")
-    with open(results_file, "w") as f:
+    with open(results_file, "w", newline='\n') as f:
         json.dump(results, f, indent=2)
 
     print(f"  Saved to {results_file}")

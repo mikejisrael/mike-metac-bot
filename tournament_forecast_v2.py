@@ -1627,7 +1627,7 @@ async def run(dry_run: bool = False, simulate_now: datetime | None = None):
     results_file = os.path.join(TOURNAMENT_BATCH_DIR, f"batch_results_{timestamp}.json")
 
     def _save_results_so_far():
-        with open(results_file, 'w') as f:
+        with open(results_file, 'w', newline='\n') as f:
             json.dump(results, f, indent=2)
 
     for i, q in enumerate(questions, 1):

@@ -555,9 +555,9 @@ def run_coverage_check():
     # console/alert output stays at the summary level deliberately.
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    with open(os.path.join(REPORTS_DIR, f"coverage_{ts}.json"), "w") as f:
+    with open(os.path.join(REPORTS_DIR, f"coverage_{ts}.json"), "w", newline='\n') as f:
         json.dump(report, f, indent=2)
-    with open(os.path.join(REPORTS_DIR, "coverage_latest.json"), "w") as f:
+    with open(os.path.join(REPORTS_DIR, "coverage_latest.json"), "w", newline='\n') as f:
         json.dump(report, f, indent=2)
 
     if report["total_gaps"] > 0:
