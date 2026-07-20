@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-07-19T14:02:12.940853+00:00",
+  "checked_at": "2026-07-20T14:02:23.599004+00:00",
   "tournaments": {
     "FutureEval": {
       "tournament_id": 33022,
@@ -25,8 +25,8 @@
       "tournament_id": 32880,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 27,
-      "forecasted_count": 27,
+      "open_count": 26,
+      "forecasted_count": 26,
       "missing_gated_ids": [],
       "missing_gated_reasons": {},
       "missing_real_ids": []
@@ -140,10 +140,12 @@
         43683,
         43755,
         43756,
-        43757
+        43757,
+        44860,
+        44861
       ],
       "missing_gated_reasons": {
-        "wrong_type": 20
+        "wrong_type": 22
       },
       "missing_real_ids": [
         40180,
@@ -187,10 +189,8 @@
         43644,
         43645,
         43686,
-        43687,
         43688,
         43689,
-        43690,
         43691,
         43692,
         43693,
@@ -338,10 +338,10 @@
       "missing_real_ids": []
     }
   },
-  "total_gaps": 61,
-  "total_gated": 143,
+  "total_gaps": 59,
+  "total_gated": 145,
   "total_gated_reasons": {
-    "wrong_type": 77,
+    "wrong_type": 79,
     "too_far_out": 66
   },
   "too_far_out_samples": [
