@@ -79,6 +79,16 @@ client_metaculus._post_question_prediction = _types.MethodType(
 # ─── Config ───────────────────────────────────────────────────────────────────
 MODEL = "claude-haiku-4-5"
 MAX_TOKENS = 2000
+# ADDED 2026-07-21: numeric questions were silently truncating at 2000
+# tokens before reaching the final "Low/Median/High" lines — confirmed
+# live against 2 real failures in batch_results_20260721_1215.json
+# (q_43285, q_43284 — both cut off mid-reasoning, well before the answer
+# block). build_numeric_prompt asks for 5 reasoning sections (a)-(e)
+# before the answer, consistently longer than binary/MC responses. Kept
+# as a SEPARATE constant rather than raising MAX_TOKENS globally, since
+# binary/MC weren't the ones failing — no reason to pay for extra tokens
+# on every request when only numeric needs them.
+NUMERIC_MAX_TOKENS = 3500
 # FIXED 2026-07-02: dropped from 50 to 20 as a deliberate cost control -
 # ALLOWED_TOURNAMENTS is expanding from 3 to 8 tournaments below, so
 # holding new-questions-per-run steady rather than letting it scale with
@@ -961,11 +971,15 @@ async def submit_batch(questions: list) -> str:
         custom_id = f"q_{q.id_of_question}"
         question_map[custom_id] = q
 
+        # ADDED 2026-07-21: numeric gets a higher token budget — see
+        # NUMERIC_MAX_TOKENS comment above for why.
+        req_max_tokens = NUMERIC_MAX_TOKENS if isinstance(q, NumericQuestion) else MAX_TOKENS
+
         requests.append({
             "custom_id": custom_id,
             "params": {
                 "model": MODEL,
-                "max_tokens": MAX_TOKENS,
+                "max_tokens": req_max_tokens,
                 "system": cached_system,
                 # CHANGED 2026-07-21: was build_user_prompt(q) (binary-only)
                 # — now dispatches per-type via build_prompt_for_question.
@@ -1199,6 +1213,21 @@ async def check_batch():
                 total_cache_read += getattr(usage, "cache_read_input_tokens", 0) or 0
                 total_cache_write += getattr(usage, "cache_creation_input_tokens", 0) or 0
 
+            # ADDED 2026-07-21: stop_reason is a direct signal from the API
+            # itself — "max_tokens" means the response was cut off before
+            # Claude finished, which is exactly what caused 2 silent
+            # numeric parse failures in batch_results_20260721_1215.json
+            # (q_43285, q_43284 — confirmed by inspecting the raw
+            # reasoning text, which stopped mid-sentence). Checking this
+            # directly is more reliable than inferring truncation after
+            # the fact from a missing Low/Median/High line, and it also
+            # applies to binary/MC if they ever hit their own limit.
+            stop_reason = getattr(result.result.message, "stop_reason", None)
+            was_truncated = stop_reason == "max_tokens"
+            if was_truncated:
+                print(f"    ⚠️  {custom_id} ({q_type}): response TRUNCATED at max_tokens — "
+                      f"this is very likely why parsing fails below, if it does.")
+
             if q_type == "multiple_choice" and mc_options:
                 probs = parse_multiple_choice_response(text, mc_options)
                 results[custom_id] = {
@@ -1206,15 +1235,28 @@ async def check_batch():
                     "probabilities": probs,
                     "submitted_forecast": probs,
                     "reasoning": text,
+                    "truncated": was_truncated,
                     "status": "success" if probs is not None else "parse_failed",
                 }
             elif q_type == "numeric" and num_bounds:
                 cdf = parse_numeric_response(text, num_bounds)
+                if cdf is None and not was_truncated:
+                    # ADDED 2026-07-21: parse_numeric_response has always
+                    # had internal warning prints for bounds/ordering
+                    # failures, but returned None SILENTLY if it just
+                    # couldn't find all three of Low/Median/High at all —
+                    # exactly the failure mode that made q_43285/q_43284
+                    # look like a mystery instead of an obvious truncation.
+                    print(f"    ⚠️  {custom_id} (numeric): could not find Low/Median/High "
+                          f"lines in the response at all (and stop_reason was NOT "
+                          f"max_tokens, so this isn't the truncation case above — "
+                          f"worth checking the reasoning text directly).")
                 results[custom_id] = {
                     **base_entry,
                     "cdf": cdf,
                     "submitted_forecast": cdf,
                     "reasoning": text,
+                    "truncated": was_truncated,
                     "status": "success" if cdf is not None else "parse_failed",
                 }
             else:
@@ -1235,6 +1277,7 @@ async def check_batch():
                     "probability": prob,
                     "submitted_forecast": prob,
                     "reasoning": text,
+                    "truncated": was_truncated,
                     "status": "success" if prob is not None else "parse_failed",
                 }
         else:
