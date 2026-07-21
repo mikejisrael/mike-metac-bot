@@ -975,18 +975,28 @@ async def submit_batch(questions: list) -> str:
 
     print(f"Submitting batch of {len(requests)} requests...")
 
-    # ADDED 2026-07-08: one-time sanity check for the scheduled_close_time
-    # attribute added below (close_times). Prints once per run, not per
-    # question, so it's cheap and won't spam. If this ever prints "NOT
-    # FOUND", the attribute name has drifted on this forecasting_tools
-    # version and close_times will silently save all-None until it's
-    # re-checked against a live object — the same failure mode close_times
-    # was added to fix in the first place, just one level up.
+    # ADDED 2026-07-08: one-time sanity check for the close_time attribute
+    # used below (close_times field). Prints once per run, not per
+    # question, so it's cheap and won't spam.
+    #
+    # FIXED 2026-07-21: this checked "scheduled_close_time" — confirmed via
+    # a live diagnostic (diagnose_close_time.py) against real BinaryQuestion,
+    # MultipleChoiceQuestion, AND NumericQuestion objects that this was
+    # simply the wrong attribute name on ALL THREE types, not something that
+    # drifted or something type-specific to MC/numeric. The real pydantic
+    # attribute is "close_time" — "scheduled_close_time" only exists in the
+    # raw api_json (both top-level and nested under api_json["question"]),
+    # never as an attribute on the object itself. This check has printed
+    # "NOT FOUND" (silently, easy to miss in cron logs) since the day it was
+    # added, because close_times was being read wrong the entire time — it
+    # just never got noticed because this file rarely reached a real
+    # submission until the MC/numeric fetch expansion started finding
+    # enough fresh questions to actually fill a batch.
     if question_map:
         _sample_q = next(iter(question_map.values()))
-        _has_attr = getattr(_sample_q, "scheduled_close_time", None) is not None
-        print(f"  (close_time attr check: scheduled_close_time = "
-              f"{getattr(_sample_q, 'scheduled_close_time', 'NOT FOUND')}"
+        _has_attr = getattr(_sample_q, "close_time", None) is not None
+        print(f"  (close_time attr check: close_time = "
+              f"{getattr(_sample_q, 'close_time', 'NOT FOUND')}"
               f"{'  ✅' if _has_attr else '  ⚠️ verify attribute name'})")
 
     batch = client_anthropic.messages.batches.create(requests=requests)
@@ -1047,12 +1057,22 @@ async def submit_batch(questions: list) -> str:
         # before the actual close date passed. scheduled_close_time is the
         # correct field for that check; resolve_times above is left
         # untouched since other things may still want the resolution date.
-        # Attribute name assumed to mirror scheduled_resolution_time's
-        # naming — VERIFY against a real run (see the one-time debug print
-        # below) before trusting this blindly, same practice as the MC
-        # centers-ordering assumption elsewhere in this codebase.
+        #
+        # FIXED 2026-07-21: was q.scheduled_close_time — confirmed via
+        # diagnose_close_time.py against real Binary/MultipleChoice/Numeric
+        # objects that this attribute name was simply wrong (not
+        # type-specific drift — wrong for ALL THREE types, and wrong since
+        # this field was added 2026-07-08). The real attribute is
+        # q.close_time; "scheduled_close_time" only exists in the raw
+        # api_json, never as an object attribute. This means every
+        # close_times entry saved between 2026-07-08 and today was silently
+        # None — see the one-time debug print above, which was ALSO
+        # checking the wrong name and so has been printing "NOT FOUND"
+        # this whole time without anyone noticing (it rarely fired at all,
+        # since this file rarely completed a real submission until the
+        # MC/numeric fetch expansion widened the candidate pool).
         "close_times": {
-            custom_id: q.scheduled_close_time.isoformat() if getattr(q, "scheduled_close_time", None) else None
+            custom_id: q.close_time.isoformat() if getattr(q, "close_time", None) else None
             for custom_id, q in question_map.items()
         },
         "categories": {

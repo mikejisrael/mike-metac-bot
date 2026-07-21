@@ -1500,12 +1500,23 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
         # be known from the ORIGINAL meta_batch_forecast.py submission —
         # the first time a question passes through THIS script's refresh
         # path, that data would otherwise be lost for any subsequent
-        # refresh cycle. Mirrors meta_batch_forecast.py's own
-        # "close_times" key exactly (see that file for the attribute-name
-        # verification note — scheduled_close_time, confirmed live there).
+        # refresh cycle. Mirrors meta_batch_forecast.py's own "close_times"
+        # key.
+        #
+        # FIXED 2026-07-21: was info["question"].scheduled_close_time — the
+        # comment here previously cited meta_batch_forecast.py's "confirmed
+        # live" note as backing for this name, but that note was itself
+        # never actually verified against a live object (it just asserted
+        # the assumption). A real diagnostic (diagnose_close_time.py)
+        # against live Binary/MultipleChoice/Numeric objects showed the
+        # correct attribute is close_time — scheduled_close_time only
+        # exists in raw api_json, never as an object attribute, for any
+        # question type. So this field has been silently saving None for
+        # every refresh batch since 2026-07-15, same failure mode as
+        # meta_batch_forecast.py's copy of this bug.
         "close_times": {
-            custom_id: (info["question"].scheduled_close_time.isoformat()
-                        if getattr(info["question"], "scheduled_close_time", None) else None)
+            custom_id: (info["question"].close_time.isoformat()
+                        if getattr(info["question"], "close_time", None) else None)
             for custom_id, info in question_map.items()
         },
     }
