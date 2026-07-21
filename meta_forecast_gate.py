@@ -41,6 +41,15 @@ import tournament_registry
 MIN_FORECASTERS = 5
 DAYS_AHEAD = 365
 
+# ADDED 2026-07-21: meta_batch_forecast.py extended from binary-only to
+# also cover multiple_choice and numeric (tournament_forecast_v2.py and
+# meta_refresh_forecast.py already handled these; the batch/discovery
+# path was the one still binary-only — see the SC Senate nominee
+# question, Q44676, a multiple_choice question that was silently
+# unreachable by any pipeline). Single place this list lives now, same
+# reasoning as QUESTION_SERIES_IDS below living in one place.
+ALLOWED_QUESTION_TYPES = ("binary", "multiple_choice", "numeric")
+
 # CHANGED 2026-07-17: now derived from tournament_registry.py instead of
 # hardcoded here. Same 5 IDs, same values (verified against the old list
 # below before this change) — this is a no-op behavior change on its own.
@@ -66,12 +75,20 @@ def passes_forecast_gate(
     close_time: datetime | None,
     now: datetime | None = None,
 ) -> bool:
-    """Mirrors the exact filter meta_batch_forecast.py applies: binary
-    type only, at least MIN_FORECASTERS forecasters, and closing within
-    DAYS_AHEAD days from now. Same three conditions whether enforced via
-    ApiFilter server-side (allowed_types/num_forecasters_gte/close_time
-    bounds) or the hand-rolled question_series path — one function
-    instead of two copies that could quietly disagree.
+    """Mirrors the exact filter meta_batch_forecast.py applies: binary,
+    multiple_choice, or numeric type, at least MIN_FORECASTERS
+    forecasters, and closing within DAYS_AHEAD days from now. Same three
+    conditions whether enforced via ApiFilter server-side
+    (allowed_types/num_forecasters_gte/close_time bounds) or the
+    hand-rolled question_series path — one function instead of two
+    copies that could quietly disagree.
+
+    CHANGED 2026-07-21: was binary-only until meta_batch_forecast.py
+    grew multiple_choice/numeric support (matching what
+    tournament_forecast_v2.py and meta_refresh_forecast.py already had).
+    ALLOWED_QUESTION_TYPES below is the single place that scope is
+    defined now, so this file and meta_coverage_check.py's gap
+    classification can't drift apart on it again.
 
     Does NOT check status=="open" — callers are expected to have already
     scoped to open questions before calling this; "open" is a
@@ -97,8 +114,12 @@ def forecast_gate_failure_reason(
     "too_far_out" bucket with questions that are actually fine on type
     and forecaster count. passes_forecast_gate() itself is defined in
     terms of this function now, so there's still only one place the
-    actual gate logic lives — this doesn't introduce a second copy."""
-    if question_type != "binary":
+    actual gate logic lives — this doesn't introduce a second copy.
+
+    CHANGED 2026-07-21: "wrong_type" used to mean "not binary". Now
+    means "not in ALLOWED_QUESTION_TYPES" (binary/multiple_choice/
+    numeric) — see that constant's comment for why."""
+    if question_type not in ALLOWED_QUESTION_TYPES:
         return "wrong_type"
     if (num_forecasters or 0) < MIN_FORECASTERS:
         return "too_few_forecasters"

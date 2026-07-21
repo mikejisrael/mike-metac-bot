@@ -104,6 +104,7 @@ import json
 import os
 import re
 import glob
+import subprocess
 import time
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
@@ -1182,6 +1183,90 @@ Probabilities: {{"<option 1 text>": XX, "<option 2 text>": YY, ...}}
 
 
 # ─── Submit refresh batch (BATCH mode — 24h turnaround) ──────────────────────
+def _auto_commit_and_push_batch_file(batch_file: str, batch_id: str) -> None:
+    """ADDED 2026-07-20 — safeguard for the gap that caused the 2026-07-18/19
+    incident: the dashboard's /refresh route (meta_dashboard.py) spawns this
+    script as a fire-and-forget background subprocess, so nothing downstream
+    of submit_refresh_batch() knows the job file was ever written. If Mike
+    forgot the manual `git add "meta batches/" && git commit && git push`
+    step afterward, the file just sat locally, invisible to the scheduled
+    meta_refresh_check.yaml workflow (which only sees what's actually in the
+    repo on GitHub) -- looking like the automation was broken when really it
+    just had nothing to find. This closes that gap at the one place BOTH the
+    dashboard-triggered and manually-run (`python meta_refresh_forecast.py
+    --submit`) paths converge: right after the job file is written to disk.
+
+    Deliberately best-effort: the batch has ALREADY been submitted to
+    Anthropic by this point (real money already spent), so a git failure
+    here must never look like the submission itself failed. Every step is
+    wrapped and any failure just prints a warning telling Mike to push
+    manually -- it never raises.
+
+    Mirrors the retry-with-rebase pattern meta_refresh_check.yaml's own
+    commit step already uses, since this can race the same GitHub Actions
+    workflow (or a manual run) writing to the same "meta batches/" folder.
+    Pulls first (Mike's own commit-hygiene rule) to catch conflicts early
+    rather than mid-push.
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    def _run(args: list[str]) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            args, cwd=script_dir, capture_output=True, text=True, timeout=30,
+        )
+
+    try:
+        pull = _run(["git", "pull", "--rebase"])
+        if pull.returncode != 0:
+            print(f"  ⚠️  Auto-commit: git pull --rebase failed (non-fatal) — "
+                  f"{pull.stderr.strip()[:200]}")
+            print(f"      Batch WAS submitted ({batch_id}) and saved to {batch_file} — "
+                  f"please pull/add/commit/push manually.")
+            return
+
+        add = _run(["git", "add", "meta batches/"])
+        if add.returncode != 0:
+            print(f"  ⚠️  Auto-commit: git add failed (non-fatal) — {add.stderr.strip()[:200]}")
+            print(f"      Batch WAS submitted ({batch_id}) — please commit/push {batch_file} manually.")
+            return
+
+        diff = _run(["git", "diff", "--cached", "--quiet"])
+        if diff.returncode == 0:
+            # Nothing staged — e.g. .gitignore still excluding this path,
+            # or somehow already committed. Either way, flag it rather than
+            # silently doing nothing, since that's the exact failure mode
+            # this function exists to prevent.
+            print(f"  ⚠️  Auto-commit: nothing staged after 'git add \"meta batches/\"' — "
+                  f"{batch_file} may not be getting tracked. Check .gitignore.")
+            return
+
+        commit = _run(["git", "commit", "-m",
+                       f"chore: dashboard-refresh batch {batch_id} [skip ci]"])
+        if commit.returncode != 0:
+            print(f"  ⚠️  Auto-commit: git commit failed (non-fatal) — {commit.stderr.strip()[:200]}")
+            print(f"      Batch WAS submitted ({batch_id}) — please push manually.")
+            return
+
+        max_attempts = 3
+        for attempt in range(1, max_attempts + 1):
+            push = _run(["git", "push"])
+            if push.returncode == 0:
+                print(f"  ✅ Auto-commit: pushed batch job file for {batch_id} to origin/main")
+                return
+            if attempt == max_attempts:
+                print(f"  ⚠️  Auto-commit: git push failed after {max_attempts} attempts (non-fatal) — "
+                      f"{push.stderr.strip()[:200]}")
+                print(f"      Batch WAS submitted ({batch_id}) and committed locally — please push manually.")
+                return
+            print(f"  Auto-commit: push rejected (attempt {attempt}/{max_attempts}), "
+                  f"rebasing and retrying...")
+            _run(["git", "pull", "--rebase"])
+            time.sleep(3)
+    except Exception as e:
+        print(f"  ⚠️  Auto-commit: unexpected error (non-fatal) — {e}")
+        print(f"      Batch WAS submitted ({batch_id}) and saved to {batch_file} — "
+              f"please pull/add/commit/push manually.")
+
+
 async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[dict], stale_cap: int):
     """CHANGED (2026-07-03): was a single flat to_refresh list, pre-sliced to
     the cap in main() BEFORE any fetching happened. That meant a stale
@@ -1431,6 +1516,8 @@ async def submit_refresh_batch(closing_soon: list[dict], stale_candidates: list[
     print(f"✅ Refresh batch submitted: {batch_id}")
     print(f"   Saved to {batch_file}")
     print(f"   Run: python meta_refresh_forecast.py --check to retrieve results")
+
+    _auto_commit_and_push_batch_file(batch_file, batch_id)
 
 
 # ─── Check refresh batch ──────────────────────────────────────────────────────

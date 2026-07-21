@@ -121,6 +121,43 @@ TOURNAMENTS = {
             "control) resolve much later than the midterm election itself."
         ),
     },
+    "animal_futures": {
+        "id": 33016,
+        # ADDED 2026-07-21. No vanity slug exists for this tournament — its
+        # own canonical page is /tournament/33016/, numeric-ID only (unlike
+        # "midterms-2026" or "ACX2026"). ApiFilter.allowed_tournaments
+        # accepts int OR str per this file's own module docstring, so the
+        # numeric id is stored directly in the slug field rather than
+        # leaving it None (which slugs_for() would silently skip, same as
+        # it does for the question_series entries below — that's fine for
+        # them since they use project_param instead, but this entry uses
+        # fetch_method="allowed_tournaments" and needs SOMETHING in slug
+        # to actually get fetched by meta_batch_forecast.py).
+        "slug": 33016,
+        "display_name": "Animal Futures Tournament",
+        "category": "Tournaments",
+        "project_type": "tournament",
+        "fetch_method": "allowed_tournaments",
+        "pipeline": "batch",
+        "notes": (
+            "Launched ~2026-06-11 by Sentient Futures / The Unjournal, "
+            "$3,400 prize pool, 16 questions (more added over time) on "
+            "animal welfare / alternative protein / policy topics — mix of "
+            "binary, multiple_choice, and numeric (e.g. Q43279, the in-ovo "
+            "sexing % question). Confirmed via test run 2026-07-21 that "
+            "meta_batch_forecast.py's numeric and multiple_choice paths "
+            "both work against real questions from this tournament. "
+            "Bot prize-eligibility NOT verified directly against this "
+            "tournament's own rules page — only found via secondary "
+            "sources (EA Forum / partner site), one of which claims bots "
+            "CAN participate. Metaculus's general tournament rules default "
+            "to bots being prize-ineligible unless a competition explicitly "
+            "says otherwise (confirmed on metaculus.com/tournament-rules/), "
+            "so treat this the same as Metaculus Cup — forecast here for "
+            "calibration data only, NOT assumed prize-eligible — until "
+            "checked directly against this tournament's own rules page."
+        ),
+    },
     "nuclear_risk_horizons": {
         "id": 1173,
         "slug": None,

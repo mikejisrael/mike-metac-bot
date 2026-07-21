@@ -17,7 +17,10 @@ import aiohttp
 
 load_dotenv()
 
-from forecasting_tools import MetaculusClient, ApiFilter, BinaryQuestion
+from forecasting_tools import (
+    MetaculusClient, ApiFilter, BinaryQuestion, MultipleChoiceQuestion, NumericQuestion,
+)
+import math
 from live_data import detect_data_needs, format_live_data_for_prompt
 from cached_llm import build_batch_forecaster_system_prompt
 from meta_prompt_cache import cacheable_system_block
@@ -206,6 +209,35 @@ def _set_research_source(obj, source) -> None:
         object.__setattr__(obj, "research_source_at_access_time", source)
 
 
+def _set_cp(obj, cp) -> None:
+    """Set community_prediction_at_access_time regardless of whether the
+    underlying pydantic model declares that field. Ported 2026-07-21 from
+    tournament_forecast_v2.py's identical helper: community_prediction_
+    at_access_time is a genuinely declared field on BinaryQuestion (plain
+    assignment already worked fine there, which is why this file never
+    needed this helper while it was binary-only), but NumericQuestion and
+    MultipleChoiceQuestion do NOT declare it and raise on plain
+    assignment. Needed now that fetch_questions() prefetches CP for all
+    three types, not just binary."""
+    try:
+        obj.community_prediction_at_access_time = cp
+    except Exception:
+        object.__setattr__(obj, "community_prediction_at_access_time", cp)
+
+
+def _question_type_str(q) -> str:
+    """Single place that maps a question object to the type string used
+    throughout this file (gate checks, CP extraction, prompt dispatch,
+    result persistence). Added 2026-07-21 alongside multiple_choice/
+    numeric support so every call site agrees on the same three strings
+    instead of each branch re-deriving isinstance checks independently."""
+    if isinstance(q, MultipleChoiceQuestion):
+        return "multiple_choice"
+    if isinstance(q, NumericQuestion):
+        return "numeric"
+    return "binary"
+
+
 # ─── Question identity guard ────────────────────────────────────────────────
 from meta_question_matching import titles_match
 
@@ -213,18 +245,20 @@ from meta_question_matching import titles_match
 # ─── question_series fetch path (2026-07-02) ───────────────────────────────
 import requests as _requests
 
-async def fetch_question_series_questions(now: datetime) -> list[BinaryQuestion]:
+async def fetch_question_series_questions(now: datetime) -> list:
     """Fetches open questions from QUESTION_SERIES_IDS via the raw
     `project=` parameter (proven correct — see check_project_type.py),
     since ApiFilter's allowed_tournaments/`tournaments=` parameter silently
     doesn't scope question_series-type projects. Applies the same
-    binary/open/close-time/forecaster-count constraints ApiFilter would
-    normally enforce, by hand, client-side. Converts each surviving match
-    via client_metaculus.get_question_by_post_id() to get a real
-    BinaryQuestion object compatible with the rest of this pipeline
-    (research, CP extraction, submission all expect that type)."""
+    open/close-time/forecaster-count constraints ApiFilter would normally
+    enforce, by hand, client-side (question TYPE is now gated via
+    meta_forecast_gate.ALLOWED_QUESTION_TYPES — binary/multiple_choice/
+    numeric — not binary-only, as of 2026-07-21). Converts each surviving
+    match via client_metaculus.get_question_by_post_id() to get a real
+    question object compatible with the rest of this pipeline (research,
+    CP extraction, submission all branch on isinstance now)."""
     headers = {"Authorization": f"Token {ACTIVE_TOKEN}"}
-    results: list[BinaryQuestion] = []
+    results: list = []
 
     for series_id in QUESTION_SERIES_IDS:
         try:
@@ -283,8 +317,8 @@ async def fetch_question_series_questions(now: datetime) -> list[BinaryQuestion]
                 print(f"    ⚠️  post {post_id}: could not fetch question object ({e}) — skipping.")
                 continue
             if isinstance(q, list):  # group_question_mode default may unpack; guard either way
-                results.extend(x for x in q if isinstance(x, BinaryQuestion))
-            elif isinstance(q, BinaryQuestion):
+                results.extend(x for x in q if isinstance(x, (BinaryQuestion, MultipleChoiceQuestion, NumericQuestion)))
+            elif isinstance(q, (BinaryQuestion, MultipleChoiceQuestion, NumericQuestion)):
                 results.append(q)
             await asyncio.sleep(1.2)  # same politeness delay used elsewhere in this codebase
 
@@ -292,7 +326,7 @@ async def fetch_question_series_questions(now: datetime) -> list[BinaryQuestion]
 
 
 # ─── Step 1: Fetch questions ───────────────────────────────────────────────────
-async def fetch_questions() -> list[BinaryQuestion]:
+async def fetch_questions() -> list:
     # Load previously forecasted question IDs (mapped to the title we forecast
     # them under, so a recycled ID — genuinely a different question on
     # Metaculus's side — isn't silently treated as already-done).
@@ -310,7 +344,13 @@ async def fetch_questions() -> list[BinaryQuestion]:
 
     now = datetime.now(timezone.utc)
     api_filter = ApiFilter(
-        allowed_types=["binary"],
+        # CHANGED 2026-07-21: was ["binary"] only — silently excluded every
+        # multiple_choice and numeric question at the API level, regardless
+        # of tournament (this is what made Q44676, the SC Senate nominee
+        # MC question, categorically unreachable). See
+        # meta_forecast_gate.ALLOWED_QUESTION_TYPES for the single place
+        # this list is now mirrored for the client-side gate check.
+        allowed_types=["binary", "multiple_choice", "numeric"],
         allowed_statuses=["open"],
         allowed_tournaments=ALLOWED_TOURNAMENTS,
         close_time_gt=now,
@@ -350,7 +390,10 @@ async def fetch_questions() -> list[BinaryQuestion]:
                     api_filter=api_filter,
                     num_questions=actual_count,
                 )
-    binary = [q for q in questions if isinstance(q, BinaryQuestion)]
+    # CHANGED 2026-07-21: was isinstance(q, BinaryQuestion) only — kept the
+    # variable name "binary" for now to minimize the diff below, but it's
+    # really "candidates" going forward (holds all three accepted types).
+    binary = [q for q in questions if isinstance(q, (BinaryQuestion, MultipleChoiceQuestion, NumericQuestion))]
 
     # 2026-07-02: separate fetch path for question_series-type projects
     # (see fetch_question_series_questions() docstring for why) — merged in
@@ -384,10 +427,18 @@ async def fetch_questions() -> list[BinaryQuestion]:
     # always operating on None. Uses q.api_json (set by the
     # forecasting_tools client on fetch) — field path for binary confirmed
     # working elsewhere in this file (update_community_predictions).
+    #
+    # CHANGED 2026-07-21: was hardcoded extract_live_cp(..., "binary") and
+    # plain q.community_prediction_at_access_time = cp — both assumed
+    # binary-only. Now branches per-question via _question_type_str() and
+    # uses the pydantic-safe _set_cp() setter, since MC/numeric don't
+    # declare this field and raise on plain assignment (see _set_cp
+    # docstring).
     cp_found = 0
     for q in fresh:
-        cp = extract_live_cp(getattr(q, "api_json", None), "binary")
-        q.community_prediction_at_access_time = cp
+        q_type = _question_type_str(q)
+        cp = extract_live_cp(getattr(q, "api_json", None), q_type)
+        _set_cp(q, cp)
         if cp is not None:
             cp_found += 1
     print(f"  Live CP found for {cp_found}/{len(fresh)} questions before forecasting "
@@ -397,7 +448,11 @@ async def fetch_questions() -> list[BinaryQuestion]:
 
 
 # ─── Step 2: Build prompts ─────────────────────────────────────────────────────
-def build_user_prompt(question: BinaryQuestion) -> str:
+# CHANGED 2026-07-21: renamed from build_user_prompt to build_binary_prompt
+# now that this file has three type-specific prompt builders (binary/
+# multiple_choice/numeric) — see build_prompt_for_question() below, which
+# dispatches to whichever one matches the question's type.
+def build_binary_prompt(question: BinaryQuestion) -> str:
     live_data = detect_data_needs(question.question_text)
     live_data_text = format_live_data_for_prompt(live_data)
     has_live_data = bool(live_data)  # live_data.py only covers crypto/stock/
@@ -487,8 +542,401 @@ The last thing you write is: "Probability: ZZ%"
 """
 
 
+# ─── Step 2b: Multiple-choice prompt/parse (ported 2026-07-21) ────────────────
+# Ported near-verbatim from tournament_forecast_v2.py's build_multiple_choice_
+# prompt/parse_multiple_choice_response — deliberately NOT rewritten, since
+# the parser encodes a real, previously-live bug fix (Q44216, "≤45" vs
+# "Less than or equal to 45" failing to match and zeroing out a genuine
+# FutureEval submission) via _normalize_option_text's symbol-to-word
+# normalization, plus the iterative clamp-to-[0.001,0.999] logic that a
+# single clamp-then-renormalize pass doesn't correctly satisfy. Only
+# change from the v2 source: uses this file's research_question/
+# _set_research_text/_set_research_source (same functions, same imports,
+# already present in this file) instead of duplicating them.
+def build_multiple_choice_prompt(question: MultipleChoiceQuestion) -> str:
+    options_list = "\n".join(f"  - {opt}" for opt in question.options)
+
+    research_text, research_source = research_question(
+        question.question_text, question.background_info or "",
+        provider_order=["openrouter", "anthropic"], return_source=True,
+    )
+    _set_research_text(question, research_text)
+    _set_research_source(question, research_source)
+    has_research = research_text is not None
+    research_block = (
+        f"\nCURRENT RESEARCH (real-time web search, fetched for this question):\n{research_text}\n"
+        if has_research else ""
+    )
+
+    cp = getattr(question, "community_prediction_at_access_time", None)
+    community = ""
+    if isinstance(cp, dict) and cp:
+        cp_lines = "\n".join(f"  {opt}: {p:.0%}" for opt, p in cp.items())
+        if has_research:
+            community = f"\nCurrent community probabilities:\n{cp_lines}\nIf your estimates differ substantially, explain why.\n"
+        else:
+            community = (
+                f"\nCurrent community probabilities:\n{cp_lines}\n"
+                "IMPORTANT: you have no research results for this question — "
+                "the community estimate reflects real people with access to "
+                "current information you don't have. Stay reasonably close "
+                "to it unless the background/resolution text above gives a "
+                "specific, concrete reason to diverge.\n"
+            )
+
+    no_data_note = ""
+    if not has_research:
+        no_data_note = (
+            "\nNOTE: No research results were found for this question. You "
+            "have no current information beyond the static text above.\n"
+        )
+
+    return f"""Question: {question.question_text}
+
+Background:
+{question.background_info or 'No background provided'}
+
+Resolution criteria:
+{question.resolution_criteria or 'No resolution criteria provided'}
+
+{question.fine_print or ''}
+
+Options:
+{options_list}
+{research_block}
+{no_data_note}
+{community}
+Today is {datetime.now().strftime("%Y-%m-%d")}.
+
+This is a MULTIPLE CHOICE forecasting question. Reason through each option carefully.
+
+Before answering write:
+(a) Time left until resolution
+(b) Most likely outcome and why
+(c) Key uncertainties that could change the outcome — only cite a specific
+    precedent or named source if it appears word-for-word in the
+    Background/Resolution criteria/Research above.
+
+Then assign a probability to each option. Probabilities must sum to exactly 100%.
+End with exactly this format (one line per option):
+Option probabilities:
+<option>: <number>%
+<option>: <number>%
+...
+"""
+
+
+def _normalize_option_text(s: str) -> str:
+    """Normalize an option label (or Claude's generated option text) so
+    symbolic and worded versions of the same comparison are recognized as
+    equal — e.g. '≤45' and 'Less than or equal to 45' must match. This is
+    exactly the bug that zeroed out a real FutureEval submission on
+    2026-06-29 (Q44216) — ported from tournament_forecast_v2.py."""
+    s = s.strip().lower()
+    replacements = [
+        ("≤", " less than or equal to "),
+        ("<=", " less than or equal to "),
+        ("≥", " greater than or equal to "),
+        (">=", " greater than or equal to "),
+        ("<", " less than "),
+        (">", " greater than "),
+    ]
+    for sym, word in replacements:
+        s = s.replace(sym, word)
+    s = re.sub(r"[^\w\s]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def parse_multiple_choice_response(text: str, options: list[str]) -> dict[str, float] | None:
+    """Parse option probabilities from Claude's response. Ported from
+    tournament_forecast_v2.py's parse_multiple_choice_response, adapted
+    to take `options: list[str]` directly rather than a question object
+    (this file's batch --check path reconstructs results from persisted
+    batch_info, not a live question object — see submit_batch's
+    options_by_question)."""
+    lines = text.split('\n')
+    start = None
+    for i, line in enumerate(lines):
+        if 'option probabilities' in line.lower():
+            start = i + 1
+            break
+    if start is None:
+        return None
+
+    probs: dict[str, float] = {}
+    unmatched_mass = 0.0
+    unmatched_examples = []
+
+    for line in lines[start:]:
+        line = line.strip()
+        if not line:
+            continue
+        match = re.match(r'^(.+?):\s*(\d+\.?\d*)\s*%?$', line)
+        if not match:
+            continue
+        option_text = match.group(1).strip()
+        prob = float(match.group(2)) / 100
+
+        matched_opt = next((opt for opt in options if opt.lower() == option_text.lower()), None)
+        if matched_opt is None:
+            matched_opt = next(
+                (opt for opt in options
+                 if opt.lower() in option_text.lower() or option_text.lower() in opt.lower()),
+                None
+            )
+        if matched_opt is None:
+            norm_option_text = _normalize_option_text(option_text)
+            matched_opt = next(
+                (opt for opt in options if _normalize_option_text(opt) == norm_option_text), None
+            )
+            if matched_opt is None:
+                matched_opt = next(
+                    (opt for opt in options
+                     if _normalize_option_text(opt) in norm_option_text
+                     or norm_option_text in _normalize_option_text(opt)),
+                    None
+                )
+
+        if matched_opt is not None:
+            probs[matched_opt] = probs.get(matched_opt, 0.0) + prob
+        else:
+            unmatched_mass += prob
+            unmatched_examples.append(option_text)
+
+    if not probs:
+        return None
+
+    if unmatched_mass > 0.05:
+        print(f"    ⚠️  {unmatched_mass:.0%} of probability mass couldn't be matched to a known "
+              f"option (unrecognized: {unmatched_examples}) — rejecting forecast")
+        return None
+
+    for opt in options:
+        probs.setdefault(opt, 0.0)
+    total = sum(probs.values())
+    if total <= 0:
+        return None
+    normalized = {opt: probs[opt] / total for opt in options}
+
+    clamped = dict(normalized)
+    for _ in range(10):
+        clamped = {opt: min(max(v, 0.001), 0.999) for opt, v in clamped.items()}
+        clamped_total = sum(clamped.values())
+        if clamped_total <= 0:
+            break
+        clamped = {opt: v / clamped_total for opt, v in clamped.items()}
+        if all(0.001 <= v <= 0.999 for v in clamped.values()):
+            break
+    return clamped
+
+
+# ─── Step 2c: Numeric prompt/parse (ported 2026-07-21, NEW to batch mode) ─────
+# CHANGED 2026-07-21: numeric support does NOT exist yet anywhere on the
+# Batch API path in this codebase — meta_refresh_forecast.py explicitly
+# leaves NumericQuestion unsupported (see its module docstring), and only
+# tournament_forecast_v2.py's SYNCHRONOUS path has it. The prompt/parse
+# logic below is ported near-verbatim from there (including the
+# reverse-scan fix for grabbing the wrong "low"/"median"/"high" line, the
+# magnitude-shorthand recovery for "89.4B"-style answers, and the
+# iterative bounds-clamp), but the BATCH persistence needed to reconstruct
+# a CDF from a --check run — potentially a separate process, possibly the
+# next day — is new: see submit_batch's numeric_bounds tracking below.
+def build_numeric_prompt(question: NumericQuestion) -> str:
+    unit = question.unit_of_measure or ""
+    lower = question.lower_bound
+    upper = question.upper_bound
+    open_lower = question.open_lower_bound
+    open_upper = question.open_upper_bound
+
+    bounds_desc = f"Range: {lower} to {upper} {unit}".strip()
+    if open_lower:
+        bounds_desc += " (lower bound is open — values below are possible)"
+    if open_upper:
+        bounds_desc += " (upper bound is open — values above are possible)"
+
+    live_data = detect_data_needs(question.question_text)
+    live_data_text = format_live_data_for_prompt(live_data)
+    has_live_data = bool(live_data)
+
+    research_text, research_source = research_question(
+        question.question_text, question.background_info or "",
+        provider_order=["openrouter", "anthropic"], return_source=True,
+    )
+    _set_research_text(question, research_text)
+    _set_research_source(question, research_source)
+    has_research = research_text is not None
+    research_block = (
+        f"\nCURRENT RESEARCH (real-time web search, fetched for this question):\n{research_text}\n"
+        if has_research else ""
+    )
+    has_real_grounding = has_live_data or has_research
+
+    cp = getattr(question, "community_prediction_at_access_time", None)
+    community = ""
+    if cp is not None:
+        if has_real_grounding:
+            community = f"\nCurrent community median estimate: {cp:,.2f} {unit}. If your median differs substantially, explain why.\n"
+        else:
+            community = (
+                f"\nCurrent community median estimate: {cp:,.2f} {unit}. "
+                "IMPORTANT: you have no live data or research for this "
+                "question — the community estimate reflects real people "
+                "with access to current information you don't have. Stay "
+                "reasonably close to it unless the background/resolution "
+                "text above gives a specific, concrete reason to diverge.\n"
+            )
+
+    no_data_note = ""
+    if not has_real_grounding:
+        no_data_note = (
+            "\nNOTE: No live market data and no research results were found "
+            "for this question. You have no current information beyond the "
+            "static text above.\n"
+        )
+
+    return f"""Question: {question.question_text}
+
+Background:
+{question.background_info or 'No background provided'}
+
+Resolution criteria:
+{question.resolution_criteria or 'No resolution criteria provided'}
+
+{question.fine_print or ''}
+
+{bounds_desc}
+{live_data_text}
+{research_block}
+{no_data_note}
+{community}
+Today is {datetime.now().strftime("%Y-%m-%d")}.
+
+This is a NUMERIC forecasting question. Reason through it carefully, then provide your estimate.
+
+Before answering write:
+(a) Time left until resolution
+(b) Most likely outcome and why
+(c) What would push the value lower?
+(d) What would push the value higher?
+(e) Base rate or historical reference values — only cite a specific
+    precedent, named source, or past value if it appears word-for-word in
+    the Background/Resolution criteria/Research above, otherwise say "No
+    reliable base rate available" and proceed on priors.
+
+Then end with exactly these three lines. Write each number IN FULL, matching
+the scale of the range given above — do NOT abbreviate with "B", "M", "K",
+"billion", "million", etc. (e.g. if the range above is in the billions,
+write 89400000000, not 89.4 or 89.4B):
+Low (10th percentile): <number>
+Median (50th percentile): <number>
+High (90th percentile): <number>
+"""
+
+
+def parse_numeric_response(text: str, bounds: dict) -> list[float] | None:
+    """Ported from tournament_forecast_v2.py's parse_numeric_response,
+    adapted to take a plain `bounds` dict (lower_bound, upper_bound,
+    open_lower_bound, open_upper_bound, cdf_size) instead of a live
+    NumericQuestion object — same reason as parse_multiple_choice_response
+    above: the --check path reconstructs from persisted batch_info, which
+    may run in a separate process after the original question object is
+    long gone."""
+    low = median = high = None
+    for line in reversed(text.split('\n')):
+        l = line.lower()
+        nums = re.findall(r'-?\d[\d,]*\.?\d*', line)
+        nums = [float(n.replace(',', '')) for n in nums]
+        if not nums:
+            continue
+        if 'low' in l and '10' in l and low is None:
+            low = nums[-1]
+        elif 'median' in l and '50' in l and median is None:
+            median = nums[-1]
+        elif 'high' in l and '90' in l and high is None:
+            high = nums[-1]
+
+    if None in (low, median, high):
+        return None
+
+    lower = bounds["lower_bound"]
+    upper = bounds["upper_bound"]
+
+    CLAMP_TOLERANCE = 0.20
+    if median < lower * (1 - CLAMP_TOLERANCE) or median > upper * (1 + CLAMP_TOLERANCE):
+        for _mag_name, _mag in (("thousand", 1e3), ("million", 1e6), ("billion", 1e9), ("trillion", 1e12)):
+            _low, _median, _high = low * _mag, median * _mag, high * _mag
+            if lower * (1 - CLAMP_TOLERANCE) <= _median <= upper * (1 + CLAMP_TOLERANCE):
+                print(f"    ℹ️  Recovered likely '{_mag_name}'-shorthand answer: "
+                      f"median {median} -> {_median} (now within bounds [{lower}, {upper}])")
+                low, median, high = _low, _median, _high
+                break
+        else:
+            print(f"    ⚠️  Parsed median {median} is >20% outside question bounds "
+                  f"[{lower}, {upper}] — likely a unit error, rejecting")
+            return None
+    if low < lower or high > upper or median < lower or median > upper:
+        old_low, old_median, old_high = low, median, high
+        low    = max(low, lower)
+        median = max(min(median, upper), lower)
+        high   = min(high, upper)
+        print(f"    ℹ️  Clamped percentiles to question bounds [{lower}, {upper}]: "
+              f"({old_low}, {old_median}, {old_high}) -> ({low}, {median}, {high})")
+
+    if not (low <= median <= high):
+        print(f"    ⚠️  Parsed percentiles not ordered after clamping "
+              f"(low={low}, median={median}, high={high}) — rejecting")
+        return None
+
+    std = (high - low) / (2 * 1.2816)
+    mean = median
+    if std <= 0:
+        std = abs(mean) * 0.1 + 0.01
+
+    cdf_size = bounds["cdf_size"]
+    start_val = 0.001 if bounds["open_lower_bound"] else 0.0
+    end_val   = 0.999 if bounds["open_upper_bound"] else 1.0
+
+    def normal_cdf(x, mu, sigma):
+        return 0.5 * (1 + math.erf((x - mu) / (sigma * math.sqrt(2))))
+
+    raw = []
+    for i in range(cdf_size):
+        x = lower + (upper - lower) * i / (cdf_size - 1)
+        raw.append(normal_cdf(x, mean, std))
+
+    raw_min, raw_max = raw[0], raw[-1]
+    if raw_max <= raw_min:
+        raw_max = raw_min + 1e-6
+    cdf = [start_val + (v - raw_min) / (raw_max - raw_min) * (end_val - start_val) for v in raw]
+
+    min_step = (end_val - start_val) / (cdf_size * 10)
+    for i in range(1, len(cdf)):
+        if cdf[i] - cdf[i-1] < min_step:
+            cdf[i] = cdf[i-1] + min_step
+
+    if cdf[-1] > end_val:
+        scale = end_val / cdf[-1]
+        cdf = [v * scale for v in cdf]
+        cdf[0] = max(cdf[0], start_val)
+
+    return cdf
+
+
+# ─── Step 2d: Prompt dispatch ──────────────────────────────────────────────────
+def build_prompt_for_question(question) -> str:
+    """Single dispatch point added 2026-07-21 so submit_batch doesn't need
+    its own isinstance branching — routes to whichever of the three
+    type-specific builders matches the question."""
+    if isinstance(question, MultipleChoiceQuestion):
+        return build_multiple_choice_prompt(question)
+    if isinstance(question, NumericQuestion):
+        return build_numeric_prompt(question)
+    return build_binary_prompt(question)
+
+
 # ─── Step 3: Submit batch ──────────────────────────────────────────────────────
-async def submit_batch(questions: list[BinaryQuestion]) -> str:
+async def submit_batch(questions: list) -> str:
     ensure_batch_dir()
     # Switched 2026-07-04 to the padded batch variant — the base prompt
     # (still used by tournament_forecast.py, untouched) was only ~990
@@ -519,7 +967,9 @@ async def submit_batch(questions: list[BinaryQuestion]) -> str:
                 "model": MODEL,
                 "max_tokens": MAX_TOKENS,
                 "system": cached_system,
-                "messages": [{"role": "user", "content": build_user_prompt(q)}]
+                # CHANGED 2026-07-21: was build_user_prompt(q) (binary-only)
+                # — now dispatches per-type via build_prompt_for_question.
+                "messages": [{"role": "user", "content": build_prompt_for_question(q)}]
             }
         })
 
@@ -608,7 +1058,43 @@ async def submit_batch(questions: list[BinaryQuestion]) -> str:
         "categories": {
             custom_id: [c.name for c in q.categories] if q.categories else []
             for custom_id, q in question_map.items()
-        }
+        },
+        # ADDED 2026-07-21 alongside multiple_choice/numeric support.
+        # question_types defaults to "binary" on read (see check_batch)
+        # for every batch_jobs file submitted before this date, since
+        # those were all binary anyway — same backward-compat pattern
+        # meta_refresh_forecast.py already uses for its own question_types
+        # key.
+        "question_types": {
+            custom_id: _question_type_str(q)
+            for custom_id, q in question_map.items()
+        },
+        # MC options, VERBATIM as returned by the API — needed by
+        # check_batch/parse_multiple_choice_response to match Claude's
+        # answer back to real option labels. None for non-MC questions.
+        "options_by_question": {
+            custom_id: (list(q.options) if isinstance(q, MultipleChoiceQuestion) else None)
+            for custom_id, q in question_map.items()
+        },
+        # Numeric bounds, needed by check_batch/parse_numeric_response to
+        # reconstruct the CDF from Claude's low/median/high answer — this
+        # is the "new to batch mode" persistence mentioned in
+        # build_numeric_prompt's comment above, since --check may run in a
+        # separate process, possibly the next day, well after this
+        # NumericQuestion object is gone. None for non-numeric questions.
+        "numeric_bounds": {
+            custom_id: (
+                {
+                    "lower_bound": q.lower_bound,
+                    "upper_bound": q.upper_bound,
+                    "open_lower_bound": q.open_lower_bound,
+                    "open_upper_bound": q.open_upper_bound,
+                    "cdf_size": q.cdf_size,
+                    "unit_of_measure": q.unit_of_measure,
+                } if isinstance(q, NumericQuestion) else None
+            )
+            for custom_id, q in question_map.items()
+        },
     }
 
     timestamped_file = os.path.join(BATCH_DIR, f"batch_jobs_{timestamp}.json")
@@ -655,52 +1141,91 @@ async def check_batch():
     for result in client_anthropic.messages.batches.results(batch_id):
         custom_id = result.custom_id
 
+        # CHANGED 2026-07-21: q_type/options/bounds now read from batch_info
+        # (added in submit_batch) instead of assuming binary. .get(...,
+        # "binary") default preserves correct behavior for any
+        # batch_jobs_*.json submitted before this date, which was all
+        # binary anyway and has no "question_types" key at all.
+        q_type = batch_info.get("question_types", {}).get(custom_id, "binary")
+        mc_options = (batch_info.get("options_by_question", {}) or {}).get(custom_id)
+        num_bounds = (batch_info.get("numeric_bounds", {}) or {}).get(custom_id)
+
+        # CHANGED 2026-07-21: base_entry fields shared by every branch,
+        # then each type adds its own value-carrying key on top — kept
+        # "probability" (binary, float) and "probabilities" (multiple_
+        # choice, dict) exactly matching meta_refresh_forecast.py's
+        # existing convention so meta_dashboard.py/meta_coverage_check.py/
+        # meta_calibration_report.py (which already know how to read
+        # refresh-batch results in this shape) don't need any changes to
+        # also read main-batch results. "cdf" is new for numeric — no
+        # prior convention exists since numeric was never in batch mode
+        # before this. "submitted_forecast" is kept too (this file's own
+        # pre-existing field, matches tournament_forecast.py) and is set
+        # to whichever type-specific value applies.
+        base_entry = {
+            "question_id":   batch_info['question_ids'][custom_id],
+            "post_id":       batch_info.get('post_ids', {}).get(custom_id),
+            "question_text": batch_info['question_texts'][custom_id],
+            "question_type": q_type,
+            "community_prediction": batch_info.get("community_predictions", {}).get(custom_id),
+            "research_text": batch_info.get("research_texts", {}).get(custom_id),
+            "research_source": batch_info.get("research_sources", {}).get(custom_id),
+        }
+
         if result.result.type == "succeeded":
             text = result.result.message.content[0].text
             usage = getattr(result.result.message, "usage", None)
             if usage is not None:
                 total_cache_read += getattr(usage, "cache_read_input_tokens", 0) or 0
                 total_cache_write += getattr(usage, "cache_creation_input_tokens", 0) or 0
-            prob = None
-            for line in reversed(text.split('\n')):
-                if 'probability:' in line.lower():
-                    numbers = re.findall(r'\d+\.?\d*', line)
-                    if numbers:
-                        prob = float(numbers[-1]) / 100
-                        prob = max(0.01, min(0.99, prob))
-                        break
 
-            results[custom_id] = {
-                "question_id":   batch_info['question_ids'][custom_id],
-                "post_id":       batch_info.get('post_ids', {}).get(custom_id),
-                "question_text": batch_info['question_texts'][custom_id],
-                "question_type": "binary",
-                "probability":   prob,
-                "submitted_forecast": prob,  # standardized field name, matches tournament_forecast.py
-                "reasoning":     text,
-                # Was previously only in batch_info (the jobs file), making
-                # the results file look CP-blind on its own. Saved here too
-                # now — also reflects the pre-forecast value if the live
-                # prefetch in fetch_questions() found one.
-                "community_prediction": batch_info.get("community_predictions", {}).get(custom_id),
-                "research_text": batch_info.get("research_texts", {}).get(custom_id),
-                "research_source": batch_info.get("research_sources", {}).get(custom_id),
-                "status":        "success"
-            }
+            if q_type == "multiple_choice" and mc_options:
+                probs = parse_multiple_choice_response(text, mc_options)
+                results[custom_id] = {
+                    **base_entry,
+                    "probabilities": probs,
+                    "submitted_forecast": probs,
+                    "reasoning": text,
+                    "status": "success" if probs is not None else "parse_failed",
+                }
+            elif q_type == "numeric" and num_bounds:
+                cdf = parse_numeric_response(text, num_bounds)
+                results[custom_id] = {
+                    **base_entry,
+                    "cdf": cdf,
+                    "submitted_forecast": cdf,
+                    "reasoning": text,
+                    "status": "success" if cdf is not None else "parse_failed",
+                }
+            else:
+                # binary (or MC/numeric missing its persisted options/
+                # bounds — falls back here rather than crashing, though
+                # that will just fail to find a "Probability:" line and
+                # come back None)
+                prob = None
+                for line in reversed(text.split('\n')):
+                    if 'probability:' in line.lower():
+                        numbers = re.findall(r'\d+\.?\d*', line)
+                        if numbers:
+                            prob = max(0.01, min(0.99, float(numbers[-1]) / 100))
+                            break
+                results[custom_id] = {
+                    **base_entry,
+                    "question_type": "binary",  # correct mislabeled MC/numeric-without-metadata cases
+                    "probability": prob,
+                    "submitted_forecast": prob,
+                    "reasoning": text,
+                    "status": "success" if prob is not None else "parse_failed",
+                }
         else:
-            results[custom_id] = {
-                "question_id":   batch_info['question_ids'][custom_id],
-                "post_id":       batch_info.get('post_ids', {}).get(custom_id),
-                "question_text": batch_info['question_texts'][custom_id],
-                "question_type": "binary",
-                "probability":   None,
-                "submitted_forecast": None,
-                "community_prediction": batch_info.get("community_predictions", {}).get(custom_id),
-                "research_text": batch_info.get("research_texts", {}).get(custom_id),
-                "research_source": batch_info.get("research_sources", {}).get(custom_id),
-                "status":        "failed",
-                "error":         str(result.result)
-            }
+            entry = {**base_entry, "status": "failed", "error": str(result.result), "submitted_forecast": None}
+            if q_type == "multiple_choice":
+                entry["probabilities"] = None
+            elif q_type == "numeric":
+                entry["cdf"] = None
+            else:
+                entry["probability"] = None
+            results[custom_id] = entry
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
     timestamped_results = os.path.join(BATCH_DIR, f"batch_results_{timestamp}.json")
@@ -755,9 +1280,18 @@ async def submit_to_metaculus(results: dict, current_results_file: str = None):
     failed = 0
 
     for custom_id, result in results.items():
-        if result["status"] != "success" or result["probability"] is None:
+        # CHANGED 2026-07-21: was result["probability"] directly, which
+        # KeyErrors on MC (carries "probabilities") or numeric (carries
+        # "cdf") entries — same failure mode meta_refresh_forecast.py
+        # already found and fixed for its own batch path (see that file's
+        # "would KeyError on MC entries" comment). "submitted_forecast" is
+        # set to the right value for every type in check_batch above, so
+        # checking that instead covers all three uniformly.
+        q_type = result.get("question_type", "binary")
+        forecast_value = result.get("submitted_forecast")
+        if result["status"] != "success" or forecast_value is None:
             print(f"  ⚠️  {custom_id} (Q{result.get('question_id')}): dropped — "
-                  f"status={result['status']}, prob={result['probability']}")
+                  f"status={result['status']}, forecast={forecast_value}")
             failed += 1
             continue
 
@@ -775,13 +1309,30 @@ async def submit_to_metaculus(results: dict, current_results_file: str = None):
             print(f"       Now:        {result.get('question_text', '')[:90]}")
 
         try:
-            client_metaculus.post_binary_question_prediction(
-                question_id=q_id,
-                prediction_in_decimal=result["probability"]
-            )
-            print(f"  ✅ Q{q_id}: {result['probability']:.0%} — {result['question_text'][:50]}")
+            if q_type == "multiple_choice":
+                client_metaculus.post_multiple_choice_question_prediction(
+                    question_id=q_id,
+                    options_with_probabilities=forecast_value,
+                )
+                top = max(forecast_value, key=forecast_value.get)
+                summary = f"top='{top}' ({forecast_value[top]:.0%})"
+            elif q_type == "numeric":
+                client_metaculus.post_numeric_question_prediction(
+                    question_id=q_id,
+                    cdf_values=forecast_value,
+                )
+                median_idx = next((i for i, v in enumerate(forecast_value) if v >= 0.5), len(forecast_value) // 2)
+                summary = f"median idx {median_idx}/{len(forecast_value) - 1}"
+            else:
+                client_metaculus.post_binary_question_prediction(
+                    question_id=q_id,
+                    prediction_in_decimal=forecast_value,
+                )
+                summary = f"{forecast_value:.0%}"
+
+            print(f"  ✅ Q{q_id} ({q_type}): {summary} — {result['question_text'][:50]}")
             send_alert(
-                f"Q{q_id}: {result['probability']:.0%}\n{result['question_text'][:100]}",
+                f"Q{q_id} ({q_type}): {summary}\n{result['question_text'][:100]}",
                 title="New forecast submitted (batch)"
             )
             submitted += 1
@@ -815,9 +1366,13 @@ async def update_community_predictions():
     synchronous fetch-before-forecast path), so simple one-at-a-time
     calls with a politeness delay are fine and easier to reason about.
 
-    This script only ever forecasts BINARY questions (see fetch_questions's
-    allowed_types=["binary"] filter) — extract_live_cp is always called
-    with "binary" here for that reason.
+    CHANGED 2026-07-21: this script used to only ever forecast BINARY
+    questions (fetch_questions's allowed_types=["binary"] filter), so
+    extract_live_cp was always called with "binary" here. Now branches
+    per-question via batch_info["question_types"] (added in submit_batch)
+    — calling extract_live_cp with the wrong type string for an MC
+    question would have silently returned None or a garbage value instead
+    of the real per-option dict.
 
     post_id is only available for batches submitted after this same date
     (see submit_batch's post_ids field, added alongside this fix) — older
@@ -875,13 +1430,16 @@ async def update_community_predictions():
                             break
 
                         data = await resp.json()
-                        cp = extract_live_cp(data, "binary")
+                        q_type = batch_info.get("question_types", {}).get(custom_id, "binary")
+                        cp = extract_live_cp(data, q_type)
 
                         if cp is not None:
                             community_preds[custom_id] = cp
                             updated += 1
                             q_text = batch_info.get("question_texts", {}).get(custom_id, "")[:50]
-                            print(f"  ✅ post {post_id} (Q{q_id}): {cp:.0%} — {q_text}")
+                            # cp is a dict for multiple_choice, a float for binary/numeric
+                            cp_str = ", ".join(f"{k}: {v:.0%}" for k, v in cp.items()) if isinstance(cp, dict) else f"{cp:.0%}"
+                            print(f"  ✅ post {post_id} (Q{q_id}): {cp_str} — {q_text}")
                         else:
                             still_hidden += 1
                         break
