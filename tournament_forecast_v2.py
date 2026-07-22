@@ -315,7 +315,7 @@ def _set_research_text(obj, text) -> None:
     stored research_text at all (only reasoning), so the dashboard's
     detail page — which reads (local_r or {}).get("research_text", "")
     per record — has been silently showing nothing for every question
-    this file has ever forecast. bf.build_user_prompt() already sets this
+    this file has ever forecast. bf.build_binary_prompt() already sets this
     for binary questions on the same object build_binary_prompt() passes
     through; this covers numeric/multiple_choice the same way."""
     try:
@@ -334,11 +334,11 @@ def _set_research_source(obj, source) -> None:
     (research_source_used) than meta_batch_forecast.py's own equivalent
     helper — confirmed via reading that file directly — which uses
     research_source_at_access_time and already sets it inside
-    bf.build_user_prompt() (called by build_binary_prompt() below on the
+    bf.build_binary_prompt() (called by build_binary_prompt() below on the
     SAME question object). Renamed to match exactly, so binary/numeric/
     multiple_choice all converge on one attribute regardless of which
     code path set it — run() only needs to read one name now, and binary
-    questions are covered "for free" via bf.build_user_prompt() without
+    questions are covered "for free" via bf.build_binary_prompt() without
     needing any changes to that shared production file.
 
     Set on the question object itself (not returned from the builder
@@ -924,7 +924,7 @@ async def fetch_tournament_questions(simulate_now: datetime | None = None, dry_r
 
 # ─── Step 2a: Binary forecasting ──────────────────────────────────────────────
 def build_binary_prompt(question: BinaryQuestion) -> str:
-    return bf.build_user_prompt(question)
+    return bf.build_binary_prompt(question)
 
 
 def parse_binary_response(text: str) -> float | None:
@@ -1640,7 +1640,7 @@ async def run(dry_run: bool = False, simulate_now: datetime | None = None):
         # None) actually served the research call for this question — set
         # via _set_research_source() inside build_numeric_prompt()/
         # build_multiple_choice_prompt(), OR (2026-07-13, gap closed)
-        # already set by bf.build_user_prompt() for binary questions —
+        # already set by bf.build_binary_prompt() for binary questions —
         # confirmed by reading meta_batch_forecast.py directly: it uses
         # the exact same attribute name (research_source_at_access_time),
         # so this one getattr covers all three question types with no
