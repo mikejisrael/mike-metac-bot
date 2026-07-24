@@ -1,18 +1,14 @@
 {
-  "checked_at": "2026-07-23T14:02:19.770568+00:00",
+  "checked_at": "2026-07-24T14:02:14.366580+00:00",
   "tournaments": {
     "FutureEval": {
       "tournament_id": 33022,
       "fetch_method": "allowed_tournaments",
       "unverified_fetch_scope": false,
-      "open_count": 1,
+      "open_count": 0,
       "forecasted_count": 0,
-      "missing_gated_ids": [
-        44911
-      ],
-      "missing_gated_reasons": {
-        "too_new_to_flag": 1
-      },
+      "missing_gated_ids": [],
+      "missing_gated_reasons": {},
       "missing_real_ids": []
     },
     "Market Pulse Challenge 26Q3": {
@@ -364,9 +360,8 @@
     }
   },
   "total_gaps": 81,
-  "total_gated": 127,
+  "total_gated": 126,
   "total_gated_reasons": {
-    "too_new_to_flag": 1,
     "too_far_out": 118,
     "wrong_type": 7,
     "too_few_forecasters": 1

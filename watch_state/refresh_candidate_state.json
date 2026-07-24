@@ -28,5 +28,11 @@
     "reasons": [
       "closing in 23h, forecast 4.6d old"
     ]
+  },
+  "43716": {
+    "alerted_at": "2026-07-24T14:08:04.105592+00:00",
+    "reasons": [
+      "closing in 45h, forecast 15.2d old"
+    ]
   }
 }
