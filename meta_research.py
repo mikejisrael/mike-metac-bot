@@ -72,12 +72,27 @@ forecaster. If verification itself fails or returns nothing usable, we
 fall back to the original unverified text rather than losing the
 research entirely — same graceful-degradation philosophy as the rest of
 this module. This runs regardless of which provider produced the raw text.
+
+BUGFIX 2026-07-24: _verify_research previously relied on the model
+reliably echoing the input text "unchanged, word-for-word" when it found
+no contradictions. It didn't — it frequently wrote its own commentary
+about the summary instead (e.g. "I've reviewed the summary... no
+contradictions detected..."), and that commentary silently overwrote the
+real research, reaching forecasters as if it were the actual findings.
+Confirmed on post_id 44652 (World Humanoid Robot Games 1,500m question,
+2026-07-23 run) and at least one other saved batch. Fixed by having the
+model emit a fixed marker instead of attempting to reproduce text, with
+the original raw_text returned by CODE (not the model) whenever no
+contradiction is found. research_question() also gained an optional
+return_raw flag so callers can log pre-verification text going forward.
 """
 
 import os
 import requests
 import anthropic
 from dotenv import load_dotenv
+
+from meta_alerts import send_alert
 
 load_dotenv()
 
@@ -120,6 +135,28 @@ def _verify_research(raw_text: str, question_text: str, timeout: int = 20) -> st
     if not api_key or not raw_text:
         return raw_text
 
+    # FIXED 2026-07-24: this prompt used to instruct the model to "return
+    # the summary UNCHANGED, word-for-word" when no contradiction was
+    # found, and we'd save whatever text came back as the verified
+    # research. In practice Haiku doesn't reliably echo text verbatim even
+    # when told to — it tends to write ITS OWN commentary about the
+    # summary instead (e.g. "I've reviewed the summary... no contradictions
+    # detected... The summary consistently references: ..."), and THAT
+    # commentary was silently overwriting the real research and reaching
+    # the forecaster. Confirmed 2026-07-24 on post_id 44652 (World Humanoid
+    # Robot Games 1,500m question): research_text in the saved batch JSON
+    # was entirely Haiku's meta-commentary, not Gemini's actual search
+    # findings, which likely caused the 7% vs. 73.9% CP divergence Mike
+    # flagged. Same signature found in other saved batches (e.g. the
+    # 2026-07-13 Maine Senate race question).
+    #
+    # Fix: never trust the model to reproduce text unchanged. Ask it to
+    # emit a fixed marker when nothing's wrong, and let the CODE (not the
+    # model) decide whether to return the original raw_text or the
+    # model's rewrite. Only a genuine contradiction rewrite ever replaces
+    # raw_text now.
+    NO_CHANGES_MARKER = "NO_CHANGES_FOUND"
+
     prompt = (
         f"Forecasting question: {question_text}\n\n"
         f"Research summary to check:\n{raw_text}\n\n"
@@ -128,16 +165,17 @@ def _verify_research(raw_text: str, question_text: str, timeout: int = 20) -> st
         "or time periods (e.g. one figure said to be from 'May' and the same "
         "number later said to be from 'April'; a year-to-date total that "
         "decreases and then jumps inconsistently across sequential dates).\n\n"
-        "If you find no contradictions, return the summary UNCHANGED, "
-        "word-for-word.\n\n"
-        "If you find contradictions, rewrite the summary: keep all "
-        "non-contradictory content as-is, resolve each contradiction by "
-        "preferring the figure with the most recent or most specific date, "
-        "and add one short line at the end stating exactly what you "
-        "discarded and why (e.g. 'Note: discarded an earlier 40.8 figure "
-        "misattributed to May; June's confirmed value is 43.6.'). If the "
-        "contradiction can't be resolved from the text given, say so "
-        "explicitly in that same line rather than guessing."
+        f'If you find NO contradictions, respond with EXACTLY the single '
+        f'word {NO_CHANGES_MARKER} and nothing else — do not repeat, '
+        f"summarize, or comment on the text.\n\n"
+        "If you DO find contradictions, respond with the rewritten summary "
+        "only: keep all non-contradictory content as-is, resolve each "
+        "contradiction by preferring the figure with the most recent or "
+        "most specific date, and add one short line at the end stating "
+        "exactly what you discarded and why (e.g. 'Note: discarded an "
+        "earlier 40.8 figure misattributed to May; June's confirmed value "
+        "is 43.6.'). If the contradiction can't be resolved from the text "
+        "given, say so explicitly in that same line rather than guessing."
     )
 
     try:
@@ -151,8 +189,15 @@ def _verify_research(raw_text: str, question_text: str, timeout: int = 20) -> st
             block.text for block in response.content
             if getattr(block, "type", None) == "text"
         ]
-        verified = "\n".join(text_parts).strip()
-        return verified if verified else raw_text
+        result = "\n".join(text_parts).strip()
+
+        if not result:
+            return raw_text
+        if result == NO_CHANGES_MARKER or NO_CHANGES_MARKER in result:
+            # Model confirmed no contradictions — return the ORIGINAL text,
+            # never whatever the model wrote alongside/instead of the marker.
+            return raw_text
+        return result
 
     except Exception as e:
         print(f"  ⚠️  Research verification failed (non-fatal, using unverified research): {e}")
@@ -279,12 +324,57 @@ _PROVIDER_FUNCS = {
 }
 
 
+# SAFETY NET added 2026-07-24, alongside the _verify_research fix above.
+# The 2026-06-30 through 2026-07-23 bug had a distinctive fingerprint:
+# _verify_research's broken output consistently talked ABOUT the research
+# ("I have reviewed the summary...", "no contradictions detected...",
+# "the summary is accurate...") rather than containing actual research
+# content. Real web-search output essentially never contains these
+# phrases — they're specific to the verification prompt's own framing,
+# not to any real-world topic. Mike noticed in hindsight that Haiku
+# apparently ALWAYS reported "no contradiction found" and never once
+# genuinely rewrote anything — itself a clue something was off, since a
+# check that never fires is either working perfectly or not really
+# checking anything.
+#
+# This is deliberately narrow (exact phrases from the known incident, not
+# a general "does this look like research" classifier) — it's a tripwire
+# for THIS failure mode recurring, not a substitute for _verify_research
+# actually being correct. If it fires, treat it as a bug alert, not
+# something to silently work around.
+_COMMENTARY_SIGNATURES = (
+    "no contradictions detected",
+    "no contradiction detected",
+    "no contradictions found",
+    "i have reviewed the summary",
+    "i've reviewed the summary",
+    "reviewed the summary for internal contradictions",
+    "the summary is accurate as written",
+    "the summary is accurate and internally consistent",
+    "contains no contradictions to resolve",
+)
+
+
+def _looks_like_verification_commentary(text: str) -> bool:
+    """Cheap heuristic: True if text appears to be _verify_research talking
+    ABOUT a summary rather than being research content itself. See the
+    _COMMENTARY_SIGNATURES comment above for the incident this guards
+    against. False positives are possible in theory but haven't been seen
+    in practice — these phrases are specific to the verification prompt's
+    own framing, not to real-world research topics."""
+    if not text:
+        return False
+    lowered = text.lower()
+    return any(sig in lowered for sig in _COMMENTARY_SIGNATURES)
+
+
 def research_question(
     question_text: str,
     background_info: str = "",
     timeout: int = 25,
     provider_order: list[str] | None = None,
     return_source: bool = False,
+    return_raw: bool = False,
 ):
     """
     Returns a short, current, search-grounded research summary for the
@@ -297,10 +387,23 @@ def research_question(
     (["anthropic"] only) if not given — this preserves exact prior
     behavior for any caller that doesn't explicitly opt in to OpenRouter.
 
-    return_source: if True, returns (text, source_name) instead of just
-    text. source_name is the provider string that actually produced the
-    result, or None if every provider in provider_order failed/was
-    unconfigured.
+    return_source: if True, includes source_name in the return value.
+    source_name is the provider string that actually produced the result,
+    or None if every provider in provider_order failed/was unconfigured.
+
+    return_raw: if True, includes the PRE-verification text (exactly what
+    the provider returned, before _verify_research touches it) in the
+    return value. Added 2026-07-24 after discovering _verify_research
+    could silently replace good research with its own commentary (see
+    comment in _verify_research) — this gives callers a way to log both
+    versions so that class of bug is visible in the data next time,
+    rather than only reconstructable after the fact from reasoning text.
+
+    Return shape depends on which flags are set:
+      neither            -> verified_text
+      return_source only  -> (verified_text, source)
+      return_raw only     -> (verified_text, raw_text)
+      both                -> (verified_text, source, raw_text)
     """
     order = provider_order or PROVIDER_ORDER_DEFAULT
 
@@ -313,6 +416,35 @@ def research_question(
         raw_text = func(question_text, background_info, timeout)
         if raw_text:
             verified = _verify_research(raw_text, question_text)
-            return (verified, provider) if return_source else verified
+            if _looks_like_verification_commentary(verified):
+                # Should be unreachable after the 2026-07-24 _verify_research
+                # fix (raw_text is now returned verbatim on the no-change
+                # path), so this firing means something upstream changed and
+                # the same bug pattern is back. Loud and unmissable on
+                # purpose — this exact signature caused weeks of silently
+                # degraded research before anyone noticed.
+                alert_msg = (
+                    f"Question: {question_text[:120]}\n"
+                    f"Provider: {provider}\n"
+                    f"Text: {verified[:200]}"
+                )
+                print(
+                    "  🚨 ALERT: research text for this question resembles "
+                    "verification COMMENTARY, not actual research content "
+                    "(matches known 2026-06-30 to 2026-07-23 bug signature). "
+                    f"Provider: {provider}. First 150 chars: {verified[:150]!r}"
+                )
+                send_alert(alert_msg, title="Research bug tripwire fired")
+            if return_source and return_raw:
+                return verified, provider, raw_text
+            if return_source:
+                return verified, provider
+            if return_raw:
+                return verified, raw_text
+            return verified
 
-    return (None, None) if return_source else None
+    if return_source and return_raw:
+        return None, None, None
+    if return_source or return_raw:
+        return None, None
+    return None
