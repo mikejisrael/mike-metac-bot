@@ -1,0 +1,40 @@
+{
+  "batch_id": "msgbatch_01Qb7MpfjPAgNUepqvDfCWqB",
+  "submitted_at": "2026-07-31T17:22:59.181618",
+  "batch_type": "refresh",
+  "num_requests": 1,
+  "question_ids": {
+    "refresh_43507_20260731": 43507
+  },
+  "post_ids": {
+    "refresh_43507_20260731": 43502
+  },
+  "question_texts": {
+    "refresh_43507_20260731": "Will Bitcoin trade above $120,000 before August 1, 2026?"
+  },
+  "original_probabilities": {
+    "refresh_43507_20260731": 0.13
+  },
+  "question_types": {
+    "refresh_43507_20260731": "binary"
+  },
+  "options_by_question": {},
+  "refresh_reasons": {
+    "refresh_43507_20260731": "manual refresh via dashboard"
+  },
+  "community_predictions": {
+    "refresh_43507_20260731": null
+  },
+  "research_texts": {
+    "refresh_43507_20260731": "Forecasts for Bitcoin reaching $120,000 by August 1, 2026, are generally low. Metaculus assigns a 0.5% chance to this outcome by August 2026, though a previous comment noted Bitcoin already surpassed $120,000 multiple times in 2025, most recently on October 10 [metaculus.com](https://www.metaculus.com/questions/43502/will-btc-hit-120k-by-aug-2026/). Another platform, Orrery, gives a 7% implied probability for Bitcoin reaching $120,000 by December 31, 2026 [orrery.me](https://orrery.me/markets/will-bitcoin-reach-120000-by-december-31-2026-625-425-562).\n\nThe $120,000 thesis is currently challenged by persistent U.S. wage growth (3.8% year-on-year in March), which could limit the Federal Reserve's rate cuts, thereby hindering risk assets like Bitcoin [twohootsandaholler.com](https://twohootsandaholler.com/article/bitcoin-s-120k-path-wage-growth-and-the-u-s-jobs-report). Macroeconomic risks like stagflation, with Brent crude oil above $100 a barrel, also present a bearish outlook [okawashashin.com](https://okawashashin.com/article/bitcoin-s-120k-path-wage-growth-and-the-u-s-jobs-report). Technically, Bitcoin has retreated from its 200-day moving average, with a breakdown below $75,000 indicating a broader trend shift [twohootsandaholler.com](https://twohootsandaholler.com/article/bitcoin-s-120k-path-wage-growth-and-the-u-s-jobs-report). Institutional demand, as indicated by the Coinbase Premium Index, has also shifted to a discount when Bitcoin rallied above $80,000 [news.nbtc.finance](https://news.nbtc.finance/bitcoin-options-traders-load-up-on-120k-strike-through-december-2026/)."
+  },
+  "research_sources": {
+    "refresh_43507_20260731": "openrouter"
+  },
+  "resolve_times": {
+    "refresh_43507_20260731": "2026-08-01T00:00:00+00:00"
+  },
+  "close_times": {
+    "refresh_43507_20260731": "2026-08-01T00:00:00+00:00"
+  }
+}
