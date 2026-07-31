@@ -18,6 +18,15 @@ Design notes:
   effect on the next scan cycle without restarting the bot.
 - benched_coins.json is the persistent state of what's currently benched
   and when each bench expires (auto-unbench/retest).
+- bench_history.json tracks the last time each coin was unbenched. This
+  is the fix for the "coins never come back off the bench" bug: a coin
+  can't be judged on a re-bench window made up of the exact same trades
+  that put it on the bench in the first place. Once a coin is unbenched
+  (cooldown expiry or manual override), it needs `window_trades` worth
+  of *fresh* closed trades - trades closed strictly after that unbench
+  timestamp - before it's eligible to be re-benched again. Until then,
+  run_bench_check() will leave it active even if its lifetime window
+  still looks bad, because that window is stale (pre-unbench) data.
 
 Integrate into bybit_sim.py:
 
@@ -40,11 +49,12 @@ from datetime import datetime, timedelta
 # ---------------------------------------------------------------------------
 # Paths - relative path matches bybit_sim.py's own DATA_DIR convention, so
 # this resolves correctly as long as it's run from the same working
-# directory (C:\Users\mikej\metac-bot-template\), same as bybit_sim.py.
+# directory (C:\Users\Mike\metac-bot-template\), same as bybit_sim.py.
 # ---------------------------------------------------------------------------
 DATA_DIR = "bybit_sim_data"
 CONFIG_PATH = os.path.join(DATA_DIR, "bench_config.json")
 BENCHED_PATH = os.path.join(DATA_DIR, "benched_coins.json")
+BENCH_HISTORY_PATH = os.path.join(DATA_DIR, "bench_history.json")
 BENCH_LOG_PATH = os.path.join(DATA_DIR, "bench_log.csv")
 
 DEFAULT_CONFIG = {
@@ -107,6 +117,32 @@ def save_benched(benched):
         json.dump(benched, f, indent=2)
 
 
+# ---------------------------------------------------------------------------
+# Bench history - last unbench timestamp per symbol. Persists across
+# bench/unbench cycles (unlike benched_coins.json, which only holds
+# CURRENTLY benched coins). Used to gate re-bench eligibility on fresh
+# post-unbench trade data.
+# ---------------------------------------------------------------------------
+
+def load_bench_history():
+    if not os.path.exists(BENCH_HISTORY_PATH):
+        return {}
+    with open(BENCH_HISTORY_PATH, "r") as f:
+        return json.load(f)
+
+
+def save_bench_history(history):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(BENCH_HISTORY_PATH, "w", newline='\n') as f:
+        json.dump(history, f, indent=2)
+
+
+def _record_unbench_history(symbol, when):
+    history = load_bench_history()
+    history[symbol] = when.isoformat(timespec="seconds")
+    save_bench_history(history)
+
+
 def is_benched(symbol):
     """Check bench status, auto-expiring if cooldown has passed."""
     benched = load_benched()
@@ -160,11 +196,15 @@ def _unbench(symbol, reason="manual"):
     if symbol in benched:
         del benched[symbol]
         save_benched(benched)
+        now = datetime.now()
+        _record_unbench_history(symbol, now)
         _log_event("UNBENCH", symbol, reason)
 
 
 def manually_unbench(symbol):
-    """Escape hatch if you want to override and re-enable a coin early."""
+    """Escape hatch if you want to override and re-enable a coin early.
+    Also resets the fresh-trade clock, same as an automatic unbench - the
+    coin gets a genuine new window before it can be re-benched."""
     _unbench(symbol, reason="manual override")
 
 
@@ -177,36 +217,60 @@ def _read_closed_trades(closed_trades_csv_path):
         return list(csv.DictReader(f))
 
 
-def _recent_trades_for_symbol(all_closed, symbol, window_trades):
-    """Returns the most recent `window_trades` closed trades for a symbol,
+def _recent_trades(trades, window_trades):
+    """Returns the most recent `window_trades` trades from the given list,
     sorted chronologically, using whichever date format each row has."""
-    matching = [c for c in all_closed if c["symbol"] == symbol]
-    matching.sort(key=lambda c: _parse_dt(c["close_date"], c["close_time"]))
-    return matching[-window_trades:]
+    ordered = sorted(trades, key=lambda c: _parse_dt(c["close_date"], c["close_time"]))
+    return ordered[-window_trades:]
 
 
 def evaluate_coin(symbol, all_closed, config=None):
     """Evaluate a single coin against current config. Returns a dict with
     the stats used, regardless of whether action was taken - useful for
-    a dashboard preview/debug view."""
+    a dashboard preview/debug view.
+
+    Re-bench eligibility is gated on FRESH trades only: if this coin has
+    been unbenched before, only trades closed after that unbench count
+    toward the window. This stops a coin from being instantly re-benched
+    off the back of the same losing trades that benched it last time,
+    before it's had any chance to trade again.
+    """
     cfg = config or load_config()
     all_for_symbol = [c for c in all_closed if c["symbol"] == symbol]
     total_trades = len(all_for_symbol)
 
+    history = load_bench_history()
+    last_unbenched_at_str = history.get(symbol)
+    last_unbenched_at = datetime.fromisoformat(last_unbenched_at_str) if last_unbenched_at_str else None
+
+    if last_unbenched_at is not None:
+        eligible_pool = [
+            c for c in all_for_symbol
+            if _parse_dt(c["close_date"], c["close_time"]) > last_unbenched_at
+        ]
+    else:
+        eligible_pool = all_for_symbol
+
+    has_min_history = total_trades >= cfg["min_trades_before_active"]
+    has_fresh_window = len(eligible_pool) >= cfg["window_trades"]
+
     result = {
         "symbol": symbol,
         "total_trades": total_trades,
-        "eligible": total_trades >= cfg["min_trades_before_active"],
+        "eligible": has_min_history and has_fresh_window,
         "window_trades": cfg["window_trades"],
         "window_wins": None,
         "window_win_rate_pct": None,
         "currently_benched": is_benched(symbol),
+        "last_unbenched_at": last_unbenched_at_str,
+        "fresh_trades_since_unbench": len(eligible_pool) if last_unbenched_at is not None else None,
+        "awaiting_fresh_data": last_unbenched_at is not None and not has_fresh_window,
     }
 
     if not result["eligible"]:
         return result
 
-    recent = _recent_trades_for_symbol(all_closed, symbol, cfg["window_trades"])
+    recent = _recent_trades(eligible_pool, cfg["window_trades"])
     wins = sum(1 for c in recent if c["outcome"] == "WIN")
     win_rate = (wins / len(recent) * 100) if recent else None
     result["window_wins"] = wins
@@ -238,8 +302,9 @@ def run_bench_check(closed_trades_csv_path):
             _bench(symbol, win_rate, cfg["window_trades"], cfg["cooldown_days"])
         # Note: we don't re-bench an already-benched coin even if it's
         # still underperforming - it stays benched until its cooldown
-        # naturally expires, at which point it gets a fresh window to
-        # prove itself again.
+        # naturally expires, at which point it needs a fresh window of
+        # post-unbench trades (not the same stale ones) to prove itself
+        # before it can be benched again.
 
     return results
 
@@ -250,9 +315,10 @@ if __name__ == "__main__":
     import sys
     path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(DATA_DIR, "closed_trades.csv")
     results = run_bench_check(path)
-    print(f"{'SYMBOL':<12}{'TRADES':<8}{'ELIGIBLE':<10}{'WINS':<6}{'WR%':<8}{'BENCHED':<8}")
+    print(f"{'SYMBOL':<12}{'TRADES':<8}{'ELIGIBLE':<10}{'WINS':<6}{'WR%':<8}{'BENCHED':<9}{'AWAITING':<10}")
     for r in results:
         wr_str = f"{r['window_win_rate_pct']:.1f}" if r['window_win_rate_pct'] is not None else "-"
         print(f"{r['symbol']:<12}{r['total_trades']:<8}{str(r['eligible']):<10}"
-              f"{str(r['window_wins']):<6}{wr_str:<8}{str(r['currently_benched']):<8}")
+              f"{str(r['window_wins']):<6}{wr_str:<8}{str(r['currently_benched']):<9}"
+              f"{str(r['awaiting_fresh_data']):<10}")
     print(f"\nCurrently benched: {load_benched()}")

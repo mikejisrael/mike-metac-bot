@@ -1,0 +1,28 @@
+{
+  "batch_id": "single_43937_20260731_173214",
+  "submitted_at": "2026-07-31T17:32:14.397324",
+  "batch_type": "single",
+  "account": "bot",
+  "num_requests": 1,
+  "question_ids": {
+    "single_43937_20260731_173214": 43937
+  },
+  "post_ids": {
+    "single_43937_20260731_173214": 43911
+  },
+  "question_texts": {
+    "single_43937_20260731_173214": "Will the US and India finalise a new bilateral trade agreement before August 2026?"
+  },
+  "original_probabilities": {
+    "single_43937_20260731_173214": 0.68
+  },
+  "refresh_reasons": {
+    "single_43937_20260731_173214": "manual single refresh (community prediction shift alert)"
+  },
+  "community_predictions": {
+    "single_43937_20260731_173214": 0.02
+  },
+  "resolve_times": {
+    "single_43937_20260731_173214": "2026-08-01T10:27:00+00:00"
+  }
+}
