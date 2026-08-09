@@ -414,6 +414,30 @@ async def fetch_questions() -> list:
           f"{len(QUESTION_SERIES_IDS)} series")
     binary.extend(series_questions)
 
+    # FIXED 2026-08-10: same question can appear more than once in `binary`
+    # here — e.g. once from the regular tournament fetch and again from a
+    # question_series fetch (same underlying question, different post_id/
+    # tournament listing — a known Metaculus quirk). The old code only
+    # deduped against PREVIOUSLY forecasted questions (already_done) and
+    # never deduped WITHIN this run's own candidate list, so two copies of
+    # the same id_of_question could both pass through into `fresh` and
+    # produce two identical custom_ids ("q_<id>") when submit_batch() built
+    # requests — which the Anthropic Batch API rejects outright ("custom_id
+    # must be unique within a batch"). Confirmed live 2026-08-09: duplicate
+    # q_45168 crashed the entire batch submission. Dedupe by id_of_question
+    # here, keeping the first occurrence seen.
+    seen_ids = set()
+    deduped_binary = []
+    for q in binary:
+        if q.id_of_question in seen_ids:
+            continue
+        seen_ids.add(q.id_of_question)
+        deduped_binary.append(q)
+    if len(deduped_binary) < len(binary):
+        print(f"  Deduped {len(binary) - len(deduped_binary)} question(s) appearing "
+              f"more than once across tournament/series fetches this run")
+    binary = deduped_binary
+
     # Filter out already-done questions (title-checked — see titles_match)
     fresh = []
     for q in binary:
@@ -969,6 +993,15 @@ async def submit_batch(questions: list) -> str:
 
     for q in questions:
         custom_id = f"q_{q.id_of_question}"
+        # DEFENSIVE 2026-08-10: fetch_questions() now dedupes by
+        # id_of_question before it ever gets here, but guard here too so a
+        # duplicate custom_id can never reach the Anthropic Batch API call
+        # (which rejects the whole batch on any duplicate) even if another
+        # code path someday feeds submit_batch() an un-deduped list.
+        if custom_id in question_map:
+            print(f"  ⚠️  Skipping duplicate question in batch: {custom_id} "
+                  f"(already queued this run)")
+            continue
         question_map[custom_id] = q
 
         # ADDED 2026-07-21: numeric gets a higher token budget — see

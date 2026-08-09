@@ -37,6 +37,18 @@ MAX_POSITIONS        = 20
 CONFIDENCE_THRESHOLD = 0.65
 STOP_LOSS_PCT        = 0.02       # 2% adverse move
 TAKE_PROFIT_PCT      = 0.04       # 4% favourable move
+
+# Structural review 2026-08-02: leverage sizing was letting noisy small-sample
+# per-coin win rates swing leverage up right before they mean-reverted
+# (backtested: >=6x trades were net -$115 vs +$268 for base 5x, over 399 trades).
+# Fixed via a Beta-shrinkage estimate that pulls small samples toward a fixed
+# system-average prior rather than trusting raw win rate from as few as 3 trades.
+# FIXED (not recomputed from the running log) — an early-run backtest showed a
+# dynamically-recomputed system prior is itself noisy in the first few dozen
+# trades, which defeats the point of shrinking toward something stable.
+COIN_WR_PRIOR         = 0.35      # long-run system average win rate, as a fixed anchor
+COIN_WR_SHRINKAGE_K   = 10.0      # "pseudo-trades" of weight given to the prior;
+                                   # at n=3 real trades, estimate is ~77% prior / 23% data
 CANDLE_INTERVAL      = '240'      # 4h candles
 CANDLES_TO_FETCH     = 50
 MARKET_URL           = 'https://api.bybit.com'
@@ -111,7 +123,7 @@ TRADE_HEADERS = [
 CLOSED_HEADERS = [
     'close_date', 'close_time', 'symbol', 'direction', 'qty',
     'entry_price', 'exit_price', 'pnl', 'pnl_pct', 'outcome', 'close_reason',
-    'fear_greed_at_close', 'regime_at_close',
+    'fear_greed_at_close', 'regime_at_close', 'mfe_pct_of_tp',
 ]
 
 def init_csv(path, headers):
@@ -342,6 +354,16 @@ def build_market_data(symbol: str) -> dict | None:
 # ─── Leverage calculation ──────────────────────────────────────────────────────
 
 def load_coin_win_rates() -> dict:
+    """
+    Returns a Beta-shrinkage-adjusted win rate per symbol: (wins + k*prior) /
+    (total + k). A coin with few closed trades sits close to COIN_WR_PRIOR;
+    only sustained, larger-sample outperformance meaningfully moves it.
+    Backtested against 399 historical trades (2026-08-02 structural review):
+    raw win rate on <=3 trades was actively counter-predictive (coins that
+    *looked* good on tiny samples went on to perform worse, not better), and
+    the old formula's default of 0.5 for unseen coins was itself enough to
+    trigger leverage-up on confidence alone. Both are fixed here.
+    """
     stats = {}
     if not os.path.exists(CLOSED_TRADE_LOG):
         return stats
@@ -352,10 +374,17 @@ def load_coin_win_rates() -> dict:
             stats[sym]['total'] += 1
             if row['outcome'] == 'WIN':
                 stats[sym]['wins'] += 1
-    return {s: v['wins']/v['total'] for s, v in stats.items() if v['total'] >= 3}
+    return {
+        s: (v['wins'] + COIN_WR_SHRINKAGE_K * COIN_WR_PRIOR) / (v['total'] + COIN_WR_SHRINKAGE_K)
+        for s, v in stats.items()
+    }
 
 def calculate_leverage(confidence: float, coin_win_rate: float | None) -> int:
-    wr    = coin_win_rate if coin_win_rate is not None else 0.5
+    # Unseen coins (no entry in load_coin_win_rates' dict at all) fall back to
+    # the same fixed prior used for shrinkage, not 0.5 — a coin with zero
+    # history shouldn't get a bigger sizing boost than one with a mediocre
+    # track record.
+    wr    = coin_win_rate if coin_win_rate is not None else COIN_WR_PRIOR
     score = confidence * 0.65 + wr * 0.35
     if score <= 0.60:
         return BASE_LEVERAGE
@@ -415,11 +444,26 @@ RISK RULES:
 - Extreme funding warns against crowded side (squeeze risk)
 - Rising OI + rising price = strong trend; falling OI + rising price = weak trend
 
+CONFIDENCE SCORING — score these three dimensions independently, each 0.00–1.00:
+- "trend_alignment":      do 24h momentum, 7d momentum, and RSI all point the same
+                          direction with no material conflict?
+- "volume_confirmation":  does the volume trend support the move (rising volume
+                          on the move's direction), or is it flat/contradicting?
+- "structure_clarity":    do funding rate, OI change, and SFP (if any) tell a
+                          clean, coherent story, or is market structure mixed?
+Most real setups are mediocre on at least one of these — score honestly rather
+than defaulting to a comfortable middle value. As a rough guide: 0.30–0.55 is
+a normal/unremarkable reading for a dimension; reserve 0.70+ for a dimension
+only when the evidence for it is clean with no material conflict; use 0.85+
+only when it's about as clear-cut as this kind of data ever gets.
+
 Return ONLY valid JSON — no markdown, no preamble:
 {{
   "decision":   "BUY" | "SELL" | "HOLD",
   "direction":  "long" | "short" | "none",
-  "confidence": 0.00–1.00,
+  "trend_alignment":     0.00–1.00,
+  "volume_confirmation": 0.00–1.00,
+  "structure_clarity":   0.00–1.00,
   "risk":       "LOW" | "MEDIUM" | "HIGH",
   "reasoning":  "2-3 sentence summary",
   "key_risk":   "single biggest risk to this trade"
@@ -432,7 +476,21 @@ Return ONLY valid JSON — no markdown, no preamble:
     )
     text = response.content[0].text.strip()
     text = text.replace('```json', '').replace('```', '').strip()
-    return json.loads(text)
+    result = json.loads(text)
+
+    # Confidence is computed here, not asked for directly — a single holistic
+    # "confidence: 0-1" ask consistently clustered at ~0.65/0.68/0.72 in practice
+    # (backtested across 424 historical trades: only 3 distinct values ever
+    # appeared, with zero relationship to actual outcome). Forcing three
+    # independent sub-judgments produces real spread; weights below favour
+    # trend alignment as the primary driver, with volume and structure as
+    # secondary confirmation.
+    trend     = float(result.get('trend_alignment', 0.5))
+    volume    = float(result.get('volume_confirmation', 0.5))
+    structure = float(result.get('structure_clarity', 0.5))
+    result['confidence'] = round(trend * 0.45 + volume * 0.25 + structure * 0.30, 4)
+
+    return result
 
 # ─── TP/SL checker ────────────────────────────────────────────────────────────
 
@@ -483,6 +541,12 @@ def check_positions(state: dict, now: datetime, macro: dict) -> list:
             margin_returned = pos['margin_usdt'] + pnl
             state['balance'] += margin_returned
 
+            # Captured before the position is deleted below — reflects the
+            # furthest toward TP the trade got at any scan during its life,
+            # per update_unrealised(). See peak_favorable_pct comment at
+            # open_position for why this is being logged.
+            mfe_pct_of_tp = pos.get('peak_favorable_pct', 0.0)
+
             closes.append({
                 'symbol':       symbol,
                 'direction':    direction,
@@ -497,6 +561,7 @@ def check_positions(state: dict, now: datetime, macro: dict) -> list:
                 'close_time':   now.strftime('%H:%M:%S'),
                 'fear_greed_at_close': macro['fear_greed'],
                 'regime_at_close':     macro['regime'],
+                'mfe_pct_of_tp':       mfe_pct_of_tp,
             })
 
             # Update state stats
@@ -555,6 +620,13 @@ def open_position(state: dict, symbol: str, direction: str, price: float,
         'open_date':    now.strftime('%Y-%m-%d'),
         'open_time':    now.strftime('%H:%M:%S'),
         'unrealised_pnl': 0.0,
+        # Monitoring-only, added 2026-08-02: tracks how far toward TP the
+        # trade has ever gotten (1.0 = reached TP, 0.0 = never moved favourably,
+        # negative = adverse). No behaviour depends on this yet — it exists so
+        # a future review has real data on whether trades commonly reverse
+        # from deep in-the-money territory, instead of going off the
+        # impression given by whatever happens to be open at any one moment.
+        'peak_favorable_pct': 0.0,
         'fear_greed_at_open': macro['fear_greed'],
         'regime_at_open':     macro['regime'],
         'sfp_at_open':        sfp_signal,
@@ -587,20 +659,24 @@ def open_position(state: dict, symbol: str, direction: str, price: float,
 # ─── Update unrealised P&L on open positions ───────────────────────────────────
 
 def update_unrealised(state: dict):
-    """Refresh current_price and unrealised_pnl for all open positions."""
+    """Refresh current_price, unrealised_pnl, and peak_favorable_pct for all open positions."""
     for symbol, pos in state['positions'].items():
         price = get_current_price(symbol)
         if price is None:
             continue
         direction = pos['direction']
         entry_px  = pos['entry_price']
+        tp_price  = pos['take_profit']
         qty       = pos['qty']
         if direction == 'long':
             pnl = (price - entry_px) * qty
+            fav = (price - entry_px) / (tp_price - entry_px) if tp_price != entry_px else 0.0
         else:
             pnl = (entry_px - price) * qty
-        pos['current_price']   = price
-        pos['unrealised_pnl']  = round(pnl, 4)
+            fav = (entry_px - price) / (entry_px - tp_price) if entry_px != tp_price else 0.0
+        pos['current_price']     = price
+        pos['unrealised_pnl']    = round(pnl, 4)
+        pos['peak_favorable_pct'] = round(max(pos.get('peak_favorable_pct', 0.0), fav), 4)
         time.sleep(0.15)
 
 # ─── Equity snapshot ───────────────────────────────────────────────────────────
@@ -675,6 +751,7 @@ def main():
                 'close_reason': c['close_reason'],
                 'fear_greed_at_close': c['fear_greed_at_close'],
                 'regime_at_close':     c['regime_at_close'],
+                'mfe_pct_of_tp':       c['mfe_pct_of_tp'],
             })
         if closes:
             save_state(state)
