@@ -34,5 +34,23 @@
     "reasons": [
       "closing in 45h, forecast 15.2d old"
     ]
+  },
+  "44835": {
+    "alerted_at": "2026-08-09T17:08:24.394563+00:00",
+    "reasons": [
+      "closing in 31h, forecast 19.2d old"
+    ]
+  },
+  "43501": {
+    "alerted_at": "2026-08-09T17:08:24.394563+00:00",
+    "reasons": [
+      "closing in 7h, forecast 28.3d old"
+    ]
+  },
+  "43926": {
+    "alerted_at": "2026-08-09T17:08:24.394563+00:00",
+    "reasons": [
+      "closing in 8h, forecast age unknown"
+    ]
   }
 }
