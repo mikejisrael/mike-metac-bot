@@ -1,0 +1,58 @@
+{
+  "batch_id": "msgbatch_011spgd9vUo8VCGZzcf97Mby",
+  "submitted_at": "2026-08-10T15:22:03.583744",
+  "batch_type": "refresh",
+  "num_requests": 1,
+  "question_ids": {
+    "refresh_44835_20260810": 44835
+  },
+  "post_ids": {
+    "refresh_44835_20260810": 44676
+  },
+  "question_texts": {
+    "refresh_44835_20260810": "Who will be the 2026 Republican nominee for U.S. Senator from South Carolina?"
+  },
+  "original_probabilities": {
+    "refresh_44835_20260810": {
+      "Pamela Evette": 0.14,
+      "Russell Fry": 0.17,
+      "Darline Graham Nordone": 0.05,
+      "Henry McMaster": 0.02,
+      "Ralph Norman": 0.16,
+      "Mark Lynch": 0.14,
+      "Other": 0.32
+    }
+  },
+  "question_types": {
+    "refresh_44835_20260810": "multiple_choice"
+  },
+  "options_by_question": {
+    "refresh_44835_20260810": [
+      "Pamela Evette",
+      "Russell Fry",
+      "Darline Graham Nordone",
+      "Henry McMaster",
+      "Ralph Norman",
+      "Mark Lynch",
+      "Other"
+    ]
+  },
+  "refresh_reasons": {
+    "refresh_44835_20260810": "manual refresh via dashboard"
+  },
+  "community_predictions": {
+    "refresh_44835_20260810": null
+  },
+  "research_texts": {
+    "refresh_44835_20260810": "Following the death of Senator Lindsey Graham on July 11, 2026, a special Republican primary is scheduled for August 11, 2026, to determine the nominee for U.S. Senator from South Carolina. Governor Henry McMaster appointed Darline Graham, Lindsey Graham's younger sister, to complete his term, and she is now seeking the full six-year term with the endorsement of President Donald Trump [thecentersquare.com](https://www.thecentersquare.com/south_carolina/article_7e8eaed0-fd45-4f55-9865-1b9851f238f3.html), [cnn.com](https://www.cnn.com/2026/08/01/politics/trump-south-carolina-lindsey-graham-darline-graham).\n\nPolls released in the last week show varying leaders, but suggest a runoff is likely [thecentersquare.com](https://www.thecentersquare.com/south_carolina/article_7e8eaed0-fd45-4f55-9865-1b9851f238f3.html). An Emerson College Polling/Nexstar Media poll released Thursday had U.S. Rep. Ralph Norman leading with 22%, followed by Darline Graham at 19%, U.S. Rep. Russell Fry at 12%, and former Governor Mark Sanford at 11% [emersoncollegepolling.com](https://emersoncollegepolling.com/south-carolina-2026-norman-graham-lead-gop-special-primary-runoff-likely/), [charlestoncitypaper.com](https://charlestoncitypaper.com/2026/07/31/norman-graham-lead-early-polling-for-special-gop-senate-primary/). Conversely, a Trafalgar Group poll released Friday showed Darline Graham leading with 27%, with Norman and Fry each at 17% [thecentersquare.com](https://www.thecentersquare.com/south_carolina/article_7e8eaed0-fd45-4f55-9865-1b9851f238f3.html). A co/efficient poll from July 31, 2026, indicated Darline Graham at 30%, Fry at 16%, and Norman at 15% [postandcourier.com](https://www.postandcourier.com/politics/sc-senate-graham-sanford-2026-fry-norman/article_2a9d2b35-0c0c-49fa-ba6c-3ad2aa91d7b2.html).\n\nOther candidates include Mark Lynch, who challenged Lindsey Graham in the June primary, and has significant support in Spartanburg and Greenville Counties [cnn.com](https://www.cnn.com/2026/08/01/politics/trump-south-carolina-lindsey-graham-darline-graham), [postandcourier.com](https://www.postandcourier.com/politics/sc-senate-graham-sanford-2026-fry-norman/article_2a9d2b35-0c0c-49fa-ba6c-3ad2aa91d7b2.html). If no candidate reaches 50% plus one vote, a runoff will be held on August 25 [thecentersquare.com](https://www.thecentersquare.com/south_carolina/article_7e8eaed0-fd45-4f55-9865-1b9851f238f3.html)."
+  },
+  "research_sources": {
+    "refresh_44835_20260810": "openrouter"
+  },
+  "resolve_times": {
+    "refresh_44835_20260810": "2026-08-15T00:00:00+00:00"
+  },
+  "close_times": {
+    "refresh_44835_20260810": "2026-08-11T00:00:00+00:00"
+  }
+}
